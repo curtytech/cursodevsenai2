@@ -225,9 +225,55 @@ body {
 }
 
 /* ==========================================================================
+   Grade de Cards
+   ========================================================================== */
+.content-container {
+    width: 100%;
+    max-width: 72rem;
+    padding: 3rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 1.5rem;
+}
+
+.cards-grid {
+    display: flex;
+    flex: 1 1 16rem;
+}
+
+.card {
+    width: 100%;
+    min-height: 12rem;
+    padding: 1.5rem;
+    background-color: var(--bg-navbar);
+    border: 1px solid var(--border-navbar);
+    border-radius: 1.5rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.card-name,
+.card-description,
+.card-links {
+    min-height: 1.5rem;
+}
+
+.card-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+/* ==========================================================================
    Responsividade (Mobile)
    ========================================================================== */
 @media (max-width: 768px) {
+    .content-container {
+        flex-direction: column;
+    }
+
     .navbar {
         width: 100%;
         justify-content: space-between;
