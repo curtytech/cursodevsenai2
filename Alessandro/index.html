@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="scroll-smooth">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,11 +8,17 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
 </head>
-<body class="bg-slate-100 px-4 py-6 font-sans text-slate-700 sm:py-10">
-    <main class="resume mx-auto max-w-4xl overflow-hidden rounded-2xl bg-white shadow-xl shadow-slate-200 print:rounded-none">
-        <header class="bg-slate-900 px-6 py-8 text-white sm:px-10">
+<body class="bg-slate-100 px-4 py-8 font-sans text-slate-700 sm:px-6 sm:py-12 lg:px-8 print:bg-white print:p-0">
+    <main id="topo" class="resume mx-auto max-w-4xl overflow-hidden rounded-2xl bg-white shadow-xl shadow-slate-200 print:max-w-none print:rounded-none print:shadow-none">
+        <header class="relative bg-slate-900 px-6 py-8 text-white sm:px-10">
             <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-                <div>
+                <div class="flex items-center gap-4 sm:gap-5">
+                    <img
+                        class="h-20 w-20 shrink-0 -translate-y-1 rounded-full border-4 border-cyan-300 object-cover shadow-lg shadow-cyan-950/50 sm:h-24 sm:w-24 sm:translate-y-2"
+                        src="https://media.licdn.com/dms/image/v2/D5635AQG89z0knzZdXA/profile-framedphoto-shrink_800_800/B56aEhHO4zIIAc-/0/1791556907255?e=1794337200&v=beta&t=JHTg5cx7mDubdsmFfWw7YOIjWfTs_WO85duk8AJdADY"
+                        alt="Avatar ilustrado de Alessandro Ramos"
+                    />
+                    <div>
                     <p class="mb-2 text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">
                         Desenvolvedor Full-Stack
                     </p>
@@ -21,14 +27,15 @@
                         Desenvolvedor em formação, apaixonado por tecnologia e pela criação de experiências digitais
                         simples, acessíveis e responsivas.
                     </p>
+                    </div>
                 </div>
-                <div class="space-y-2 text-sm text-slate-300 sm:text-right">
+                <address class="space-y-2 text-sm not-italic text-slate-300 sm:text-right" aria-label="Informações de contato">
                     <p>Niterói, RJ</p>
-                    <p><a href="mailto:ale.ramos.oliveira@hotmail.com" target="_blank" rel="noopener noreferrer">ale.ramos.oliveira@hotmail.com</a></p>
-                    <p><a href="tel:21991661881" target="_blank" rel="noopener noreferrer">(21) 99166-1881</a></p>
-                    <p><a href="https://www.linkedin.com/in/aleramosdev" target="_blank" rel="noopener noreferrer">Linkedin</a></p>
-                    <p><a href="https://github.com/aleramosdev" target="_blank" rel="noopener noreferrer">GitHub</a></p>
-                </div>
+                    <p><a class="break-all transition-colors hover:text-cyan-300 focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300 sm:break-normal" href="mailto:ale.ramos.oliveira@hotmail.com">ale.ramos.oliveira@hotmail.com</a></p>
+                    <p><a class="transition-colors hover:text-cyan-300 focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300" href="tel:21991661881">(21) 99166-1881</a></p>
+                    <p><a class="transition-colors hover:text-cyan-300 focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300" href="https://www.linkedin.com/in/aleramosdev" target="_blank" rel="noopener noreferrer">LinkedIn</a></p>
+                    <p><a class="transition-colors hover:text-cyan-300 focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300" href="https://github.com/aleramosdev" target="_blank" rel="noopener noreferrer">GitHub</a></p>
+                </address>
             </div>
         </header>
 
@@ -73,7 +80,7 @@
             </aside>
 
             <div class="space-y-7">
-                <section>
+                <section id="experiencia">
                     <h2 class="mb-4 border-b-2 border-cyan-500 pb-2 text-sm font-bold uppercase tracking-widest text-slate-900">
                         Experiência
                     </h2>
@@ -92,7 +99,7 @@
                     </article>
                 </section>
 
-                <section>
+                <section id="formacao">
                     <h2 class="mb-4 border-b-2 border-cyan-500 pb-2 text-sm font-bold uppercase tracking-widest text-slate-900">
                         Formação
                     </h2>
@@ -107,7 +114,7 @@
                     </article>
                 </section>
 
-                <section>
+                <section id="projetos">
                     <h2 class="mb-4 border-b-2 border-cyan-500 pb-2 text-sm font-bold uppercase tracking-widest text-slate-900">
                         Projetos em destaque
                     </h2>
@@ -125,8 +132,38 @@
             </div>
         </div>
 
-        <footer class="border-t border-slate-200 bg-slate-50 px-6 py-4 text-center text-xs text-slate-500 sm:px-10">
-            Disponível para oportunidades de estágio e desenvolvimento front-end.
+        <footer class="border-t border-slate-200 bg-slate-900 px-6 py-8 text-slate-300 sm:px-10">
+            <div class="grid gap-8 sm:grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr]">
+                <div>
+                    <p class="text-lg font-bold text-white">Alessandro Ramos</p>
+                    <p class="mt-2 max-w-xs text-sm leading-6 text-slate-400">
+                        Desenvolvedor em formação, disponível para oportunidades de estágio e projetos colaborativos.
+                    </p>
+                </div>
+
+                <div>
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-cyan-300">Navegação</h2>
+                    <ul class="mt-3 space-y-2 text-sm">
+                        <li><a class="transition hover:text-cyan-300 focus:outline-none focus-visible:text-cyan-300" href="#experiencia">Experiência</a></li>
+                        <li><a class="transition hover:text-cyan-300 focus:outline-none focus-visible:text-cyan-300" href="#formacao">Formação</a></li>
+                        <li><a class="transition hover:text-cyan-300 focus:outline-none focus-visible:text-cyan-300" href="#projetos">Projetos</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-cyan-300">Contato</h2>
+                    <ul class="mt-3 space-y-2 text-sm">
+                        <li><a class="break-words transition hover:text-cyan-300 focus:outline-none focus-visible:text-cyan-300" href="mailto:ale.ramos.oliveira@hotmail.com">E-mail</a></li>
+                        <li><a class="transition hover:text-cyan-300 focus:outline-none focus-visible:text-cyan-300" href="https://www.linkedin.com/in/aleramosdev" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+                        <li><a class="transition hover:text-cyan-300 focus:outline-none focus-visible:text-cyan-300" href="https://github.com/aleramosdev" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-8 flex flex-col gap-3 border-t border-slate-700 pt-4 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+                <p>&copy; Alessandro Ramos de Oliveira. Todos os direitos reservados.</p>
+                <a class="font-semibold text-cyan-300 transition hover:text-cyan-200 focus:outline-none focus-visible:text-cyan-200" href="#topo">Voltar ao topo &uarr;</a>
+            </div>
         </footer>
     </main>
 </body>
