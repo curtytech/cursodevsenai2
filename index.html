@@ -1,23 +1,25 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Curso dev senai 2</title>
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Arquivo CSS Externo -->
-    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
-<body>
 
-    <!-- Container da Navbar -->
-    <header class="header-container">
-        <nav class="navbar">
-            <a href="https://prebuiltui.com" class="nav-logo" aria-label="Página Inicial">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<body class="min-h-screen scroll-smooth bg-slate-950 px-4 py-8 font-['Inter',sans-serif] text-white antialiased">
+    <header class="mx-auto w-full max-w-6xl">
+        <nav
+            class="relative mx-auto flex w-full items-center rounded-full border border-slate-700 bg-slate-900/65 px-6 py-4 text-sm backdrop-blur-xl md:w-auto md:max-w-fit"
+            aria-label="Navegação principal">
+            <a href="#" class="flex shrink-0 items-center rounded-full transition duration-200 hover:scale-110 hover:bg-slate-800/70 active:scale-90 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                aria-label="Página Inicial">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true">
                     <circle cx="4.706" cy="16" r="4.706" fill="#D9D9D9" />
                     <circle cx="16.001" cy="4.706" r="4.706" fill="#D9D9D9" />
                     <circle cx="16.001" cy="27.294" r="4.706" fill="#D9D9D9" />
@@ -25,57 +27,366 @@
                 </svg>
             </a>
 
-            <!-- Links para Desktop -->
-            <div class="nav-links">
-                <a href="#" class="nav-link">
-                    <span>Produtos</span>
-                    <span>Produtos</span>
+            <div class="ml-7 hidden items-center gap-2 md:flex">
+                <a href="#projetos"
+                    class="group inline-flex h-10 items-center whitespace-nowrap px-3 text-white transition duration-200 ease-out hover:text-indigo-300 active:scale-[0.98] active:text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">
+                    <span class="relative block h-6 overflow-hidden">
+                        <span class="block transition-transform duration-300 group-hover:-translate-y-full">Projetos</span>
+                        <span class="absolute left-0 top-full block text-indigo-300 transition-transform duration-300 group-hover:-translate-y-full"
+                            aria-hidden="true">Projetos</span>
+                    </span>
                 </a>
-                <a href="#" class="nav-link">
-                    <span>Historias</span>
-                    <span>Historias</span>
+                <a href="#"
+                    class="group inline-flex h-10 items-center whitespace-nowrap px-3 text-white transition duration-200 ease-out hover:text-indigo-300 active:scale-[0.98] active:text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">
+                    <span class="relative block h-6 overflow-hidden">
+                        <span class="block transition-transform duration-300 group-hover:-translate-y-full">Historias</span>
+                        <span class="absolute left-0 top-full block text-indigo-300 transition-transform duration-300 group-hover:-translate-y-full"
+                            aria-hidden="true">Historias</span>
+                    </span>
                 </a>
-                <a href="#" class="nav-link">
-                    <span>Preços</span>
-                    <span>Preços</span>
+                <a href="#"
+                    class="group inline-flex h-10 items-center whitespace-nowrap px-3 text-white transition duration-200 ease-out hover:text-indigo-300 active:scale-[0.98] active:text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">
+                    <span class="relative block h-6 overflow-hidden">
+                        <span class="block transition-transform duration-300 group-hover:-translate-y-full">Preços</span>
+                        <span class="absolute left-0 top-full block text-indigo-300 transition-transform duration-300 group-hover:-translate-y-full"
+                            aria-hidden="true">Preços</span>
+                    </span>
                 </a>
-                <a href="#" class="nav-link">
-                    <span>Documentação</span>
-                    <span>Documentação</span>
+                <a href="#"
+                    class="group inline-flex h-10 items-center whitespace-nowrap px-3 text-white transition duration-200 ease-out hover:text-indigo-300 active:scale-[0.98] active:text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">
+                    <span class="relative block h-6 overflow-hidden">
+                        <span class="block transition-transform duration-300 group-hover:-translate-y-full">Documentação</span>
+                        <span class="absolute left-0 top-full block text-indigo-300 transition-transform duration-300 group-hover:-translate-y-full"
+                            aria-hidden="true">Documentação</span>
+                    </span>
                 </a>
             </div>
 
-            <!-- Botões para Desktop -->
-            <div class="nav-actions">
-                <button class="btn btn-secondary">Contatos</button>
-                <button class="btn btn-primary">Comece Agora</button>
+            <div class="ml-14 hidden items-center gap-4 md:flex">
+                <button type="button"
+                    class="rounded-full border border-slate-600 px-4 py-2 font-medium transition duration-200 hover:border-indigo-400 hover:bg-indigo-500/15 hover:text-indigo-300 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    Contatos
+                </button>
+                <button type="button"
+                    class="rounded-full bg-white px-4 py-2 font-medium text-black shadow-[0_0_30px_7px_rgba(255,255,255,0.5)] transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-100 hover:shadow-[0_0_30px_14px_rgba(129,140,248,0.55)] active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    Comece Agora
+                </button>
             </div>
 
-            <!-- Botão Menu Mobile -->
-            <button id="menuToggle" class="menu-toggle" aria-label="Alternar Menu">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-                    stroke-linecap="round" stroke-linejoin="round">
+            <button id="menuToggle" type="button"
+                class="ml-auto rounded p-1 text-slate-400 transition duration-200 hover:bg-slate-800 hover:text-white active:scale-90 focus:outline-none focus:ring-2 focus:ring-indigo-400 md:hidden"
+                aria-label="Alternar menu" aria-controls="mobileMenu" aria-expanded="false">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
             </button>
 
-            <!-- Menu Dropdown Mobile -->
-            <div id="mobileMenu" class="mobile-menu hidden">
-                <a href="#">Produtos</a>
-                <a href="#">Historias</a>
-                <a href="#">Preços</a>
-                <a href="#">Documentação</a>
-                <button class="btn btn-secondary">Contatos</button>
-                <button class="btn btn-primary">Comece Agora</button>
+            <div id="mobileMenu"
+                class="absolute left-0 top-[calc(100%+1rem)] hidden w-full flex-col items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/95 p-6 shadow-2xl backdrop-blur-xl md:!hidden">
+                <a href="#projetos" class="w-full rounded-lg px-4 py-2 text-center text-base transition duration-200 ease-out hover:bg-indigo-500/15 hover:text-indigo-400 active:scale-[0.98] active:text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">Projetos</a>
+                <a href="#" class="w-full rounded-lg px-4 py-2 text-center text-base transition duration-200 ease-out hover:bg-indigo-500/15 hover:text-indigo-400 active:scale-[0.98] active:text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">Historias</a>
+                <a href="#" class="w-full rounded-lg px-4 py-2 text-center text-base transition duration-200 ease-out hover:bg-indigo-500/15 hover:text-indigo-400 active:scale-[0.98] active:text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">Preços</a>
+                <a href="#" class="w-full rounded-lg px-4 py-2 text-center text-base transition duration-200 ease-out hover:bg-indigo-500/15 hover:text-indigo-400 active:scale-[0.98] active:text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">Documentação</a>
+                <button type="button"
+                    class="w-4/5 max-w-xs rounded-full border border-slate-600 px-4 py-2 font-medium transition duration-200 hover:border-indigo-400 hover:bg-indigo-500/15 hover:text-indigo-300 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    Contatos
+                </button>
+                <button type="button"
+                    class="w-4/5 max-w-xs rounded-full bg-white px-4 py-2 font-medium text-black transition duration-200 hover:bg-indigo-100 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    Comece Agora
+                </button>
             </div>
         </nav>
     </header>
 
-    <main>
+    <main id="projetos" class="mx-auto flex w-full max-w-6xl scroll-mt-8 flex-col gap-8 py-12">
+        <header class="text-center">
+            <h1 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                Projetos e materiais
+            </h1>
+            <p class="mx-auto mt-3 max-w-2xl text-slate-400">
+                Explore os conteúdos e recursos disponíveis para seus estudos.
+            </p>
+        </header>
 
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:auto-rows-[minmax(190px,auto)]">
+        <section class="sm:col-span-2 lg:row-span-2" aria-label="Alunos DevTarde">
+            <article
+                class="flex h-full min-h-64 w-full flex-col rounded-3xl border border-cyan-400/40 bg-cyan-950/30 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-cyan-300/80 hover:shadow-2xl hover:shadow-cyan-950/40 active:scale-[0.98] lg:min-h-0 lg:p-8">
+                <div class="mb-3 flex items-center justify-between gap-3">
+                    <span class="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-200">Turma DevTarde</span>
+                    <span aria-hidden="true" class="text-2xl">✦</span>
+                </div>
+                <h2 class="text-xl font-semibold text-white">Alunos DevTarde</h2>
+                <p class="mt-3 text-slate-300">Gerencie matrículas e visualize os currículos profissionais dos alunos da turma.</p>
+                <button id="openStudentsApp" type="button"
+                    class="mt-auto inline-flex w-fit items-center rounded-lg bg-cyan-500 px-5 py-3 font-semibold text-slate-950 shadow-lg shadow-cyan-950/40 transition duration-200 hover:-translate-y-0.5 hover:bg-cyan-300 active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-cyan-300 focus:ring-offset-2 focus:ring-offset-slate-950">
+                    Acessar Alunos DevTarde
+                    <span class="ml-2" aria-hidden="true">&rarr;</span>
+                </button>
+            </article>
+        </section>
+        <section class="lg:col-span-2" aria-label="Projetos">
+            <article
+                class="flex h-full min-h-48 w-full flex-col rounded-3xl border border-slate-700 bg-slate-900/65 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-indigo-500/70 hover:shadow-2xl hover:shadow-indigo-950/40 active:scale-[0.98]">
+                <h2 class="text-xl font-semibold text-white">Apresentação HTML & CSS</h2>
+                <p class="mt-3 text-slate-300">Uma apresentação simples usando HTML e CSS.</p>
+                <a href="apresentacao_html_e_css.html"
+                    class="mt-auto inline-flex w-fit items-center rounded-lg bg-indigo-600 px-5 py-3 font-semibold text-white shadow-lg shadow-indigo-950/40 transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-500 hover:shadow-indigo-500/30 active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-950">
+                    Abrir apresentação
+                    <span class="ml-2" aria-hidden="true">&rarr;</span>
+                </a>
+            </article>
+        </section>
+
+        <section aria-label="Projetos">
+            <article
+                class="flex h-full min-h-48 w-full flex-col rounded-3xl border border-slate-700 bg-slate-900/65 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-indigo-500/70 hover:shadow-2xl hover:shadow-indigo-950/40 active:scale-[0.98]">
+                <h2 class="text-xl font-semibold text-white">Nosso GitHub</h2>
+                <p class="mt-3 text-slate-300">Repositório com os códigos do curso e tudo que você precisa para começar a desenvolver.</p>
+                <a href="https://github.com/curtytech/cursodevsenai2" target="_blank" rel="noopener noreferrer"
+                    class="mt-auto inline-flex w-fit items-center rounded-lg bg-indigo-600 px-5 py-3 font-semibold text-white shadow-lg shadow-indigo-950/40 transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-500 hover:shadow-indigo-500/30 active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-950">
+                    Abrir GitHub
+                    <span class="ml-2" aria-hidden="true">&rarr;</span>
+                </a>
+            </article>
+        </section>
+
+        <section aria-label="Projetos">
+            <article
+                class="flex h-full min-h-48 w-full flex-col rounded-3xl border border-slate-700 bg-slate-900/65 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-indigo-500/70 hover:shadow-2xl hover:shadow-indigo-950/40 active:scale-[0.98]">
+                <h2 class="text-xl font-semibold text-white">Manual de Git e GitHub</h2>
+                <p class="mt-3 text-slate-300">Um manual completo sobre Git e GitHub.</p>
+                <a href="https://andersonfariaas.github.io/manual-Git-e-GitHub/" target="_blank" rel="noopener noreferrer"
+                    class="mt-auto inline-flex w-fit items-center rounded-lg bg-indigo-600 px-5 py-3 font-semibold text-white shadow-lg shadow-indigo-950/40 transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-500 hover:shadow-indigo-500/30 active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-950">
+                    Abrir manual
+                    <span class="ml-2" aria-hidden="true">&rarr;</span>
+                </a>
+            </article>
+        </section>
+
+        <section class="lg:col-span-2" aria-label="Projetos">
+            <article
+                class="flex h-full min-h-48 w-full flex-col rounded-3xl border border-slate-700 bg-slate-900/65 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-indigo-500/70 hover:shadow-2xl hover:shadow-indigo-950/40 active:scale-[0.98]">
+                <h2 class="text-xl font-semibold text-white">Gemini de Estudos para TailwindCSS</h2>
+                <p class="mt-3 text-slate-300">Um guia completo para estudar TailwindCSS com o auxílio do Gemini.</p>
+                <a href="https://gemini.google.com/gem/15aX5w44xaDjJ_NTG2vYmwCuRTESC9N2x?usp=sharing" target="_blank" rel="noopener noreferrer"
+                    class="mt-auto inline-flex w-fit items-center rounded-lg bg-indigo-600 px-5 py-3 font-semibold text-white shadow-lg shadow-indigo-950/40 transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-500 hover:shadow-indigo-500/30 active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-950">
+                    Abrir guia
+                    <span class="ml-2" aria-hidden="true">&rarr;</span>
+                </a>
+            </article>
+        </section>
+
+        </div>
     </main>
 
-    <!-- Arquivo JavaScript Externo -->
-    <script src="script.js"></script>
+    <section id="studentsApp" class="fixed inset-0 z-40 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm" aria-labelledby="studentsTitle" role="dialog" aria-modal="true">
+        <div class="mx-auto my-6 w-full max-w-6xl rounded-3xl border border-slate-700 bg-slate-900/95 p-5 shadow-2xl shadow-cyan-950/30 sm:my-10 sm:p-8">
+            <div class="flex flex-col gap-5 border-b border-slate-700 pb-6 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <span class="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-200">DevTarde</span>
+                        <span id="storageStatus" class="rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 text-xs font-semibold text-amber-200">Local Sync</span>
+                    </div>
+                    <h2 id="studentsTitle" class="text-2xl font-bold text-white sm:text-3xl">Gestão de alunos e currículos</h2>
+                    <p class="mt-2 text-sm text-slate-400">Cadastre talentos, organize especialidades e compartilhe currículos.</p>
+                </div>
+                <div class="flex gap-3">
+                    <button id="closeStudentsApp" type="button" class="rounded-lg border border-slate-600 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-slate-400 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-300">Fechar</button>
+                    <button id="newStudentButton" type="button" class="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300">+ Novo aluno</button>
+                </div>
+            </div>
+
+            <div id="studentFeedback" class="mt-5 hidden rounded-lg border px-4 py-3 text-sm" role="status"></div>
+            <div class="mt-6 grid gap-3 sm:grid-cols-3">
+                <label class="sm:col-span-2"><span class="mb-2 block text-sm font-medium text-slate-300">Buscar por matrícula, nome ou habilidade</span>
+                    <input id="studentSearch" type="search" placeholder="Ex.: NIT00000000 ou JavaScript" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white outline-none transition focus:border-cyan-300 focus:ring-2 focus:ring-cyan-300/30">
+                </label>
+                <div class="rounded-xl border border-slate-700 bg-slate-950/40 p-4"><span class="block text-xs uppercase tracking-wider text-slate-500">Resultados</span><strong id="studentCount" class="mt-1 block text-2xl text-cyan-300">0</strong></div>
+            </div>
+            <div id="studentGrid" class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3"></div>
+        </div>
+    </section>
+
+    <div id="studentFormModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="studentFormTitle">
+        <div class="mx-auto my-6 max-w-3xl rounded-3xl border border-slate-700 bg-slate-900 p-5 shadow-2xl sm:p-8">
+            <div class="flex items-start justify-between gap-4">
+                <div><h2 id="studentFormTitle" class="text-2xl font-bold text-white">Novo aluno</h2><p class="mt-1 text-sm text-slate-400">Os campos marcados com * são obrigatórios.</p></div>
+                <button type="button" data-close-modal="studentFormModal" class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label="Fechar formulário">✕</button>
+            </div>
+            <form id="studentForm" class="mt-6 space-y-5">
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Matrícula *</span><input id="studentRegistration" required maxlength="10" pattern="[A-Z]{3}[0-9]{7}" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 uppercase text-white outline-none focus:border-cyan-300"><small class="mt-1 block text-slate-500">Formato: NIT0312117</small></label>
+                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Nome completo *</span><input id="studentName" required class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-300"></label>
+                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Telefone / WhatsApp *</span><input id="studentPhone" required inputmode="tel" placeholder="(21) 99999-9999" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-300"></label>
+                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Link do currículo ou portfólio *</span><input id="studentPortfolio" required type="url" placeholder="https://seusite.com/curriculo" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-300"><small class="mt-1 block text-slate-500">Use um endereço público começando com https://</small></label>
+                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Foto por arquivo</span><input id="studentPhotoFile" type="file" accept="image/*" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-300 file:mr-3 file:border-0 file:bg-cyan-500 file:px-3 file:py-2 file:font-semibold file:text-slate-950"><small class="mt-1 block text-slate-500">PNG, JPG ou WEBP até 2 MB.</small></label>
+                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Foto por URL</span><input id="studentPhotoUrl" type="url" placeholder="https://site.com/foto.jpg" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-300"><small class="mt-1 block text-slate-500">Se informar os dois, a URL terá prioridade.</small></label>
+                </div>
+                <div class="flex flex-wrap justify-end gap-3 border-t border-slate-700 pt-5"><button type="button" data-close-modal="studentFormModal" class="rounded-xl border border-slate-600 px-5 py-3 font-semibold text-slate-300 hover:bg-slate-800">Cancelar</button><button type="submit" class="rounded-xl bg-cyan-500 px-5 py-3 font-bold text-slate-950 hover:bg-cyan-300">Salvar aluno</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="studentViewModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="studentViewTitle">
+        <div class="mx-auto my-6 max-w-5xl rounded-3xl border border-slate-700 bg-slate-900 p-5 shadow-2xl sm:p-8">
+            <div class="flex items-start justify-between gap-4"><div class="flex items-center gap-4"><div id="studentViewPhoto" class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-cyan-400/20 text-2xl font-bold text-cyan-200"></div><div><p id="studentViewRegistration" class="text-sm font-semibold text-cyan-300"></p><h2 id="studentViewTitle" class="mt-1 text-2xl font-bold text-white"></h2><p id="studentViewMeta" class="mt-2 text-sm text-slate-400"></p></div></div><button type="button" data-close-modal="studentViewModal" class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label="Fechar aluno">✕</button></div>
+            <div class="mt-5 flex flex-wrap gap-3"><a id="studentWhatsapp" target="_blank" rel="noopener noreferrer" class="rounded-xl bg-green-500 px-4 py-2 font-semibold text-slate-950 hover:bg-green-400">Abrir WhatsApp</a><a id="studentPortfolioOpen" target="_blank" rel="noopener noreferrer" class="rounded-xl bg-cyan-500 px-4 py-2 font-semibold text-slate-950 hover:bg-cyan-300">Abrir</a><button id="editStudentButton" type="button" class="rounded-xl border border-cyan-400/40 px-4 py-2 font-semibold text-cyan-200 hover:bg-cyan-400/10">Editar</button><button id="deleteStudentButton" type="button" class="rounded-xl border border-red-400/40 px-4 py-2 font-semibold text-red-300 hover:bg-red-400/10">Excluir</button></div>
+            <div class="mt-6 overflow-hidden rounded-2xl border border-slate-700 bg-white shadow-xl"><iframe id="studentPortfolioPreview" class="h-[min(72vh,720px)] min-h-[420px] w-full resize-y" title="Preview do currículo ou portfólio" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+            <p class="mt-3 text-xs text-slate-500">O preview é carregado automaticamente. Se o site bloquear incorporação, <a id="studentPortfolioFallback" class="hidden font-semibold text-cyan-300 underline hover:text-cyan-200" target="_blank" rel="noopener noreferrer">abra o endereço em uma nova guia</a>.</p>
+        </div>
+    </div>
+
+    <script>
+        (() => {
+            const API_URL = 'https://onlinestorage.you.tec.br/api';
+            const API_BUCKET = 'devtarde';
+            const API_INDEX_KEY = 'students-index';
+            const STORAGE_KEY = 'senai-devtarde-students';
+            const byId = (id) => document.getElementById(id);
+            const state = { students: [], editingId: null, viewedId: null, lastFocus: null };
+            const defaultResume = '<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:Arial,sans-serif;color:#172033;max-width:850px;margin:0 auto;padding:40px}h1{color:#0e7490;border-bottom:2px solid #67e8f9;padding-bottom:12px}h2{color:#155e75;margin-top:28px}li{margin:8px 0}</style></head><body><h1>Nome do aluno</h1><p>Desenvolvedor em formação | Turma DevTarde</p><h2>Perfil</h2><p>Apresente aqui seu perfil profissional.</p><h2>Habilidades</h2><ul><li>HTML e CSS</li><li>JavaScript</li><li>Git e GitHub</li></ul><h2>Formação</h2><p>Curso de Desenvolvimento de Sistemas - SENAI</p></body></html>';
+            const service = {
+                async request(path, options = {}) {
+                    const response = await fetch(API_URL + path, { ...options, headers: { Accept: 'application/json', ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.headers || {}) } });
+                    if (!response.ok) throw new Error('FreeOnlineStorage respondeu ' + response.status);
+                    if (response.status === 204) return null;
+                    const text = await response.text();
+                    if (!text) return null;
+                    try { return JSON.parse(text); } catch { return text; }
+                },
+                async readKey(key) {
+                    return this.request('/getkey/' + encodeURIComponent(API_BUCKET) + '/' + encodeURIComponent(key), { method: 'GET' });
+                },
+                async writeKey(key, value) {
+                    return this.request('/', { method: 'POST', body: JSON.stringify({ bucket: API_BUCKET, key, value }) });
+                },
+                async deleteKey(key) {
+                    return this.request('/deletekey/' + encodeURIComponent(API_BUCKET) + '/' + encodeURIComponent(key), { method: 'DELETE' });
+                },
+                async readIndex() {
+                    try {
+                        const result = await this.readKey(API_INDEX_KEY);
+                        const rawValue = result && Object.prototype.hasOwnProperty.call(result, 'value') ? result.value : result;
+                        const parsed = typeof rawValue === 'string' ? JSON.parse(rawValue) : rawValue;
+                        return Array.isArray(parsed) ? parsed : [];
+                    } catch (error) {
+                        if (/404/.test(error.message)) return [];
+                        throw error;
+                    }
+                },
+                async list() {
+                    const registrations = await this.readIndex();
+                    const students = await Promise.all(registrations.map(async (matricula) => {
+                        try {
+                            const result = await this.readKey('student-' + matricula);
+                            const rawValue = result && Object.prototype.hasOwnProperty.call(result, 'value') ? result.value : result;
+                            return typeof rawValue === 'string' ? JSON.parse(rawValue) : rawValue;
+                        } catch (error) {
+                            console.warn('Registro ignorado:', matricula, error);
+                            return null;
+                        }
+                    }));
+                    return students.filter(Boolean);
+                },
+                async save(student) {
+                    const registrations = await this.readIndex();
+                    if (!registrations.includes(student.matricula)) registrations.push(student.matricula);
+                    await this.writeKey('student-' + student.matricula, student);
+                    await this.writeKey(API_INDEX_KEY, registrations);
+                },
+                async remove(matricula) {
+                    const registrations = (await this.readIndex()).filter((item) => item !== matricula);
+                    await this.deleteKey('student-' + matricula);
+                    await this.writeKey(API_INDEX_KEY, registrations);
+                }
+            };
+            const localStore = {
+                read() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (error) { console.error(error); return []; } },
+                write(items) { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
+            };
+            function abbreviateName(name) {
+                const parts = name.trim().split(/\s+/).filter((part) => !['de', 'da', 'do', 'dos', 'das'].includes(part.toLowerCase()));
+                return parts.length > 1 ? parts[0] + ' ' + parts[parts.length - 1][0].toUpperCase() + '.' : parts[0] || 'Aluno';
+            }
+            function sanitizeHtml(html) {
+                const documentNode = new DOMParser().parseFromString(String(html || ''), 'text/html');
+                documentNode.querySelectorAll('iframe,object,embed,form,base').forEach((node) => node.remove());
+                documentNode.querySelectorAll('script').forEach((node) => {
+                    const source = node.getAttribute('src') || '';
+                    if (source !== 'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4') node.remove();
+                    else { node.removeAttribute('integrity'); node.removeAttribute('crossorigin'); }
+                });
+                documentNode.querySelectorAll('*').forEach((node) => [...node.attributes].forEach((attribute) => {
+                    if (/^on/i.test(attribute.name) || /^(javascript|data):/i.test(attribute.value)) node.removeAttribute(attribute.name);
+                }));
+                if (!documentNode.querySelector('script[src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"]')) {
+                    const tailwindScript = documentNode.createElement('script');
+                    tailwindScript.src = 'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4';
+                    documentNode.head.appendChild(tailwindScript);
+                }
+                return '<!doctype html>' + documentNode.documentElement.outerHTML;
+            }
+            function notify(message, type = 'success') {
+                const element = byId('studentFeedback');
+                element.textContent = message;
+                element.className = 'mt-5 rounded-lg border px-4 py-3 text-sm ' + (type === 'error' ? 'border-red-400/40 bg-red-400/10 text-red-200' : 'border-green-400/40 bg-green-400/10 text-green-200');
+                window.setTimeout(() => element.classList.add('hidden'), 4500);
+            }
+            function setStorageMode(cloud) {
+                const badge = byId('storageStatus');
+                badge.textContent = cloud ? 'Cloud API' : 'Local Sync';
+                badge.className = 'rounded-full border px-3 py-1 text-xs font-semibold ' + (cloud ? 'border-green-300/30 bg-green-300/10 text-green-200' : 'border-amber-300/30 bg-amber-300/10 text-amber-200');
+            }
+            async function loadStudents() {
+                if (API_URL) try { const result = await service.list(); state.students = Array.isArray(result) ? result : Array.isArray(result && result.data) ? result.data : []; setStorageMode(true); } catch (error) { console.warn(error); state.students = localStore.read(); setStorageMode(false); notify('API indisponível. Usando Local Sync.', 'error'); }
+                else { state.students = localStore.read(); setStorageMode(false); }
+                renderStudents();
+            }
+            function persistLocal() { localStore.write(state.students); }
+            function renderStudents() {
+                const query = byId('studentSearch').value.trim().toLowerCase();
+                const students = state.students.filter((student) => [student.matricula, student.nome, student.telefone, student.portfolioUrl].join(' ').toLowerCase().includes(query)).sort((a, b) => abbreviateName(a.nome).localeCompare(abbreviateName(b.nome), 'pt-BR'));
+                byId('studentCount').textContent = students.length;
+                byId('studentGrid').innerHTML = students.length ? students.map((student) => `<article class="rounded-2xl border border-slate-700 bg-slate-950/50 p-5 transition hover:-translate-y-1 hover:border-cyan-400/60"><div class="flex items-start gap-4"><div class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-cyan-400/20 text-xl font-bold text-cyan-200">${student.foto ? `<img src="${escapeHtml(student.foto)}" alt="Foto de ${escapeHtml(student.nome)}" class="h-full w-full object-cover" loading="lazy" onerror="this.parentElement.textContent='${escapeHtml(student.nome.charAt(0).toUpperCase())}'">` : escapeHtml(student.nome.charAt(0).toUpperCase())}</div><div class="min-w-0"><h3 class="truncate font-bold text-white">${escapeHtml(abbreviateName(student.nome))}</h3><span class="text-xs font-semibold text-cyan-300">${escapeHtml(student.matricula)}</span></div></div><p class="mt-4 truncate text-sm text-slate-400">${escapeHtml(student.telefone || 'Telefone não informado')}</p><a href="${escapeHtml(student.portfolioUrl || '#')}" target="_blank" rel="noopener noreferrer" class="mt-2 block truncate text-sm text-cyan-300 hover:text-cyan-200">${escapeHtml(student.portfolioUrl || 'Link não informado')}</a><div class="mt-5 flex gap-2"><button type="button" data-view="${escapeHtml(student.matricula)}" class="flex-1 rounded-lg bg-cyan-500 px-3 py-2 text-sm font-bold text-slate-950 hover:bg-cyan-300">Ver aluno</button><button type="button" data-edit="${escapeHtml(student.matricula)}" class="rounded-lg border border-slate-600 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800">Editar</button></div></article>`).join('') : '<div class="rounded-2xl border border-dashed border-slate-700 p-10 text-center text-slate-400 md:col-span-2 xl:col-span-3">Nenhum aluno encontrado. Cadastre o primeiro aluno da turma.</div>';
+            }
+            function escapeHtml(value) { return String(value).replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[character])); }
+            function openModal(id) { byId(id).classList.remove('hidden'); document.body.classList.add('overflow-hidden'); state.lastFocus = document.activeElement; }
+            function closeModal(id) { byId(id).classList.add('hidden'); if (!document.querySelector('[role="dialog"]:not(.hidden)')) document.body.classList.remove('overflow-hidden'); if (state.lastFocus) state.lastFocus.focus(); }
+            function openForm(matricula = null) {
+                state.editingId = matricula;
+                const student = state.students.find((item) => item.matricula === matricula);
+                byId('studentFormTitle').textContent = student ? 'Editar aluno' : 'Novo aluno';
+                byId('studentForm').reset();
+                byId('studentRegistration').readOnly = Boolean(student);
+                byId('studentPhotoFile').value = '';
+                byId('studentPhotoUrl').dataset.fileValue = '';
+                if (student) { byId('studentRegistration').value = student.matricula; byId('studentName').value = student.nome; byId('studentPhone').value = student.telefone || ''; byId('studentPortfolio').value = student.portfolioUrl || ''; byId('studentPhotoUrl').value = student.foto && !student.foto.startsWith('data:') ? student.foto : ''; }
+                openModal('studentFormModal');
+            }
+            function showStudent(matricula) {
+                const student = state.students.find((item) => item.matricula === matricula); if (!student) return;
+                state.viewedId = matricula; byId('studentViewRegistration').textContent = student.matricula; byId('studentViewTitle').textContent = student.nome; byId('studentViewMeta').textContent = student.telefone || 'Telefone não informado'; byId('studentViewPhoto').innerHTML = student.foto ? `<img src="${escapeHtml(student.foto)}" alt="Foto de ${escapeHtml(student.nome)}" class="h-full w-full object-cover">` : escapeHtml(student.nome.charAt(0).toUpperCase()); byId('studentWhatsapp').href = student.telefone ? 'https://wa.me/55' + student.telefone.replace(/\D/g, '') : '#'; const preview = byId('studentPortfolioPreview'); const portfolioOpen = byId('studentPortfolioOpen'); const fallback = byId('studentPortfolioFallback'); preview.src = student.portfolioUrl || 'about:blank'; portfolioOpen.href = student.portfolioUrl || '#'; portfolioOpen.classList.toggle('pointer-events-none', !student.portfolioUrl); portfolioOpen.setAttribute('aria-disabled', String(!student.portfolioUrl)); fallback.href = student.portfolioUrl || '#'; fallback.classList.toggle('hidden', !student.portfolioUrl); openModal('studentViewModal');
+            }
+            function closeStudentsApp() { byId('studentsApp').classList.add('hidden'); if (!document.querySelector('[role="dialog"]:not(.hidden)')) document.body.classList.remove('overflow-hidden'); }
+            byId('openStudentsApp').addEventListener('click', () => { byId('studentsApp').classList.remove('hidden'); document.body.classList.add('overflow-hidden'); loadStudents(); byId('newStudentButton').focus(); });
+            byId('closeStudentsApp').addEventListener('click', closeStudentsApp);
+            byId('studentsApp').addEventListener('click', (event) => { if (event.target === byId('studentsApp')) closeStudentsApp(); });
+            byId('newStudentButton').addEventListener('click', () => openForm());
+            byId('studentSearch').addEventListener('input', renderStudents);
+            byId('studentRegistration').addEventListener('input', (event) => { event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10); });
+            byId('studentPhone').addEventListener('input', (event) => { const digits = event.target.value.replace(/\D/g, '').slice(0, 11); event.target.value = digits.length > 6 ? `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}` : digits; });
+            byId('studentPhotoFile').addEventListener('change', (event) => { const file = event.target.files[0]; if (!file) return; if (!file.type.startsWith('image/')) { event.target.value = ''; return notify('Selecione um arquivo de imagem válido.', 'error'); } if (file.size > 2 * 1024 * 1024) { event.target.value = ''; return notify('A foto deve ter no máximo 2 MB.', 'error'); } const reader = new FileReader(); reader.onload = () => { byId('studentPhotoUrl').value = ''; byId('studentPhotoUrl').dataset.fileValue = reader.result; }; reader.readAsDataURL(file); });
+            byId('studentForm').addEventListener('submit', async (event) => { event.preventDefault(); const matricula = byId('studentRegistration').value.trim(); const existing = state.students.find((student) => student.matricula === matricula); if (!/^[A-Z]{3}\d{7}$/.test(matricula)) return notify('Informe uma matrícula no formato correto.', 'error'); if (existing && state.editingId !== matricula) return notify('Esta matrícula já está cadastrada.', 'error'); const old = state.students.find((student) => student.matricula === state.editingId); const portfolioUrl = byId('studentPortfolio').value.trim(); const photoUrl = byId('studentPhotoUrl').value.trim(); let foto = byId('studentPhotoUrl').dataset.fileValue || (old && old.foto) || ''; if (photoUrl) { try { const parsedUrl = new URL(photoUrl); if (!['http:', 'https:'].includes(parsedUrl.protocol)) throw new Error(); foto = photoUrl; } catch { return notify('Informe uma URL válida para a foto.', 'error'); } } try { const parsedPortfolioUrl = new URL(portfolioUrl); if (!['http:', 'https:'].includes(parsedPortfolioUrl.protocol)) throw new Error(); } catch { return notify('Informe um link HTTP ou HTTPS válido para currículo ou portfólio.', 'error'); } const student = { matricula, nome: byId('studentName').value.trim(), telefone: byId('studentPhone').value.trim(), portfolioUrl, foto }; if (!student.nome || !student.telefone) return notify('Preencha nome e telefone.', 'error'); try { if (API_URL) { try { await service.save(student); setStorageMode(true); } catch (error) { console.warn('Cloud API indisponível; salvando localmente.', error); setStorageMode(false); } } state.students = old ? state.students.map((item) => item.matricula === old.matricula ? student : item) : [...state.students, student]; persistLocal(); closeModal('studentFormModal'); renderStudents(); notify(old ? 'Aluno atualizado com sucesso.' : 'Aluno cadastrado com sucesso.'); } catch (error) { console.error(error); notify('Não foi possível salvar o aluno.', 'error'); } });
+            byId('studentGrid').addEventListener('click', (event) => { const view = event.target.closest('[data-view]'); const edit = event.target.closest('[data-edit]'); if (view) showStudent(view.dataset.view); if (edit) openForm(edit.dataset.edit); });
+            byId('editStudentButton').addEventListener('click', () => { closeModal('studentViewModal'); openForm(state.viewedId); });
+            byId('deleteStudentButton').addEventListener('click', async () => { const student = state.students.find((item) => item.matricula === state.viewedId); if (!student || !window.confirm(`Excluir a matrícula ${student.matricula}?`)) return; if (API_URL) try { await service.remove(student.matricula); } catch (error) { console.warn('Cloud API indisponível; excluindo do cache local.', error); setStorageMode(false); } state.students = state.students.filter((item) => item.matricula !== student.matricula); persistLocal(); closeModal('studentViewModal'); renderStudents(); notify('Matrícula excluída.'); });
+            document.querySelectorAll('[data-close-modal]').forEach((button) => button.addEventListener('click', () => closeModal(button.dataset.closeModal)));
+            document.addEventListener('keydown', (event) => { if (event.key !== 'Escape') return; const childDialog = document.querySelector('[role="dialog"]:not(.hidden)[id^="student"]'); if (childDialog && childDialog.id !== 'studentsApp') closeModal(childDialog.id); else if (!byId('studentsApp').classList.contains('hidden')) closeStudentsApp(); });
+        })();
+    </script>
 </body>
+
 </html>
