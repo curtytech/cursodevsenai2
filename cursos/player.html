@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Player de Curso - DEV SENAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased"
+  >
+    <!-- Topbar / Navbar -->
+    <header
+      class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50"
+    >
+      <div
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"
+      >
+        <div class="flex items-center gap-3">
+          <a
+            href="index.html"
+            class="text-sm font-semibold text-slate-400 hover:text-white transition-colors flex items-center gap-1"
+          >
+            &larr; Voltar aos Cursos
+          </a>
+          <span class="text-slate-700">|</span>
+          <h1
+            id="headerCourseTitle"
+            class="text-base font-bold text-white truncate max-w-xs sm:max-w-md"
+          >
+            Carregando Curso...
+          </h1>
+        </div>
+
+        <button
+          id="openAddLessonModalBtn"
+          type="button"
+          class="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2 text-xs font-bold text-slate-950 shadow-md transition hover:bg-cyan-300"
+        >
+          <span class="text-sm leading-none">+</span> Adicionar Aula
+        </button>
+      </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Player de Vídeo -->
+        <section class="lg:col-span-2 space-y-4">
+          <div
+            class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-800"
+          >
+            <iframe
+              id="mainPlayer"
+              class="w-full h-full border-0"
+              src=""
+              title="Player da Aula"
+              allow="
+                accelerometer;
+                autoplay;
+                clipboard-write;
+                encrypted-media;
+                gyroscope;
+                picture-in-picture;
+              "
+              allowfullscreen
+            >
+            </iframe>
+
+            <!-- Empty State Profissional -->
+            <div
+              id="noPlayerState"
+              class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 p-6 text-center"
+            >
+              <div
+                class="w-12 h-12 rounded-2xl bg-slate-800/80 border border-slate-700/80 flex items-center justify-center text-cyan-400 mb-3 shadow-lg"
+              >
+                <svg
+                  class="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  />
+                </svg>
+              </div>
+              <p class="text-sm font-bold text-slate-200">
+                Nenhuma aula cadastrada neste curso
+              </p>
+              <p class="text-xs text-slate-400 mt-1">
+                Clique no botão "+ Adicionar Aula" no topo para incluir a
+                primeira videoaula.
+              </p>
+            </div>
+          </div>
+
+          <div
+            id="lessonInfoCard"
+            class="p-6 bg-slate-900/90 rounded-2xl border border-slate-800/80 shadow-sm space-y-3"
+          >
+            <div class="flex items-center justify-between">
+              <span
+                id="lessonNumberBadge"
+                class="px-3 py-1 text-xs font-semibold text-cyan-400 bg-cyan-950/80 rounded-full border border-cyan-800/60"
+              >
+                Aula 1
+              </span>
+              <span id="lessonDurationText" class="text-xs text-slate-400"
+                >Duração: --:--</span
+              >
+            </div>
+
+            <h2
+              id="lessonTitleText"
+              class="text-2xl font-bold tracking-tight text-slate-100"
+            >
+              Selecione uma aula
+            </h2>
+
+            <p
+              id="lessonDescText"
+              class="text-sm text-slate-400 leading-relaxed pt-1"
+            >
+              As informações da aula aparecerão aqui.
+            </p>
+          </div>
+        </section>
+
+        <!-- Sidebar / Playlist -->
+        <aside
+          class="bg-slate-900/90 rounded-2xl border border-slate-800/80 p-5 flex flex-col h-full max-h-[650px] shadow-sm"
+        >
+          <div
+            class="border-b border-slate-800/80 pb-4 mb-4 flex items-center justify-between"
+          >
+            <h3 class="text-base font-bold text-slate-100">
+              Conteúdo do Curso
+            </h3>
+            <span
+              id="totalLessonsBadge"
+              class="text-xs font-medium text-cyan-400 bg-cyan-950/60 px-2.5 py-1 rounded-full border border-cyan-900"
+            >
+              0 Aulas
+            </span>
+          </div>
+
+          <div
+            id="lessonsListContainer"
+            class="space-y-3 overflow-y-auto pr-1 flex-1"
+          ></div>
+        </aside>
+      </div>
+    </main>
+
+    <!-- MODAL: Criar / Editar Aula -->
+    <div
+      id="addLessonModal"
+      class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        class="mx-auto my-8 max-w-lg rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-5"
+      >
+        <div
+          class="flex items-center justify-between border-b border-slate-800 pb-3"
+        >
+          <h3 id="modalLessonHeading" class="text-lg font-bold text-white">
+            Adicionar Aula ao Curso
+          </h3>
+          <button
+            id="closeAddLessonModalBtn"
+            type="button"
+            class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
+          >
+            ✕
+          </button>
+        </div>
+
+        <form id="addLessonForm" class="space-y-4">
+          <input type="hidden" id="editingVideoId" />
+
+          <div>
+            <label
+              class="block text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-1"
+              >Link ou ID do Vídeo no YouTube *</label
+            >
+            <input
+              id="youtubeInput"
+              required
+              type="text"
+              placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+              class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400"
+            />
+          </div>
+
+          <div>
+            <label
+              class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1"
+              >Título da Aula *</label
+            >
+            <input
+              id="lessonTitleInput"
+              required
+              type="text"
+              placeholder="Ex.: Aula 1 - Introdução aos Elementos Semânticos"
+              class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400"
+            />
+          </div>
+
+          <div>
+            <label
+              class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1"
+              >Descrição Curta *</label
+            >
+            <textarea
+              id="lessonDescInput"
+              required
+              rows="3"
+              placeholder="Resumo do conteúdo abordado nesta videoaula..."
+              class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400"
+            ></textarea>
+          </div>
+
+          <div>
+            <label
+              class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1"
+              >Duração estimada</label
+            >
+            <input
+              id="lessonDurationInput"
+              type="text"
+              placeholder="Ex.: 12:45 min"
+              class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400"
+            />
+          </div>
+
+          <div
+            class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4"
+          >
+            <button
+              id="cancelAddLessonBtn"
+              type="button"
+              class="rounded-xl border border-slate-700 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="rounded-xl bg-cyan-500 px-4 py-2 text-xs font-bold text-slate-950 hover:bg-cyan-300"
+            >
+              Salvar Aula
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL CUSTOMIZADO DE CONFIRMAÇÃO DE EXCLUSÃO DE AULA -->
+    <div
+      id="deleteLessonModal"
+      class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        class="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-4 text-center"
+      >
+        <div
+          class="mx-auto w-12 h-12 rounded-2xl bg-rose-950/50 border border-rose-800/60 flex items-center justify-center text-rose-400"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
+          </svg>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-bold text-white">Excluir Videoaula</h3>
+          <p class="text-xs text-slate-400 mt-1">
+            Deseja realmente remover esta aula do curso? Esta ação não pode ser
+            desfeita.
+          </p>
+        </div>
+
+        <div class="flex items-center justify-center gap-3 pt-2">
+          <button
+            id="cancelDeleteLessonBtn"
+            type="button"
+            class="rounded-xl border border-slate-700 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition"
+          >
+            Cancelar
+          </button>
+          <button
+            id="confirmDeleteLessonBtn"
+            type="button"
+            class="rounded-xl bg-rose-500 px-4 py-2.5 text-xs font-bold text-white hover:bg-rose-600 transition shadow-lg shadow-rose-950/50"
+          >
+            Sim, Excluir
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const BIN_ID = "6aebbe1fac6210605a6d6a0f";
+      const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+      const urlParams = new URLSearchParams(window.location.search);
+      const currentCourseId = urlParams.get("courseId");
+
+      let videoToDeleteId = null;
+
+      async function getCourses() {
+        try {
+          const res = await fetch(`${API_URL}/latest`);
+          if (!res.ok) throw new Error("Falha ao ler da nuvem");
+          const data = await res.json();
+          return data.record || [];
+        } catch (err) {
+          return JSON.parse(
+            localStorage.getItem("senai_courses_catalog_v1") || "[]",
+          );
+        }
+      }
+
+      async function saveCourses(courses) {
+        localStorage.setItem(
+          "senai_courses_catalog_v1",
+          JSON.stringify(courses),
+        );
+        try {
+          await fetch(API_URL, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(courses),
+          });
+        } catch (err) {
+          console.error("Erro ao salvar na nuvem:", err);
+        }
+      }
+
+      function extractYouTubeId(input) {
+        const match = input.match(
+          /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/,
+        );
+        return match && match[1] ? match[1] : input.trim();
+      }
+
+      async function loadCoursePlayer() {
+        const courses = await getCourses();
+        const course =
+          courses.find((c) => c.id === currentCourseId) || courses[0];
+
+        if (!course) {
+          document.getElementById("headerCourseTitle").textContent =
+            "Curso Não Encontrado";
+          return;
+        }
+
+        document.getElementById("headerCourseTitle").textContent = course.title;
+        const videos = course.videos || [];
+        document.getElementById("totalLessonsBadge").textContent =
+          `${videos.length} Aulas`;
+
+        const listContainer = document.getElementById("lessonsListContainer");
+        listContainer.innerHTML = "";
+
+        if (videos.length === 0) {
+          document.getElementById("noPlayerState").classList.remove("hidden");
+          document.getElementById("mainPlayer").src = "";
+          document.getElementById("lessonTitleText").textContent =
+            "Nenhuma aula disponível";
+          document.getElementById("lessonDescText").textContent =
+            "Adicione uma aula usando o botão no topo.";
+          return;
+        }
+
+        document.getElementById("noPlayerState").classList.add("hidden");
+
+        videos.forEach((video, index) => {
+          const thumbUrl = `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`;
+
+          const card = document.createElement("div");
+          card.className = `p-2.5 rounded-xl border transition-all flex items-center justify-between gap-2 ${
+            index === 0
+              ? "bg-cyan-950/40 border-cyan-500/40"
+              : "bg-slate-800/40 border-slate-800 hover:bg-slate-800"
+          }`;
+
+          card.innerHTML = `
+          <div onclick="selectVideoByIndex(${index})" class="flex items-center gap-3 flex-1 min-w-0 cursor-pointer">
+            <div class="relative w-16 h-10 rounded-lg overflow-hidden bg-slate-950 shrink-0 border border-slate-700">
+              <img src="${thumbUrl}" alt="${video.title}" class="w-full h-full object-cover">
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-bold text-slate-100 truncate">${index + 1}. ${video.title}</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">${video.duration || "Vídeo"}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button onclick="editVideo('${video.id}')" title="Editar Aula" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-cyan-300 transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+            </button>
+            <button onclick="confirmDeleteVideo('${video.id}')" title="Excluir Aula" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-rose-400 transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </div>
+        `;
+
+          listContainer.appendChild(card);
+        });
+
+        selectVideo(videos[0], 0);
+      }
+
+      async function selectVideoByIndex(index) {
+        const courses = await getCourses();
+        const course =
+          courses.find((c) => c.id === currentCourseId) || courses[0];
+        if (course && course.videos[index]) {
+          selectVideo(course.videos[index], index);
+        }
+      }
+
+      function selectVideo(video, index) {
+        document.getElementById("mainPlayer").src =
+          `https://www.youtube.com/embed/${video.youtubeId}?autoplay=1`;
+        document.getElementById("lessonNumberBadge").textContent =
+          `Aula ${index + 1}`;
+        document.getElementById("lessonTitleText").textContent = video.title;
+        document.getElementById("lessonDescText").textContent =
+          video.description;
+        document.getElementById("lessonDurationText").textContent =
+          `Duração: ${video.duration || "N/A"}`;
+      }
+
+      const modal = document.getElementById("addLessonModal");
+      const deleteModal = document.getElementById("deleteLessonModal");
+
+      function openLessonModal(video = null) {
+        document.getElementById("addLessonForm").reset();
+
+        if (video) {
+          document.getElementById("modalLessonHeading").textContent =
+            "Editar Aula";
+          document.getElementById("editingVideoId").value = video.id;
+          document.getElementById("youtubeInput").value =
+            `https://www.youtube.com/watch?v=${video.youtubeId}`;
+          document.getElementById("lessonTitleInput").value = video.title;
+          document.getElementById("lessonDescInput").value = video.description;
+          document.getElementById("lessonDurationInput").value =
+            video.duration || "";
+        } else {
+          document.getElementById("modalLessonHeading").textContent =
+            "Adicionar Aula ao Curso";
+          document.getElementById("editingVideoId").value = "";
+        }
+        modal.classList.remove("hidden");
+      }
+
+      async function editVideo(videoId) {
+        const courses = await getCourses();
+        const course = courses.find((c) => c.id === currentCourseId);
+        if (course) {
+          const video = course.videos.find((v) => v.id === videoId);
+          if (video) openLessonModal(video);
+        }
+      }
+
+      function confirmDeleteVideo(videoId) {
+        videoToDeleteId = videoId;
+        deleteModal.classList.remove("hidden");
+        deleteModal.classList.add("flex");
+      }
+
+      document
+        .getElementById("cancelDeleteLessonBtn")
+        .addEventListener("click", () => {
+          videoToDeleteId = null;
+          deleteModal.classList.add("hidden");
+          deleteModal.classList.remove("flex");
+        });
+
+      document
+        .getElementById("confirmDeleteLessonBtn")
+        .addEventListener("click", async () => {
+          if (!videoToDeleteId) return;
+          const courses = await getCourses();
+          const courseIndex = courses.findIndex(
+            (c) => c.id === currentCourseId,
+          );
+          if (courseIndex !== -1) {
+            courses[courseIndex].videos = courses[courseIndex].videos.filter(
+              (v) => v.id !== videoToDeleteId,
+            );
+            await saveCourses(courses);
+            await loadCoursePlayer();
+          }
+          videoToDeleteId = null;
+          deleteModal.classList.add("hidden");
+          deleteModal.classList.remove("flex");
+        });
+
+      document
+        .getElementById("openAddLessonModalBtn")
+        .addEventListener("click", () => openLessonModal());
+      document
+        .getElementById("closeAddLessonModalBtn")
+        .addEventListener("click", () => modal.classList.add("hidden"));
+      document
+        .getElementById("cancelAddLessonBtn")
+        .addEventListener("click", () => modal.classList.add("hidden"));
+
+      document
+        .getElementById("addLessonForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const editingId = document.getElementById("editingVideoId").value;
+          const rawYoutube = document.getElementById("youtubeInput").value;
+          const youtubeId = extractYouTubeId(rawYoutube);
+          const title = document
+            .getElementById("lessonTitleInput")
+            .value.trim();
+          const description = document
+            .getElementById("lessonDescInput")
+            .value.trim();
+          const duration =
+            document.getElementById("lessonDurationInput").value.trim() ||
+            "10:00 min";
+
+          if (!youtubeId) return alert("Link ou ID do YouTube inválido.");
+
+          const courses = await getCourses();
+          const courseIndex = courses.findIndex(
+            (c) => c.id === currentCourseId,
+          );
+
+          if (courseIndex !== -1) {
+            if (!courses[courseIndex].videos) courses[courseIndex].videos = [];
+
+            if (editingId) {
+              courses[courseIndex].videos = courses[courseIndex].videos.map(
+                (v) =>
+                  v.id === editingId
+                    ? { ...v, youtubeId, title, description, duration }
+                    : v,
+              );
+            } else {
+              courses[courseIndex].videos.push({
+                id: "v_" + Date.now(),
+                youtubeId,
+                title,
+                description,
+                duration,
+              });
+            }
+
+            await saveCourses(courses);
+            await loadCoursePlayer();
+            modal.classList.add("hidden");
+          }
+        });
+
+      document.addEventListener("DOMContentLoaded", loadCoursePlayer);
+    </script>
+  </body>
+</html>
