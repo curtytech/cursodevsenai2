@@ -1,172 +1,562 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Módulo de Cursos & Vídeos - SENAI</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
-
-  <!-- Header -->
-  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg bg-cyan-600 flex items-center justify-center font-bold text-white shadow-lg shadow-cyan-500/20">
-          S
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Módulo de Cursos & Vídeos - SENAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased"
+  >
+    <!-- Header / Navbar -->
+    <header
+      class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50"
+    >
+      <div
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="w-8 h-8 rounded-lg bg-cyan-600 flex items-center justify-center font-bold text-white shadow-lg shadow-cyan-500/20"
+          >
+            S
+          </div>
+          <span class="font-bold text-lg tracking-tight text-slate-100"
+            >DEV SENAI
+            <span class="text-cyan-400 font-normal"
+              >| Plataforma de Cursos</span
+            ></span
+          >
         </div>
-        <span class="font-bold text-lg tracking-tight text-slate-100">DEV SENAI <span class="text-cyan-400 font-normal">| Cursos</span></span>
+        <a
+          href="../index.html"
+          class="text-sm font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-1"
+        >
+          &larr; Voltar ao Início
+        </a>
       </div>
-      <a href="../index.html" class="text-sm font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-1">
-        &larr; Voltar ao Início
-      </a>
-    </div>
-  </header>
+    </header>
 
-  <!-- Conteúdo Principal -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      
-      <!-- Player de Vídeo -->
-      <section class="lg:col-span-2 space-y-4">
-        <div class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
-          <iframe 
-            id="mainPlayer"
-            class="w-full h-full border-0"
-            src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
-            title="Player de Vídeo do Curso"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowfullscreen>
-          </iframe>
-        </div>
-
-        <!-- Info da Aula -->
-        <div class="p-6 bg-slate-900/90 rounded-2xl border border-slate-800/80 shadow-sm space-y-3">
-          <div class="flex items-center gap-2">
-            <span id="lessonTag" class="px-3 py-1 text-xs font-semibold text-cyan-400 bg-cyan-950/80 rounded-full border border-cyan-800/60">
-              Módulo 1 · Aula 1
-            </span>
-          </div>
-
-          <h1 id="lessonTitle" class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-100">
-            Criando a Primeira Estrutura HTML5
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800/80 pb-6"
+      >
+        <div>
+          <h1
+            class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white"
+          >
+            Cursos Disponíveis
           </h1>
-          
-          <p id="lessonDescription" class="text-sm sm:text-base text-slate-400 leading-relaxed pt-1">
-            Nesta aula introdutória, vamos aprender como estruturar uma página web moderna utilizando elementos semânticos do HTML5.
+          <p class="mt-1 text-sm text-slate-400">
+            Gerencie e acesse os treinamentos e videoaulas da turma.
           </p>
+        </div>
 
-          <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-            <span>Instrutor: <strong class="text-slate-200">Prof. Curty</strong></span>
-            <span id="lessonDuration">Duração: <strong class="text-slate-200">10:15 min</strong></span>
+        <button
+          id="openModalBtn"
+          type="button"
+          class="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-950/40 transition duration-200 hover:bg-cyan-300 active:scale-95 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+        >
+          <span class="text-lg leading-none">+</span> Criar Novo Curso
+        </button>
+      </div>
+
+      <!-- Grid do Catálogo de Cursos -->
+      <div
+        id="coursesGrid"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      ></div>
+    </main>
+
+    <!-- MODAL: Criar / Editar Curso -->
+    <div
+      id="courseModal"
+      class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        class="mx-auto my-6 max-w-2xl rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-6 sm:p-8"
+      >
+        <div
+          class="flex items-center justify-between border-b border-slate-800 pb-4"
+        >
+          <div>
+            <h2 id="modalCourseTitle" class="text-xl font-bold text-white">
+              Cadastrar Novo Curso
+            </h2>
+            <p class="text-xs text-slate-400">
+              Preencha as informações do curso.
+            </p>
           </div>
-        </div>
-      </section>
-
-      <!-- Sidebar / Playlist -->
-      <aside class="bg-slate-900/90 rounded-2xl border border-slate-800/80 p-5 flex flex-col h-full max-h-[650px] shadow-sm">
-        <div class="border-b border-slate-800/80 pb-4 mb-4 flex items-center justify-between">
-          <h2 class="text-lg font-bold text-slate-100">Conteúdo do Curso</h2>
-          <span class="text-xs font-medium text-cyan-400 bg-cyan-950/60 px-2.5 py-1 rounded-full border border-cyan-900">
-            4 Aulas
-          </span>
+          <button
+            id="closeModalBtn"
+            type="button"
+            class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white"
+          >
+            ✕
+          </button>
         </div>
 
-        <div id="playlist" class="space-y-2.5 overflow-y-auto pr-1 flex-1">
-          
-          <!-- Aula 1 (Ativa por padrão) -->
-          <button 
-            data-video-id="dQw4w9WgXcQ"
-            data-title="Criando a Primeira Estrutura HTML5"
-            data-tag="Módulo 1 · Aula 1"
-            data-desc="Nesta aula introdutória, vamos aprender como estruturar uma página web moderna utilizando elementos semânticos do HTML5."
-            data-duration="10:15 min"
-            class="lesson-btn active-lesson w-full text-left p-3.5 rounded-xl bg-cyan-950/40 border border-cyan-500/40 text-cyan-200 transition-all flex items-center gap-3">
-            <span class="text-xs font-mono font-bold bg-cyan-900/60 px-2.5 py-1 rounded-lg text-cyan-300 border border-cyan-700/50">01</span>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold truncate">Criando a Primeira Estrutura</p>
-              <p class="text-xs text-cyan-400/70 mt-0.5">10:15 min</p>
+        <form id="createCourseForm" class="space-y-5">
+          <input type="hidden" id="editingCourseId" />
+
+          <div>
+            <label
+              class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2"
+              >Título do Curso *</label
+            >
+            <input
+              id="courseTitle"
+              required
+              type="text"
+              placeholder="Ex.: Curso de HTML5 e CSS3 Semântico"
+              class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+            />
+          </div>
+
+          <div>
+            <label
+              class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2"
+              >Descrição Resumida *</label
+            >
+            <textarea
+              id="courseDescription"
+              required
+              rows="3"
+              placeholder="Escreva uma breve apresentação do conteúdo do curso..."
+              class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+            ></textarea>
+          </div>
+
+          <div>
+            <label
+              class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1"
+              >URL da Capa / Thumbnail</label
+            >
+            <input
+              id="courseImage"
+              type="url"
+              placeholder="https://exemplo.com/imagem.jpg"
+              class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
+            />
+          </div>
+
+          <div class="space-y-3 border-t border-slate-800/80 pt-4">
+            <label
+              class="block text-xs font-semibold text-cyan-400 uppercase tracking-wider"
+              >Tags do Curso (Até 3 Tags Estilo Pill)</label
+            >
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="space-y-1.5">
+                <input
+                  id="tag1Text"
+                  type="text"
+                  placeholder="Tag 1 (Ex: HTML)"
+                  class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400"
+                />
+                <select
+                  id="tag1Color"
+                  class="w-full rounded-lg border border-slate-800 bg-slate-950 px-2 py-1 text-xs text-slate-300 outline-none"
+                >
+                  <option value="cyan">Cyan</option>
+                  <option value="indigo">Indigo</option>
+                  <option value="emerald">Emerald</option>
+                  <option value="amber">Amber</option>
+                  <option value="rose">Rose</option>
+                </select>
+              </div>
+
+              <div class="space-y-1.5">
+                <input
+                  id="tag2Text"
+                  type="text"
+                  placeholder="Tag 2"
+                  class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400"
+                />
+                <select
+                  id="tag2Color"
+                  class="w-full rounded-lg border border-slate-800 bg-slate-950 px-2 py-1 text-xs text-slate-300 outline-none"
+                >
+                  <option value="indigo">Indigo</option>
+                  <option value="cyan">Cyan</option>
+                  <option value="emerald">Emerald</option>
+                  <option value="amber">Amber</option>
+                  <option value="rose">Rose</option>
+                </select>
+              </div>
+
+              <div class="space-y-1.5">
+                <input
+                  id="tag3Text"
+                  type="text"
+                  placeholder="Tag 3"
+                  class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400"
+                />
+                <select
+                  id="tag3Color"
+                  class="w-full rounded-lg border border-slate-800 bg-slate-950 px-2 py-1 text-xs text-slate-300 outline-none"
+                >
+                  <option value="emerald">Emerald</option>
+                  <option value="cyan">Cyan</option>
+                  <option value="indigo">Indigo</option>
+                  <option value="amber">Amber</option>
+                  <option value="rose">Rose</option>
+                </select>
+              </div>
             </div>
-          </button>
+          </div>
 
-          <!-- Aula 2 -->
-          <button 
-            data-video-id="L_LUpnjgPso"
-            data-title="Estilizando com Tailwind CSS"
-            data-tag="Módulo 1 · Aula 2"
-            data-desc="Aprenda a aplicar utilitários do Tailwind CSS para construir layouts responsivos rapidamente."
-            data-duration="15:40 min"
-            class="lesson-btn w-full text-left p-3.5 rounded-xl bg-slate-800/40 border border-slate-800 text-slate-300 transition-all hover:bg-slate-800 hover:text-white flex items-center gap-3">
-            <span class="text-xs font-mono font-medium bg-slate-900 px-2.5 py-1 rounded-lg text-slate-400 border border-slate-800">02</span>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium truncate">Estilizando com Tailwind CSS</p>
-              <p class="text-xs text-slate-500 mt-0.5">15:40 min</p>
-            </div>
-          </button>
-
-          <!-- Aula 3 -->
-          <button 
-            data-video-id="UB1O30fR-EE"
-            data-title="Componentes Responsivos no Grid"
-            data-tag="Módulo 1 · Aula 3"
-            data-desc="Dominando o CSS Grid Layout e breakpoints para diferentes tamanhos de tela."
-            data-duration="12:20 min"
-            class="lesson-btn w-full text-left p-3.5 rounded-xl bg-slate-800/40 border border-slate-800 text-slate-300 transition-all hover:bg-slate-800 hover:text-white flex items-center gap-3">
-            <span class="text-xs font-mono font-medium bg-slate-900 px-2.5 py-1 rounded-lg text-slate-400 border border-slate-800">03</span>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium truncate">Componentes Responsivos no Grid</p>
-              <p class="text-xs text-slate-500 mt-0.5">12:20 min</p>
-            </div>
-          </button>
-
-          <!-- Aula 4 -->
-          <button 
-            data-video-id="RGOj5yH7evE"
-            data-title="Integrando com GitHub & Git Workflow"
-            data-tag="Módulo 1 · Aula 4"
-            data-desc="Como utilizar branches, Pull Requests e colaborar em projetos no GitHub."
-            data-duration="18:05 min"
-            class="lesson-btn w-full text-left p-3.5 rounded-xl bg-slate-800/40 border border-slate-800 text-slate-300 transition-all hover:bg-slate-800 hover:text-white flex items-center gap-3">
-            <span class="text-xs font-mono font-medium bg-slate-900 px-2.5 py-1 rounded-lg text-slate-400 border border-slate-800">04</span>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium truncate">Integrando com GitHub</p>
-              <p class="text-xs text-slate-500 mt-0.5">18:05 min</p>
-            </div>
-          </button>
-
-        </div>
-      </aside>
-
+          <div
+            class="flex items-center justify-end gap-3 border-t border-slate-800 pt-5"
+          >
+            <button
+              id="cancelModalBtn"
+              type="button"
+              class="rounded-xl border border-slate-700 px-5 py-2.5 text-xs font-semibold text-slate-300 hover:bg-slate-800"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="rounded-xl bg-cyan-500 px-5 py-2.5 text-xs font-bold text-slate-950 hover:bg-cyan-300"
+            >
+              Salvar Curso
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-  </main>
 
-  <!-- Script para trocar o vídeo ao clicar na playlist -->
-  <script>
-    document.querySelectorAll('.lesson-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const videoId = btn.dataset.videoId;
-        const title = btn.dataset.title;
-        const tag = btn.dataset.tag;
-        const desc = btn.dataset.desc;
-        const duration = btn.dataset.duration;
+    <!-- MODAL CUSTOMIZADO DE CONFIRMAÇÃO DE EXCLUSÃO -->
+    <div
+      id="deleteConfirmModal"
+      class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        class="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-4 text-center"
+      >
+        <div
+          class="mx-auto w-12 h-12 rounded-2xl bg-rose-950/50 border border-rose-800/60 flex items-center justify-center text-rose-400"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
+          </svg>
+        </div>
 
-        // Atualiza o player iFrame do YouTube
-        document.getElementById('mainPlayer').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+        <div>
+          <h3 class="text-lg font-bold text-white">Excluir Curso</h3>
+          <p class="text-xs text-slate-400 mt-1">
+            Deseja realmente excluir este curso e todas as suas aulas? Esta ação
+            não poderá ser desfeita.
+          </p>
+        </div>
 
-        // Atualiza textos
-        document.getElementById('lessonTitle').textContent = title;
-        document.getElementById('lessonTag').textContent = tag;
-        document.getElementById('lessonDescription').textContent = desc;
-        document.getElementById('lessonDuration').innerHTML = `Duração: <strong class="text-slate-200">${duration}</strong>`;
+        <div class="flex items-center justify-center gap-3 pt-2">
+          <button
+            id="cancelDeleteBtn"
+            type="button"
+            class="rounded-xl border border-slate-700 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition"
+          >
+            Cancelar
+          </button>
+          <button
+            id="confirmDeleteBtn"
+            type="button"
+            class="rounded-xl bg-rose-500 px-4 py-2.5 text-xs font-bold text-white hover:bg-rose-600 transition shadow-lg shadow-rose-950/50"
+          >
+            Sim, Excluir
+          </button>
+        </div>
+      </div>
+    </div>
 
-        // Atualiza destaque visual dos botões
-        document.querySelectorAll('.lesson-btn').forEach(b => {
-          b.className = "lesson-btn w-full text-left p-3.5 rounded-xl bg-slate-800/40 border border-slate-800 text-slate-300 transition-all hover:bg-slate-800 hover:text-white flex items-center gap-3";
+    <script>
+      // ID do seu Bin no JSONBin.io
+      const BIN_ID = "6aebbe1fac6210605a6d6a0f";
+      const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+      const DEFAULT_COVER =
+        "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&auto=format&fit=crop&q=80";
+
+      const defaultCourses = [
+        {
+          id: "c1",
+          title: "Módulo de Cursos & Vídeos",
+          description:
+            "Acesse videoaulas, playlists de conteúdo e materiais práticos em vídeo da turma.",
+          image: DEFAULT_COVER,
+          tags: [
+            { text: "VIDEOAULAS", color: "cyan" },
+            { text: "DEV", color: "indigo" },
+          ],
+          videos: [],
+        },
+      ];
+
+      let courseToDeleteId = null;
+
+      // 1. GET: Buscar da Nuvem (com fallback local caso a API falhe)
+      async function getCourses() {
+        try {
+          const res = await fetch(`${API_URL}/latest`);
+          if (!res.ok) throw new Error("Falha ao conectar com a nuvem");
+          const data = await res.json();
+          return data.record || defaultCourses;
+        } catch (err) {
+          console.warn("Usando fallback do localStorage:", err);
+          return JSON.parse(
+            localStorage.getItem("senai_courses_catalog_v1") ||
+              JSON.stringify(defaultCourses),
+          );
+        }
+      }
+
+      // 2. PUT: Salvar na Nuvem
+      async function saveCourses(courses) {
+        localStorage.setItem(
+          "senai_courses_catalog_v1",
+          JSON.stringify(courses),
+        ); // Backup local
+        try {
+          await fetch(API_URL, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(courses),
+          });
+        } catch (err) {
+          console.error("Erro ao sincronizar na nuvem:", err);
+        }
+      }
+
+      function getTagStyle(color) {
+        const styles = {
+          cyan: "text-cyan-400 border-cyan-500/60 bg-cyan-950/30",
+          indigo: "text-indigo-400 border-indigo-500/60 bg-indigo-950/30",
+          emerald: "text-emerald-400 border-emerald-500/60 bg-emerald-950/30",
+          amber: "text-amber-400 border-amber-500/60 bg-amber-950/30",
+          rose: "text-rose-400 border-rose-500/60 bg-rose-950/30",
+        };
+        return styles[color] || styles.cyan;
+      }
+
+      async function renderCourses() {
+        const grid = document.getElementById("coursesGrid");
+        grid.innerHTML =
+          '<p class="text-slate-400 text-sm">Carregando cursos da nuvem...</p>';
+
+        const courses = await getCourses();
+        grid.innerHTML = "";
+
+        courses.forEach((course) => {
+          const card = document.createElement("article");
+          card.className =
+            "flex flex-col justify-between rounded-3xl border border-cyan-500/40 bg-cyan-950/20 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-cyan-400 hover:shadow-2xl hover:shadow-cyan-950/50";
+
+          const tagsHtml = (course.tags || [])
+            .map(
+              (t) => `
+          <span class="inline-block rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${getTagStyle(t.color)}">
+            ${t.text}
+          </span>
+        `,
+            )
+            .join("");
+
+          card.innerHTML = `
+          <div class="space-y-4">
+            <div class="relative h-44 w-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 group">
+              <img src="${course.image || DEFAULT_COVER}" alt="${course.title}" class="h-full w-full object-cover transition duration-300 hover:scale-105" onerror="this.src='${DEFAULT_COVER}'">
+              
+              <div class="absolute top-3 right-3 flex gap-2">
+                <button onclick="editCourse('${course.id}')" title="Editar Curso" class="p-2 rounded-xl bg-slate-900/90 border border-slate-700/80 text-slate-300 hover:bg-cyan-500 hover:text-slate-950 transition shadow-lg">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                </button>
+                <button onclick="confirmDeleteCourse('${course.id}')" title="Excluir Curso" class="p-2 rounded-xl bg-slate-900/90 border border-slate-700/80 text-slate-300 hover:bg-rose-500 hover:text-white transition shadow-lg">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              ${tagsHtml}
+            </div>
+
+            <h2 class="text-xl font-bold text-white tracking-tight">${course.title}</h2>
+            <p class="text-sm text-slate-300 leading-relaxed">${course.description}</p>
+          </div>
+
+          <div class="pt-6 mt-6 border-t border-slate-800/80 flex items-center justify-between">
+            <span class="text-xs text-slate-400">${(course.videos || []).length} Aulas</span>
+            <a href="player.html?courseId=${course.id}" class="inline-flex items-center rounded-lg bg-cyan-500 px-4 py-2.5 text-xs font-bold text-slate-950 shadow-md transition hover:bg-cyan-300">
+              Assistir Aulas &rarr;
+            </a>
+          </div>
+        `;
+
+          grid.appendChild(card);
         });
-        btn.className = "lesson-btn active-lesson w-full text-left p-3.5 rounded-xl bg-cyan-950/40 border border-cyan-500/40 text-cyan-200 transition-all flex items-center gap-3";
-      });
-    });
-  </script>
+      }
 
-</body>
+      const modal = document.getElementById("courseModal");
+      const deleteModal = document.getElementById("deleteConfirmModal");
+
+      async function openModal(course = null) {
+        const form = document.getElementById("createCourseForm");
+        form.reset();
+
+        if (course) {
+          document.getElementById("modalCourseTitle").textContent =
+            "Editar Curso";
+          document.getElementById("editingCourseId").value = course.id;
+          document.getElementById("courseTitle").value = course.title;
+          document.getElementById("courseDescription").value =
+            course.description;
+          document.getElementById("courseImage").value = course.image || "";
+
+          if (course.tags && course.tags[0]) {
+            document.getElementById("tag1Text").value = course.tags[0].text;
+            document.getElementById("tag1Color").value = course.tags[0].color;
+          }
+          if (course.tags && course.tags[1]) {
+            document.getElementById("tag2Text").value = course.tags[1].text;
+            document.getElementById("tag2Color").value = course.tags[1].color;
+          }
+          if (course.tags && course.tags[2]) {
+            document.getElementById("tag3Text").value = course.tags[2].text;
+            document.getElementById("tag3Color").value = course.tags[2].color;
+          }
+        } else {
+          document.getElementById("modalCourseTitle").textContent =
+            "Cadastrar Novo Curso";
+          document.getElementById("editingCourseId").value = "";
+        }
+        modal.classList.remove("hidden");
+      }
+
+      async function editCourse(id) {
+        const courses = await getCourses();
+        const course = courses.find((c) => c.id === id);
+        if (course) openModal(course);
+      }
+
+      function confirmDeleteCourse(id) {
+        courseToDeleteId = id;
+        deleteModal.classList.remove("hidden");
+        deleteModal.classList.add("flex");
+      }
+
+      document
+        .getElementById("cancelDeleteBtn")
+        .addEventListener("click", () => {
+          courseToDeleteId = null;
+          deleteModal.classList.add("hidden");
+          deleteModal.classList.remove("flex");
+        });
+
+      document
+        .getElementById("confirmDeleteBtn")
+        .addEventListener("click", async () => {
+          if (!courseToDeleteId) return;
+          let courses = await getCourses();
+          courses = courses.filter((c) => c.id !== courseToDeleteId);
+          await saveCourses(courses);
+          await renderCourses();
+          courseToDeleteId = null;
+          deleteModal.classList.add("hidden");
+          deleteModal.classList.remove("flex");
+        });
+
+      document
+        .getElementById("openModalBtn")
+        .addEventListener("click", () => openModal());
+      document
+        .getElementById("closeModalBtn")
+        .addEventListener("click", () => modal.classList.add("hidden"));
+      document
+        .getElementById("cancelModalBtn")
+        .addEventListener("click", () => modal.classList.add("hidden"));
+
+      document
+        .getElementById("createCourseForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const editingId = document.getElementById("editingCourseId").value;
+          const title = document.getElementById("courseTitle").value.trim();
+          const description = document
+            .getElementById("courseDescription")
+            .value.trim();
+          const image =
+            document.getElementById("courseImage").value.trim() ||
+            DEFAULT_COVER;
+
+          const tags = [];
+          const t1 = document.getElementById("tag1Text").value.trim();
+          if (t1)
+            tags.push({
+              text: t1,
+              color: document.getElementById("tag1Color").value,
+            });
+
+          const t2 = document.getElementById("tag2Text").value.trim();
+          if (t2)
+            tags.push({
+              text: t2,
+              color: document.getElementById("tag2Color").value,
+            });
+
+          const t3 = document.getElementById("tag3Text").value.trim();
+          if (t3)
+            tags.push({
+              text: t3,
+              color: document.getElementById("tag3Color").value,
+            });
+
+          if (tags.length === 0)
+            tags.push({ text: "VIDEOAULAS", color: "cyan" });
+
+          let courses = await getCourses();
+
+          if (editingId) {
+            courses = courses.map((c) =>
+              c.id === editingId
+                ? { ...c, title, description, image, tags }
+                : c,
+            );
+          } else {
+            courses.push({
+              id: "course_" + Date.now(),
+              title,
+              description,
+              image,
+              tags,
+              videos: [],
+            });
+          }
+
+          await saveCourses(courses);
+          await renderCourses();
+          modal.classList.add("hidden");
+        });
+
+      document.addEventListener("DOMContentLoaded", renderCourses);
+    </script>
+  </body>
 </html>
