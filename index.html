@@ -110,10 +110,26 @@
             </p>
         </header>
 
-        <div class="flex flex-col gap-6 md:flex-row">
-        <section class="flex flex-1" aria-label="Projetos">
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:auto-rows-[minmax(190px,auto)]">
+        <section class="sm:col-span-2 lg:row-span-2" aria-label="Alunos DevTarde">
             <article
-                class="flex min-h-48 w-full flex-col rounded-3xl border border-slate-700 bg-slate-900/65 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-indigo-500/70 hover:shadow-2xl hover:shadow-indigo-950/40 active:scale-[0.98]">
+                class="flex h-full min-h-64 w-full flex-col rounded-3xl border border-cyan-400/40 bg-cyan-950/30 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-cyan-300/80 hover:shadow-2xl hover:shadow-cyan-950/40 active:scale-[0.98] lg:min-h-0 lg:p-8">
+                <div class="mb-3 flex items-center justify-between gap-3">
+                    <span class="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-200">Turma DevTarde</span>
+                    <span aria-hidden="true" class="text-2xl">✦</span>
+                </div>
+                <h2 class="text-xl font-semibold text-white">Alunos DevTarde</h2>
+                <p class="mt-3 text-slate-300">Gerencie matrículas e visualize os currículos profissionais dos alunos da turma.</p>
+                <button id="openStudentsApp" type="button"
+                    class="mt-auto inline-flex w-fit items-center rounded-lg bg-cyan-500 px-5 py-3 font-semibold text-slate-950 shadow-lg shadow-cyan-950/40 transition duration-200 hover:-translate-y-0.5 hover:bg-cyan-300 active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-cyan-300 focus:ring-offset-2 focus:ring-offset-slate-950">
+                    Acessar Alunos DevTarde
+                    <span class="ml-2" aria-hidden="true">&rarr;</span>
+                </button>
+            </article>
+        </section>
+        <section class="lg:col-span-2" aria-label="Projetos">
+            <article
+                class="flex h-full min-h-48 w-full flex-col rounded-3xl border border-slate-700 bg-slate-900/65 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-indigo-500/70 hover:shadow-2xl hover:shadow-indigo-950/40 active:scale-[0.98]">
                 <h2 class="text-xl font-semibold text-white">Apresentação HTML & CSS</h2>
                 <p class="mt-3 text-slate-300">Uma apresentação simples usando HTML e CSS.</p>
                 <a href="apresentacao_html_e_css.html"
@@ -124,9 +140,9 @@
             </article>
         </section>
 
-        <section class="flex flex-1" aria-label="Projetos">
+        <section aria-label="Projetos">
             <article
-                class="flex min-h-48 w-full flex-col rounded-3xl border border-slate-700 bg-slate-900/65 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-indigo-500/70 hover:shadow-2xl hover:shadow-indigo-950/40 active:scale-[0.98]">
+                class="flex h-full min-h-48 w-full flex-col rounded-3xl border border-slate-700 bg-slate-900/65 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-indigo-500/70 hover:shadow-2xl hover:shadow-indigo-950/40 active:scale-[0.98]">
                 <h2 class="text-xl font-semibold text-white">Nosso GitHub</h2>
                 <p class="mt-3 text-slate-300">Repositório com os códigos do curso e tudo que você precisa para começar a desenvolver.</p>
                 <a href="https://github.com/curtytech/cursodevsenai2" target="_blank" rel="noopener noreferrer"
@@ -137,9 +153,9 @@
             </article>
         </section>
 
-        <section class="flex flex-1" aria-label="Projetos">
+        <section aria-label="Projetos">
             <article
-                class="flex min-h-48 w-full flex-col rounded-3xl border border-slate-700 bg-slate-900/65 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-indigo-500/70 hover:shadow-2xl hover:shadow-indigo-950/40 active:scale-[0.98]">
+                class="flex h-full min-h-48 w-full flex-col rounded-3xl border border-slate-700 bg-slate-900/65 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-indigo-500/70 hover:shadow-2xl hover:shadow-indigo-950/40 active:scale-[0.98]">
                 <h2 class="text-xl font-semibold text-white">Manual de Git e GitHub</h2>
                 <p class="mt-3 text-slate-300">Um manual completo sobre Git e GitHub.</p>
                 <a href="https://andersonfariaas.github.io/manual-Git-e-GitHub/" target="_blank" rel="noopener noreferrer"
@@ -150,9 +166,9 @@
             </article>
         </section>
 
-        <section class="flex flex-1" aria-label="Projetos">
+        <section class="lg:col-span-2" aria-label="Projetos">
             <article
-                class="flex min-h-48 w-full flex-col rounded-3xl border border-slate-700 bg-slate-900/65 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-indigo-500/70 hover:shadow-2xl hover:shadow-indigo-950/40 active:scale-[0.98]">
+                class="flex h-full min-h-48 w-full flex-col rounded-3xl border border-slate-700 bg-slate-900/65 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-indigo-500/70 hover:shadow-2xl hover:shadow-indigo-950/40 active:scale-[0.98]">
                 <h2 class="text-xl font-semibold text-white">Gemini de Estudos para TailwindCSS</h2>
                 <p class="mt-3 text-slate-300">Um guia completo para estudar TailwindCSS com o auxílio do Gemini.</p>
                 <a href="https://gemini.google.com/gem/15aX5w44xaDjJ_NTG2vYmwCuRTESC9N2x?usp=sharing" target="_blank" rel="noopener noreferrer"
@@ -166,6 +182,219 @@
         </div>
     </main>
 
+    <section id="studentsApp" class="fixed inset-0 z-40 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm" aria-labelledby="studentsTitle" role="dialog" aria-modal="true">
+        <div class="mx-auto my-6 w-full max-w-6xl rounded-3xl border border-slate-700 bg-slate-900/95 p-5 shadow-2xl shadow-cyan-950/30 sm:my-10 sm:p-8">
+            <div class="flex flex-col gap-5 border-b border-slate-700 pb-6 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <span class="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-200">DevTarde</span>
+                        <span id="storageStatus" class="rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 text-xs font-semibold text-amber-200">Local Sync</span>
+                    </div>
+                    <h2 id="studentsTitle" class="text-2xl font-bold text-white sm:text-3xl">Gestão de alunos e currículos</h2>
+                    <p class="mt-2 text-sm text-slate-400">Cadastre talentos, organize especialidades e compartilhe currículos.</p>
+                </div>
+                <div class="flex gap-3">
+                    <button id="closeStudentsApp" type="button" class="rounded-lg border border-slate-600 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-slate-400 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-300">Fechar</button>
+                    <button id="newStudentButton" type="button" class="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300">+ Novo aluno</button>
+                </div>
+            </div>
+
+            <div id="studentFeedback" class="mt-5 hidden rounded-lg border px-4 py-3 text-sm" role="status"></div>
+            <div class="mt-6 grid gap-3 sm:grid-cols-3">
+                <label class="sm:col-span-2"><span class="mb-2 block text-sm font-medium text-slate-300">Buscar por matrícula, nome ou habilidade</span>
+                    <input id="studentSearch" type="search" placeholder="Ex.: NIT0312117 ou JavaScript" class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white outline-none transition focus:border-cyan-300 focus:ring-2 focus:ring-cyan-300/30">
+                </label>
+                <div class="rounded-xl border border-slate-700 bg-slate-950/40 p-4"><span class="block text-xs uppercase tracking-wider text-slate-500">Resultados</span><strong id="studentCount" class="mt-1 block text-2xl text-cyan-300">0</strong></div>
+            </div>
+            <div id="studentGrid" class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3"></div>
+        </div>
+    </section>
+
+    <div id="studentFormModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="studentFormTitle">
+        <div class="mx-auto my-6 max-w-3xl rounded-3xl border border-slate-700 bg-slate-900 p-5 shadow-2xl sm:p-8">
+            <div class="flex items-start justify-between gap-4">
+                <div><h2 id="studentFormTitle" class="text-2xl font-bold text-white">Novo aluno</h2><p class="mt-1 text-sm text-slate-400">Os campos marcados com * são obrigatórios.</p></div>
+                <button type="button" data-close-modal="studentFormModal" class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label="Fechar formulário">✕</button>
+            </div>
+            <form id="studentForm" class="mt-6 space-y-5">
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Matrícula *</span><div class="flex gap-2"><input id="studentRegistration" required maxlength="10" pattern="[A-Z]{3}[0-9]{7}" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 uppercase text-white outline-none focus:border-cyan-300"><button id="generateRegistration" type="button" class="shrink-0 rounded-xl border border-cyan-400/40 px-3 text-xs font-semibold text-cyan-200 hover:bg-cyan-400/10">Gerar NIT</button></div><small class="mt-1 block text-slate-500">Formato: NIT0312117</small></label>
+                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Nome completo *</span><input id="studentName" required class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-300"></label>
+                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Endereço</span><input id="studentAddress" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-300"></label>
+                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Telefone</span><input id="studentPhone" inputmode="tel" placeholder="(21) 99999-9999" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-300"></label>
+                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Foto de perfil</span><input id="studentPhoto" type="file" accept="image/*" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-300 file:mr-3 file:border-0 file:bg-cyan-500 file:px-3 file:py-2 file:font-semibold file:text-slate-950"></label>
+                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Tags de especialidade</span><input id="studentSkills" placeholder="HTML, JavaScript, Git" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-300"><small class="mt-1 block text-slate-500">Separe as habilidades por vírgula.</small></label>
+                </div>
+                <div class="block"><div class="mb-2 flex flex-wrap items-center justify-between gap-2"><span class="block text-sm font-medium text-slate-300">Currículo HTML *</span><button id="loadResumeTemplate" type="button" class="text-xs font-semibold text-cyan-300 hover:text-cyan-200">Carregar template Tailwind SENAI</button></div><input id="studentResumeFile" type="file" accept=".html,text/html" class="mb-3 w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-300 file:mr-3 file:border-0 file:bg-cyan-500 file:px-3 file:py-2 file:font-semibold file:text-slate-950"><div class="grid gap-4 lg:grid-cols-2"><textarea id="studentResume" required rows="12" class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 font-mono text-sm text-slate-200 outline-none focus:border-cyan-300" placeholder="Cole aqui o HTML do currículo..."></textarea><iframe id="resumePreview" class="min-h-[280px] w-full rounded-xl border border-slate-700 bg-white" sandbox="allow-scripts" title="Preview do currículo"></iframe></div><p class="mt-2 text-xs text-slate-500">Cole o documento HTML completo. O Tailwind é preservado e scripts externos ou código JavaScript do currículo são removidos.</p></div>
+                <div class="flex flex-wrap justify-end gap-3 border-t border-slate-700 pt-5"><button type="button" data-close-modal="studentFormModal" class="rounded-xl border border-slate-600 px-5 py-3 font-semibold text-slate-300 hover:bg-slate-800">Cancelar</button><button type="submit" class="rounded-xl bg-cyan-500 px-5 py-3 font-bold text-slate-950 hover:bg-cyan-300">Salvar aluno</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div id="studentViewModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="studentViewTitle">
+        <div class="mx-auto my-6 max-w-5xl rounded-3xl border border-slate-700 bg-slate-900 p-5 shadow-2xl sm:p-8">
+            <div class="flex items-start justify-between gap-4"><div><p id="studentViewRegistration" class="text-sm font-semibold text-cyan-300"></p><h2 id="studentViewTitle" class="mt-1 text-2xl font-bold text-white"></h2><p id="studentViewMeta" class="mt-2 text-sm text-slate-400"></p></div><button type="button" data-close-modal="studentViewModal" class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label="Fechar currículo">✕</button></div>
+            <div class="mt-5 flex flex-wrap gap-3"><a id="studentWhatsapp" target="_blank" rel="noopener noreferrer" class="rounded-xl bg-green-500 px-4 py-2 font-semibold text-slate-950 hover:bg-green-400">WhatsApp</a><button id="openResumeButton" type="button" class="rounded-xl border border-slate-600 px-4 py-2 font-semibold text-slate-200 hover:bg-slate-800">Abrir em nova página</button><button id="printResumeButton" type="button" class="rounded-xl border border-slate-600 px-4 py-2 font-semibold text-slate-200 hover:bg-slate-800">Imprimir / PDF</button><button id="downloadResumeButton" type="button" class="rounded-xl border border-slate-600 px-4 py-2 font-semibold text-slate-200 hover:bg-slate-800">Baixar .html</button><button id="editStudentButton" type="button" class="rounded-xl border border-cyan-400/40 px-4 py-2 font-semibold text-cyan-200 hover:bg-cyan-400/10">Editar</button><button id="deleteStudentButton" type="button" class="rounded-xl border border-red-400/40 px-4 py-2 font-semibold text-red-300 hover:bg-red-400/10">Excluir</button></div>
+            <div id="studentViewTags" class="mt-5 flex flex-wrap gap-2"></div><iframe id="resumeFrame" class="mt-6 min-h-[560px] w-full rounded-2xl border border-slate-700 bg-white" sandbox="allow-scripts" title="Currículo do aluno"></iframe>
+        </div>
+    </div>
+
+    <script>
+        (() => {
+            const API_URL = 'http://onlinestorage.you.tec.br/api';
+            const API_BUCKET = 'devtarde';
+            const API_INDEX_KEY = 'students-index';
+            const STORAGE_KEY = 'senai-devtarde-students';
+            const byId = (id) => document.getElementById(id);
+            const state = { students: [], editingId: null, viewedId: null, lastFocus: null };
+            const defaultResume = '<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:Arial,sans-serif;color:#172033;max-width:850px;margin:0 auto;padding:40px}h1{color:#0e7490;border-bottom:2px solid #67e8f9;padding-bottom:12px}h2{color:#155e75;margin-top:28px}li{margin:8px 0}</style></head><body><h1>Nome do aluno</h1><p>Desenvolvedor em formação | Turma DevTarde</p><h2>Perfil</h2><p>Apresente aqui seu perfil profissional.</p><h2>Habilidades</h2><ul><li>HTML e CSS</li><li>JavaScript</li><li>Git e GitHub</li></ul><h2>Formação</h2><p>Curso de Desenvolvimento de Sistemas - SENAI</p></body></html>';
+            const service = {
+                async request(path, options = {}) {
+                    const response = await fetch(API_URL + path, { ...options, headers: { Accept: 'application/json', ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.headers || {}) } });
+                    if (!response.ok) throw new Error('FreeOnlineStorage respondeu ' + response.status);
+                    if (response.status === 204) return null;
+                    const text = await response.text();
+                    if (!text) return null;
+                    try { return JSON.parse(text); } catch { return text; }
+                },
+                async readKey(key) {
+                    return this.request('/getkey/' + encodeURIComponent(API_BUCKET) + '/' + encodeURIComponent(key), { method: 'GET' });
+                },
+                async writeKey(key, value) {
+                    return this.request('/', { method: 'POST', body: JSON.stringify({ bucket: API_BUCKET, key, value: JSON.stringify(value) }) });
+                },
+                async deleteKey(key) {
+                    return this.request('/deletekey/' + encodeURIComponent(API_BUCKET) + '/' + encodeURIComponent(key), { method: 'DELETE' });
+                },
+                async readIndex() {
+                    try {
+                        const result = await this.readKey(API_INDEX_KEY);
+                        const rawValue = result && Object.prototype.hasOwnProperty.call(result, 'value') ? result.value : result;
+                        const parsed = typeof rawValue === 'string' ? JSON.parse(rawValue) : rawValue;
+                        return Array.isArray(parsed) ? parsed : [];
+                    } catch (error) {
+                        if (/404/.test(error.message)) return [];
+                        throw error;
+                    }
+                },
+                async list() {
+                    const registrations = await this.readIndex();
+                    const students = await Promise.all(registrations.map(async (matricula) => {
+                        try {
+                            const result = await this.readKey('student-' + matricula);
+                            const rawValue = result && Object.prototype.hasOwnProperty.call(result, 'value') ? result.value : result;
+                            return typeof rawValue === 'string' ? JSON.parse(rawValue) : rawValue;
+                        } catch (error) {
+                            console.warn('Registro ignorado:', matricula, error);
+                            return null;
+                        }
+                    }));
+                    return students.filter(Boolean);
+                },
+                async save(student) {
+                    const registrations = await this.readIndex();
+                    if (!registrations.includes(student.matricula)) registrations.push(student.matricula);
+                    await this.writeKey('student-' + student.matricula, student);
+                    await this.writeKey(API_INDEX_KEY, registrations);
+                },
+                async remove(matricula) {
+                    const registrations = (await this.readIndex()).filter((item) => item !== matricula);
+                    await this.deleteKey('student-' + matricula);
+                    await this.writeKey(API_INDEX_KEY, registrations);
+                }
+            };
+            const localStore = {
+                read() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (error) { console.error(error); return []; } },
+                write(items) { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
+            };
+            function abbreviateName(name) {
+                const parts = name.trim().split(/\s+/).filter((part) => !['de', 'da', 'do', 'dos', 'das'].includes(part.toLowerCase()));
+                return parts.length > 1 ? parts[0] + ' ' + parts[parts.length - 1][0].toUpperCase() + '.' : parts[0] || 'Aluno';
+            }
+            function sanitizeHtml(html) {
+                const documentNode = new DOMParser().parseFromString(String(html || ''), 'text/html');
+                documentNode.querySelectorAll('iframe,object,embed,form,base').forEach((node) => node.remove());
+                documentNode.querySelectorAll('script').forEach((node) => {
+                    const source = node.getAttribute('src') || '';
+                    if (source !== 'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4') node.remove();
+                    else { node.removeAttribute('integrity'); node.removeAttribute('crossorigin'); }
+                });
+                documentNode.querySelectorAll('*').forEach((node) => [...node.attributes].forEach((attribute) => {
+                    if (/^on/i.test(attribute.name) || /^(javascript|data):/i.test(attribute.value)) node.removeAttribute(attribute.name);
+                }));
+                if (!documentNode.querySelector('script[src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"]')) {
+                    const tailwindScript = documentNode.createElement('script');
+                    tailwindScript.src = 'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4';
+                    documentNode.head.appendChild(tailwindScript);
+                }
+                return '<!doctype html>' + documentNode.documentElement.outerHTML;
+            }
+            function notify(message, type = 'success') {
+                const element = byId('studentFeedback');
+                element.textContent = message;
+                element.className = 'mt-5 rounded-lg border px-4 py-3 text-sm ' + (type === 'error' ? 'border-red-400/40 bg-red-400/10 text-red-200' : 'border-green-400/40 bg-green-400/10 text-green-200');
+                window.setTimeout(() => element.classList.add('hidden'), 4500);
+            }
+            function setStorageMode(cloud) {
+                const badge = byId('storageStatus');
+                badge.textContent = cloud ? 'Cloud API' : 'Local Sync';
+                badge.className = 'rounded-full border px-3 py-1 text-xs font-semibold ' + (cloud ? 'border-green-300/30 bg-green-300/10 text-green-200' : 'border-amber-300/30 bg-amber-300/10 text-amber-200');
+            }
+            async function loadStudents() {
+                if (API_URL) try { const result = await service.list(); state.students = Array.isArray(result) ? result : Array.isArray(result && result.data) ? result.data : []; setStorageMode(true); } catch (error) { console.warn(error); state.students = localStore.read(); setStorageMode(false); notify('API indisponível. Usando Local Sync.', 'error'); }
+                else { state.students = localStore.read(); setStorageMode(false); }
+                renderStudents();
+            }
+            function persistLocal() { localStore.write(state.students); }
+            function renderStudents() {
+                const query = byId('studentSearch').value.trim().toLowerCase();
+                const students = state.students.filter((student) => [student.matricula, student.nome, ...(student.skills || [])].join(' ').toLowerCase().includes(query)).sort((a, b) => abbreviateName(a.nome).localeCompare(abbreviateName(b.nome), 'pt-BR'));
+                byId('studentCount').textContent = students.length;
+                byId('studentGrid').innerHTML = students.length ? students.map((student) => `<article class="rounded-2xl border border-slate-700 bg-slate-950/50 p-5 transition hover:-translate-y-1 hover:border-cyan-400/60"><div class="flex items-start gap-4"><div class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-cyan-400/20 text-xl font-bold text-cyan-200">${student.foto ? `<img src="${student.foto}" alt="" class="h-full w-full object-cover">` : student.nome.charAt(0).toUpperCase()}</div><div class="min-w-0"><h3 class="truncate font-bold text-white">${escapeHtml(abbreviateName(student.nome))}</h3><span class="text-xs font-semibold text-cyan-300">${escapeHtml(student.matricula)}</span></div></div><div class="mt-4 flex min-h-7 flex-wrap gap-2">${(student.skills || []).map((skill) => `<span class="rounded-full bg-slate-800 px-2.5 py-1 text-xs text-slate-300">${escapeHtml(skill)}</span>`).join('')}</div><div class="mt-5 flex gap-2"><button type="button" data-view="${escapeHtml(student.matricula)}" class="flex-1 rounded-lg bg-cyan-500 px-3 py-2 text-sm font-bold text-slate-950 hover:bg-cyan-300">Ver currículo</button><button type="button" data-edit="${escapeHtml(student.matricula)}" class="rounded-lg border border-slate-600 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800">Editar</button></div></article>`).join('') : '<div class="rounded-2xl border border-dashed border-slate-700 p-10 text-center text-slate-400 md:col-span-2 xl:col-span-3">Nenhum aluno encontrado. Cadastre o primeiro aluno da turma.</div>';
+            }
+            function escapeHtml(value) { return String(value).replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[character])); }
+            function openModal(id) { byId(id).classList.remove('hidden'); document.body.classList.add('overflow-hidden'); state.lastFocus = document.activeElement; }
+            function closeModal(id) { byId(id).classList.add('hidden'); if (!document.querySelector('[role="dialog"]:not(.hidden)')) document.body.classList.remove('overflow-hidden'); if (state.lastFocus) state.lastFocus.focus(); }
+            function openForm(matricula = null) {
+                state.editingId = matricula;
+                const student = state.students.find((item) => item.matricula === matricula);
+                byId('studentFormTitle').textContent = student ? 'Editar aluno' : 'Novo aluno';
+                byId('studentForm').reset();
+                byId('studentRegistration').readOnly = Boolean(student);
+                byId('studentPhoto').dataset.value = student ? student.foto || '' : '';
+                if (student) { byId('studentRegistration').value = student.matricula; byId('studentName').value = student.nome; byId('studentAddress').value = student.endereco || ''; byId('studentPhone').value = student.telefone || ''; byId('studentSkills').value = (student.skills || []).join(', '); byId('studentResume').value = student.curriculo; } else { byId('studentResume').value = defaultResume; }
+                updateResumePreview();
+                openModal('studentFormModal');
+            }
+            function showStudent(matricula) {
+                const student = state.students.find((item) => item.matricula === matricula); if (!student) return;
+                state.viewedId = matricula; byId('studentViewRegistration').textContent = student.matricula; byId('studentViewTitle').textContent = student.nome; byId('studentViewMeta').textContent = [student.endereco, student.telefone].filter(Boolean).join(' • ') || 'Dados de contato não informados'; byId('studentViewTags').innerHTML = (student.skills || []).map((skill) => `<span class="rounded-full bg-cyan-400/10 px-3 py-1 text-xs text-cyan-200">${escapeHtml(skill)}</span>`).join(''); byId('studentWhatsapp').href = student.telefone ? 'https://wa.me/55' + student.telefone.replace(/\D/g, '') : '#'; byId('resumeFrame').srcdoc = sanitizeHtml(student.curriculo); openModal('studentViewModal');
+            }
+            function closeStudentsApp() { byId('studentsApp').classList.add('hidden'); if (!document.querySelector('[role="dialog"]:not(.hidden)')) document.body.classList.remove('overflow-hidden'); }
+            byId('openStudentsApp').addEventListener('click', () => { byId('studentsApp').classList.remove('hidden'); document.body.classList.add('overflow-hidden'); loadStudents(); byId('newStudentButton').focus(); });
+            byId('closeStudentsApp').addEventListener('click', closeStudentsApp);
+            byId('studentsApp').addEventListener('click', (event) => { if (event.target === byId('studentsApp')) closeStudentsApp(); });
+            byId('newStudentButton').addEventListener('click', () => openForm());
+            byId('studentSearch').addEventListener('input', renderStudents);
+            byId('generateRegistration').addEventListener('click', () => { let value; do { value = 'NIT03' + String(Math.floor(Math.random() * 100000)).padStart(5, '0'); } while (state.students.some((student) => student.matricula === value)); byId('studentRegistration').value = value; });
+            byId('studentRegistration').addEventListener('input', (event) => { event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10); });
+            byId('studentPhone').addEventListener('input', (event) => { const digits = event.target.value.replace(/\D/g, '').slice(0, 11); event.target.value = digits.length > 6 ? `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}` : digits; });
+            function updateResumePreview() { byId('resumePreview').srcdoc = sanitizeHtml(byId('studentResume').value || '<p style="font-family:Arial;padding:24px;color:#64748b">O preview aparecerá aqui.</p>'); }
+            byId('studentResume').addEventListener('input', updateResumePreview);
+            byId('studentResumeFile').addEventListener('change', (event) => { const file = event.target.files[0]; if (!file) return; if (file.size > 1024 * 1024) return notify('O currículo deve ter no máximo 1 MB.', 'error'); const reader = new FileReader(); reader.onload = () => { byId('studentResume').value = reader.result; updateResumePreview(); }; reader.readAsText(file); });
+            byId('loadResumeTemplate').addEventListener('click', () => { byId('studentResume').value = defaultResume; updateResumePreview(); });
+            byId('studentPhoto').addEventListener('change', (event) => { const file = event.target.files[0]; if (!file || file.size > 2 * 1024 * 1024) { if (file) notify('A foto deve ter no máximo 2 MB.', 'error'); return; } const reader = new FileReader(); reader.onload = () => { byId('studentPhoto').dataset.value = reader.result; }; reader.readAsDataURL(file); });
+            byId('studentForm').addEventListener('submit', async (event) => { event.preventDefault(); const matricula = byId('studentRegistration').value.trim(); const existing = state.students.find((student) => student.matricula === matricula); if (!/^[A-Z]{3}\d{7}$/.test(matricula)) return notify('Informe uma matrícula no formato correto.', 'error'); if (existing && state.editingId !== matricula) return notify('Esta matrícula já está cadastrada.', 'error'); const old = state.students.find((student) => student.matricula === state.editingId); const student = { matricula, nome: byId('studentName').value.trim(), endereco: byId('studentAddress').value.trim(), telefone: byId('studentPhone').value.trim(), foto: byId('studentPhoto').dataset.value || (old && old.foto) || '', skills: byId('studentSkills').value.split(',').map((skill) => skill.trim()).filter(Boolean), curriculo: sanitizeHtml(byId('studentResume').value) }; if (!student.nome || !byId('studentResume').value.trim()) return notify('Preencha o nome e o currículo.', 'error'); try { if (API_URL) { try { await service.save(student, Boolean(old)); setStorageMode(true); } catch (error) { console.warn('Cloud API indisponível; salvando localmente.', error); setStorageMode(false); } } state.students = old ? state.students.map((item) => item.matricula === old.matricula ? student : item) : [...state.students, student]; persistLocal(); closeModal('studentFormModal'); renderStudents(); notify(old ? 'Aluno atualizado com sucesso.' : 'Aluno cadastrado com sucesso.'); } catch (error) { console.error(error); notify('Não foi possível salvar o aluno.', 'error'); } });
+            byId('studentGrid').addEventListener('click', (event) => { const view = event.target.closest('[data-view]'); const edit = event.target.closest('[data-edit]'); if (view) showStudent(view.dataset.view); if (edit) openForm(edit.dataset.edit); });
+            byId('editStudentButton').addEventListener('click', () => { closeModal('studentViewModal'); openForm(state.viewedId); });
+            byId('deleteStudentButton').addEventListener('click', async () => { const student = state.students.find((item) => item.matricula === state.viewedId); if (!student || !window.confirm(`Excluir a matrícula ${student.matricula}?`)) return; if (API_URL) try { await service.remove(student.matricula); } catch (error) { console.warn('Cloud API indisponível; excluindo do cache local.', error); setStorageMode(false); } state.students = state.students.filter((item) => item.matricula !== student.matricula); persistLocal(); closeModal('studentViewModal'); renderStudents(); notify('Matrícula excluída.'); });
+            byId('openResumeButton').addEventListener('click', () => { const student = state.students.find((item) => item.matricula === state.viewedId); if (student) window.open(URL.createObjectURL(new Blob([sanitizeHtml(student.curriculo)], { type: 'text/html' })), '_blank', 'noopener'); });
+            byId('downloadResumeButton').addEventListener('click', () => { const student = state.students.find((item) => item.matricula === state.viewedId); if (!student) return; const link = document.createElement('a'); link.href = URL.createObjectURL(new Blob([sanitizeHtml(student.curriculo)], { type: 'text/html' })); link.download = `curriculo_${student.matricula}.html`; link.click(); });
+            byId('printResumeButton').addEventListener('click', () => byId('resumeFrame').contentWindow.print());
+            document.querySelectorAll('[data-close-modal]').forEach((button) => button.addEventListener('click', () => closeModal(button.dataset.closeModal)));
+            document.addEventListener('keydown', (event) => { if (event.key !== 'Escape') return; const childDialog = document.querySelector('[role="dialog"]:not(.hidden)[id^="student"]'); if (childDialog && childDialog.id !== 'studentsApp') closeModal(childDialog.id); else if (!byId('studentsApp').classList.contains('hidden')) closeStudentsApp(); });
+        })();
+    </script>
 </body>
 
 </html>
