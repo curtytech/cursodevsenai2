@@ -100,7 +100,7 @@
           </button>
         </div>
 
-        <form id="createCourseForm" class="space-y-5">
+        <form id="createCourseForm" autocomplete="off" class="space-y-5">
           <input type="hidden" id="editingCourseId" />
 
           <div>
@@ -112,6 +112,7 @@
               id="courseTitle"
               required
               type="text"
+              autocomplete="off"
               placeholder="Ex.: Curso de HTML5 e CSS3 Semântico"
               class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
             />
@@ -126,6 +127,7 @@
               id="courseDescription"
               required
               rows="3"
+              autocomplete="off"
               placeholder="Escreva uma breve apresentação do conteúdo do curso..."
               class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
             ></textarea>
@@ -139,6 +141,7 @@
             <input
               id="courseImage"
               type="url"
+              autocomplete="off"
               placeholder="https://exemplo.com/imagem.jpg"
               class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400"
             />
@@ -155,6 +158,7 @@
                 <input
                   id="tag1Text"
                   type="text"
+                  autocomplete="off"
                   placeholder="Tag 1 (Ex: HTML)"
                   class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400"
                 />
@@ -174,6 +178,7 @@
                 <input
                   id="tag2Text"
                   type="text"
+                  autocomplete="off"
                   placeholder="Tag 2"
                   class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400"
                 />
@@ -193,6 +198,7 @@
                 <input
                   id="tag3Text"
                   type="text"
+                  autocomplete="off"
                   placeholder="Tag 3"
                   class="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white outline-none focus:border-cyan-400"
                 />
@@ -287,9 +293,9 @@
     </div>
 
     <script>
-      // ID do seu Bin no JSONBin.io
       const BIN_ID = "6aebbe1fac6210605a6d6a0f";
       const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+      const API_KEY = "$2a$10$5qW96G0vwZ7H1w89Oy92HekA6SAbZLZ5LbUcaL51.Xgrp6el0RUh6";
       const DEFAULT_COVER =
         "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&auto=format&fit=crop&q=80";
 
@@ -310,10 +316,12 @@
 
       let courseToDeleteId = null;
 
-      // 1. GET: Buscar da Nuvem (com fallback local caso a API falhe)
+      // 1. GET: Buscar da Nuvem
       async function getCourses() {
         try {
-          const res = await fetch(`${API_URL}/latest`);
+          const res = await fetch(`${API_URL}/latest`, {
+            headers: { "X-Access-Key": API_KEY },
+          });
           if (!res.ok) throw new Error("Falha ao conectar com a nuvem");
           const data = await res.json();
           return data.record || defaultCourses;
@@ -331,12 +339,13 @@
         localStorage.setItem(
           "senai_courses_catalog_v1",
           JSON.stringify(courses),
-        ); // Backup local
+        );
         try {
           await fetch(API_URL, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
+              "X-Access-Key": API_KEY,
             },
             body: JSON.stringify(courses),
           });
