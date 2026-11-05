@@ -182,7 +182,7 @@
           </button>
         </div>
 
-        <form id="addLessonForm" class="space-y-4">
+        <form id="addLessonForm" autocomplete="off" class="space-y-4">
           <input type="hidden" id="editingVideoId" />
 
           <div>
@@ -194,6 +194,7 @@
               id="youtubeInput"
               required
               type="text"
+              autocomplete="off"
               placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
               class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400"
             />
@@ -208,6 +209,7 @@
               id="lessonTitleInput"
               required
               type="text"
+              autocomplete="off"
               placeholder="Ex.: Aula 1 - Introdução aos Elementos Semânticos"
               class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400"
             />
@@ -222,6 +224,7 @@
               id="lessonDescInput"
               required
               rows="3"
+              autocomplete="off"
               placeholder="Resumo do conteúdo abordado nesta videoaula..."
               class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400"
             ></textarea>
@@ -235,6 +238,7 @@
             <input
               id="lessonDurationInput"
               type="text"
+              autocomplete="off"
               placeholder="Ex.: 12:45 min"
               class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400"
             />
@@ -319,6 +323,8 @@
     <script>
       const BIN_ID = "6aebbe1fac6210605a6d6a0f";
       const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+      const API_KEY =
+        "$2a$10$5qW96G0vwZ7H1w89Oy92HekA6SAbZLZ5LbUcaL51.Xgrp6el0RUh6";
       const urlParams = new URLSearchParams(window.location.search);
       const currentCourseId = urlParams.get("courseId");
 
@@ -326,7 +332,9 @@
 
       async function getCourses() {
         try {
-          const res = await fetch(`${API_URL}/latest`);
+          const res = await fetch(`${API_URL}/latest`, {
+            headers: { "X-Access-Key": API_KEY },
+          });
           if (!res.ok) throw new Error("Falha ao ler da nuvem");
           const data = await res.json();
           return data.record || [];
@@ -345,7 +353,10 @@
         try {
           await fetch(API_URL, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              "X-Access-Key": API_KEY,
+            },
             body: JSON.stringify(courses),
           });
         } catch (err) {
@@ -431,7 +442,7 @@
         const courses = await getCourses();
         const course =
           courses.find((c) => c.id === currentCourseId) || courses[0];
-        if (course && course.videos[index]) {
+        if (course && course.videos && course.videos[index]) {
           selectVideo(course.videos[index], index);
         }
       }
@@ -474,8 +485,9 @@
 
       async function editVideo(videoId) {
         const courses = await getCourses();
-        const course = courses.find((c) => c.id === currentCourseId);
-        if (course) {
+        const course =
+          courses.find((c) => c.id === currentCourseId) || courses[0];
+        if (course && course.videos) {
           const video = course.videos.find((v) => v.id === videoId);
           if (video) openLessonModal(video);
         }
@@ -500,10 +512,10 @@
         .addEventListener("click", async () => {
           if (!videoToDeleteId) return;
           const courses = await getCourses();
-          const courseIndex = courses.findIndex(
-            (c) => c.id === currentCourseId,
-          );
-          if (courseIndex !== -1) {
+          const targetId =
+            currentCourseId || (courses[0] ? courses[0].id : null);
+          const courseIndex = courses.findIndex((c) => c.id === targetId);
+          if (courseIndex !== -1 && courses[courseIndex].videos) {
             courses[courseIndex].videos = courses[courseIndex].videos.filter(
               (v) => v.id !== videoToDeleteId,
             );
@@ -530,49 +542,62 @@
         .addEventListener("submit", async (e) => {
           e.preventDefault();
 
-          const editingId = document.getElementById("editingVideoId").value;
-          const rawYoutube = document.getElementById("youtubeInput").value;
-          const youtubeId = extractYouTubeId(rawYoutube);
-          const title = document
-            .getElementById("lessonTitleInput")
-            .value.trim();
-          const description = document
-            .getElementById("lessonDescInput")
-            .value.trim();
-          const duration =
-            document.getElementById("lessonDurationInput").value.trim() ||
-            "10:00 min";
+          const submitBtn = e.target.querySelector('button[type="submit"]');
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Salvando...";
 
-          if (!youtubeId) return alert("Link ou ID do YouTube inválido.");
+          try {
+            const editingId = document.getElementById("editingVideoId").value;
+            const rawYoutube = document.getElementById("youtubeInput").value;
+            const youtubeId = extractYouTubeId(rawYoutube);
+            const title = document
+              .getElementById("lessonTitleInput")
+              .value.trim();
+            const description = document
+              .getElementById("lessonDescInput")
+              .value.trim();
+            const duration =
+              document.getElementById("lessonDurationInput").value.trim() ||
+              "10:00 min";
 
-          const courses = await getCourses();
-          const courseIndex = courses.findIndex(
-            (c) => c.id === currentCourseId,
-          );
-
-          if (courseIndex !== -1) {
-            if (!courses[courseIndex].videos) courses[courseIndex].videos = [];
-
-            if (editingId) {
-              courses[courseIndex].videos = courses[courseIndex].videos.map(
-                (v) =>
-                  v.id === editingId
-                    ? { ...v, youtubeId, title, description, duration }
-                    : v,
-              );
-            } else {
-              courses[courseIndex].videos.push({
-                id: "v_" + Date.now(),
-                youtubeId,
-                title,
-                description,
-                duration,
-              });
+            if (!youtubeId) {
+              alert("Link ou ID do YouTube inválido.");
+              return;
             }
 
-            await saveCourses(courses);
-            await loadCoursePlayer();
-            modal.classList.add("hidden");
+            const courses = await getCourses();
+            const targetId =
+              currentCourseId || (courses[0] ? courses[0].id : null);
+            const courseIndex = courses.findIndex((c) => c.id === targetId);
+
+            if (courseIndex !== -1) {
+              if (!courses[courseIndex].videos)
+                courses[courseIndex].videos = [];
+
+              if (editingId) {
+                courses[courseIndex].videos = courses[courseIndex].videos.map(
+                  (v) =>
+                    v.id === editingId
+                      ? { ...v, youtubeId, title, description, duration }
+                      : v,
+                );
+              } else {
+                courses[courseIndex].videos.push({
+                  id: "v_" + Date.now(),
+                  youtubeId,
+                  title,
+                  description,
+                  duration,
+                });
+              }
+
+              await saveCourses(courses);
+              await loadCoursePlayer();
+              modal.classList.add("hidden");
+            }
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Salvar Aula";
           }
         });
 
