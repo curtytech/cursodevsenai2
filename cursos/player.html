@@ -321,76 +321,84 @@
     </div>
 
     <script>
-      const BIN_ID = "6aebbe1fac6210605a6d6a0f";
-      const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-      const API_KEY =
-        "$2a$10$5qW96G0vwZ7H1w89Oy92HekA6SAbZLZ5LbUcaL51.Xgrp6el0RUh6";
+      // Configuração da API Cloudflare Workers D1 (Produção)
+      const API_BASE_URL = "https://api-cursos.matheusbarroso124.workers.dev/api";
+      const API_KEY = "senai-dev-secret-key-2026";
       const urlParams = new URLSearchParams(window.location.search);
-      const currentCourseId = urlParams.get("courseId");
+      let currentCourseId = urlParams.get("courseId");
 
+      let currentVideos = [];
       let videoToDeleteId = null;
 
-      async function getCourses() {
+      // 1. GET: Buscar curso e suas aulas via Cloudflare Worker
+      async function getCourseData() {
         try {
-          const res = await fetch(`${API_URL}/latest`, {
-            headers: { "X-Access-Key": API_KEY },
-          });
-          if (!res.ok) throw new Error("Falha ao ler da nuvem");
-          const data = await res.json();
-          return data.record || [];
-        } catch (err) {
-          return JSON.parse(
-            localStorage.getItem("senai_courses_catalog_v1") || "[]",
-          );
-        }
-      }
+          if (currentCourseId) {
+            const res = await fetch(
+              `${API_BASE_URL}/cursos/${encodeURIComponent(currentCourseId)}`
+            );
+            if (res.ok) {
+              return await res.json();
+            }
+          }
 
-      async function saveCourses(courses) {
-        localStorage.setItem(
-          "senai_courses_catalog_v1",
-          JSON.stringify(courses),
-        );
-        try {
-          await fetch(API_URL, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Access-Key": API_KEY,
-            },
-            body: JSON.stringify(courses),
-          });
+          // Fallback: busca todos os cursos e seleciona o primeiro se nenhum ID foi passado
+          const resAll = await fetch(`${API_BASE_URL}/cursos`);
+          if (!resAll.ok) throw new Error("Falha ao comunicar com o servidor Worker.");
+          const courses = await resAll.json();
+          if (Array.isArray(courses) && courses.length > 0) {
+            const found = currentCourseId
+              ? courses.find((c) => c.id === currentCourseId) || courses[0]
+              : courses[0];
+            if (found && !currentCourseId) {
+              currentCourseId = found.id;
+            }
+            return found;
+          }
+          return null;
         } catch (err) {
-          console.error("Erro ao salvar na nuvem:", err);
+          console.warn("Erro ao buscar da API, tentando cache local:", err);
+          const cached = JSON.parse(
+            localStorage.getItem("senai_courses_catalog_cache") || "[]"
+          );
+          return (
+            cached.find((c) => c.id === currentCourseId) || cached[0] || null
+          );
         }
       }
 
       function extractYouTubeId(input) {
         const match = input.match(
-          /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/,
+          /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/
         );
         return match && match[1] ? match[1] : input.trim();
       }
 
       async function loadCoursePlayer() {
-        const courses = await getCourses();
-        const course =
-          courses.find((c) => c.id === currentCourseId) || courses[0];
+        const course = await getCourseData();
 
         if (!course) {
           document.getElementById("headerCourseTitle").textContent =
             "Curso Não Encontrado";
+          document.getElementById("noPlayerState").classList.remove("hidden");
+          document.getElementById("mainPlayer").src = "";
+          document.getElementById("lessonTitleText").textContent =
+            "Nenhum curso disponível";
+          document.getElementById("lessonDescText").textContent =
+            "Cadastre um curso na página inicial para começar.";
           return;
         }
 
+        currentCourseId = course.id;
         document.getElementById("headerCourseTitle").textContent = course.title;
-        const videos = course.videos || [];
+        currentVideos = course.videos || [];
         document.getElementById("totalLessonsBadge").textContent =
-          `${videos.length} Aulas`;
+          `${currentVideos.length} Aulas`;
 
         const listContainer = document.getElementById("lessonsListContainer");
         listContainer.innerHTML = "";
 
-        if (videos.length === 0) {
+        if (currentVideos.length === 0) {
           document.getElementById("noPlayerState").classList.remove("hidden");
           document.getElementById("mainPlayer").src = "";
           document.getElementById("lessonTitleText").textContent =
@@ -402,7 +410,7 @@
 
         document.getElementById("noPlayerState").classList.add("hidden");
 
-        videos.forEach((video, index) => {
+        currentVideos.forEach((video, index) => {
           const thumbUrl = `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`;
 
           const card = document.createElement("div");
@@ -435,15 +443,12 @@
           listContainer.appendChild(card);
         });
 
-        selectVideo(videos[0], 0);
+        selectVideo(currentVideos[0], 0);
       }
 
-      async function selectVideoByIndex(index) {
-        const courses = await getCourses();
-        const course =
-          courses.find((c) => c.id === currentCourseId) || courses[0];
-        if (course && course.videos && course.videos[index]) {
-          selectVideo(course.videos[index], index);
+      function selectVideoByIndex(index) {
+        if (currentVideos && currentVideos[index]) {
+          selectVideo(currentVideos[index], index);
         }
       }
 
@@ -454,7 +459,7 @@
           `Aula ${index + 1}`;
         document.getElementById("lessonTitleText").textContent = video.title;
         document.getElementById("lessonDescText").textContent =
-          video.description;
+          video.description || "";
         document.getElementById("lessonDurationText").textContent =
           `Duração: ${video.duration || "N/A"}`;
       }
@@ -472,7 +477,7 @@
           document.getElementById("youtubeInput").value =
             `https://www.youtube.com/watch?v=${video.youtubeId}`;
           document.getElementById("lessonTitleInput").value = video.title;
-          document.getElementById("lessonDescInput").value = video.description;
+          document.getElementById("lessonDescInput").value = video.description || "";
           document.getElementById("lessonDurationInput").value =
             video.duration || "";
         } else {
@@ -483,14 +488,9 @@
         modal.classList.remove("hidden");
       }
 
-      async function editVideo(videoId) {
-        const courses = await getCourses();
-        const course =
-          courses.find((c) => c.id === currentCourseId) || courses[0];
-        if (course && course.videos) {
-          const video = course.videos.find((v) => v.id === videoId);
-          if (video) openLessonModal(video);
-        }
+      function editVideo(videoId) {
+        const video = currentVideos.find((v) => v.id === videoId);
+        if (video) openLessonModal(video);
       }
 
       function confirmDeleteVideo(videoId) {
@@ -507,24 +507,44 @@
           deleteModal.classList.remove("flex");
         });
 
+      // 2. DELETE: Excluir Videoaula diretamente no D1
       document
         .getElementById("confirmDeleteLessonBtn")
         .addEventListener("click", async () => {
           if (!videoToDeleteId) return;
-          const courses = await getCourses();
-          const targetId =
-            currentCourseId || (courses[0] ? courses[0].id : null);
-          const courseIndex = courses.findIndex((c) => c.id === targetId);
-          if (courseIndex !== -1 && courses[courseIndex].videos) {
-            courses[courseIndex].videos = courses[courseIndex].videos.filter(
-              (v) => v.id !== videoToDeleteId,
+
+          const confirmBtn = document.getElementById("confirmDeleteLessonBtn");
+          const originalText = confirmBtn.textContent;
+          confirmBtn.disabled = true;
+          confirmBtn.textContent = "Excluindo...";
+
+          try {
+            const res = await fetch(
+              `${API_BASE_URL}/videos/${encodeURIComponent(videoToDeleteId)}`,
+              {
+                method: "DELETE",
+                headers: {
+                  "X-Access-Key": API_KEY,
+                },
+              }
             );
-            await saveCourses(courses);
+
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData.error || `Erro ${res.status} ao excluir vídeo.`);
+            }
+
             await loadCoursePlayer();
+            videoToDeleteId = null;
+            deleteModal.classList.add("hidden");
+            deleteModal.classList.remove("flex");
+          } catch (err) {
+            console.error("Erro ao excluir vídeo:", err);
+            alert("Erro ao excluir vídeo: " + err.message);
+          } finally {
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = originalText;
           }
-          videoToDeleteId = null;
-          deleteModal.classList.add("hidden");
-          deleteModal.classList.remove("flex");
         });
 
       document
@@ -537,17 +557,23 @@
         .getElementById("cancelAddLessonBtn")
         .addEventListener("click", () => modal.classList.add("hidden"));
 
+      // 3. POST: Salvar ou Atualizar Videoaula diretamente no D1
       document
         .getElementById("addLessonForm")
         .addEventListener("submit", async (e) => {
           e.preventDefault();
+
+          if (!currentCourseId) {
+            alert("Nenhum curso associado foi encontrado.");
+            return;
+          }
 
           const submitBtn = e.target.querySelector('button[type="submit"]');
           submitBtn.disabled = true;
           submitBtn.textContent = "Salvando...";
 
           try {
-            const editingId = document.getElementById("editingVideoId").value;
+            const editingId = document.getElementById("editingVideoId").value.trim();
             const rawYoutube = document.getElementById("youtubeInput").value;
             const youtubeId = extractYouTubeId(rawYoutube);
             const title = document
@@ -565,36 +591,34 @@
               return;
             }
 
-            const courses = await getCourses();
-            const targetId =
-              currentCourseId || (courses[0] ? courses[0].id : null);
-            const courseIndex = courses.findIndex((c) => c.id === targetId);
+            const payload = {
+              ...(editingId ? { id: editingId } : {}),
+              course_id: currentCourseId,
+              youtubeId,
+              title,
+              description,
+              duration,
+            };
 
-            if (courseIndex !== -1) {
-              if (!courses[courseIndex].videos)
-                courses[courseIndex].videos = [];
+            const res = await fetch(`${API_BASE_URL}/videos`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-Access-Key": API_KEY,
+              },
+              body: JSON.stringify(payload),
+            });
 
-              if (editingId) {
-                courses[courseIndex].videos = courses[courseIndex].videos.map(
-                  (v) =>
-                    v.id === editingId
-                      ? { ...v, youtubeId, title, description, duration }
-                      : v,
-                );
-              } else {
-                courses[courseIndex].videos.push({
-                  id: "v_" + Date.now(),
-                  youtubeId,
-                  title,
-                  description,
-                  duration,
-                });
-              }
-
-              await saveCourses(courses);
-              await loadCoursePlayer();
-              modal.classList.add("hidden");
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData.error || `Erro ${res.status} ao salvar aula.`);
             }
+
+            await loadCoursePlayer();
+            modal.classList.add("hidden");
+          } catch (err) {
+            console.error("Erro ao salvar aula:", err);
+            alert("Erro ao salvar aula: " + err.message);
           } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = "Salvar Aula";

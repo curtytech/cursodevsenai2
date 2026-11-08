@@ -293,64 +293,28 @@
     </div>
 
     <script>
-      const BIN_ID = "6aebbe1fac6210605a6d6a0f";
-      const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-      const API_KEY = "$2a$10$5qW96G0vwZ7H1w89Oy92HekA6SAbZLZ5LbUcaL51.Xgrp6el0RUh6";
+      // Configuração da API Cloudflare Workers D1 (Produção)
+      const API_BASE_URL = "https://api-cursos.matheusbarroso124.workers.dev/api";
+      const API_KEY = "senai-dev-secret-key-2026";
       const DEFAULT_COVER =
         "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&auto=format&fit=crop&q=80";
 
-      const defaultCourses = [
-        {
-          id: "c1",
-          title: "Módulo de Cursos & Vídeos",
-          description:
-            "Acesse videoaulas, playlists de conteúdo e materiais práticos em vídeo da turma.",
-          image: DEFAULT_COVER,
-          tags: [
-            { text: "VIDEOAULAS", color: "cyan" },
-            { text: "DEV", color: "indigo" },
-          ],
-          videos: [],
-        },
-      ];
-
       let courseToDeleteId = null;
 
-      // 1. GET: Buscar da Nuvem
+      // 1. GET: Buscar catálogo de cursos via Cloudflare Worker
       async function getCourses() {
         try {
-          const res = await fetch(`${API_URL}/latest`, {
-            headers: { "X-Access-Key": API_KEY },
-          });
-          if (!res.ok) throw new Error("Falha ao conectar com a nuvem");
+          const res = await fetch(`${API_BASE_URL}/cursos`);
+          if (!res.ok) {
+            throw new Error(`Servidor respondeu com status ${res.status}`);
+          }
           const data = await res.json();
-          return data.record || defaultCourses;
+          return Array.isArray(data) ? data : [];
         } catch (err) {
-          console.warn("Usando fallback do localStorage:", err);
+          console.warn("Falha ao conectar com o Worker D1, tentando cache local:", err);
           return JSON.parse(
-            localStorage.getItem("senai_courses_catalog_v1") ||
-              JSON.stringify(defaultCourses),
+            localStorage.getItem("senai_courses_catalog_cache") || "[]"
           );
-        }
-      }
-
-      // 2. PUT: Salvar na Nuvem
-      async function saveCourses(courses) {
-        localStorage.setItem(
-          "senai_courses_catalog_v1",
-          JSON.stringify(courses),
-        );
-        try {
-          await fetch(API_URL, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Access-Key": API_KEY,
-            },
-            body: JSON.stringify(courses),
-          });
-        } catch (err) {
-          console.error("Erro ao sincronizar na nuvem:", err);
         }
       }
 
@@ -368,10 +332,25 @@
       async function renderCourses() {
         const grid = document.getElementById("coursesGrid");
         grid.innerHTML =
-          '<p class="text-slate-400 text-sm">Carregando cursos da nuvem...</p>';
+          '<p class="text-slate-400 text-sm">Carregando cursos do Cloudflare D1...</p>';
 
         const courses = await getCourses();
         grid.innerHTML = "";
+
+        if (courses.length === 0) {
+          grid.innerHTML = `
+            <div class="col-span-full rounded-3xl border border-dashed border-slate-800 p-12 text-center">
+              <p class="text-slate-400 text-sm">Nenhum curso cadastrado no momento.</p>
+              <button onclick="openModal()" class="mt-4 inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2 text-xs font-bold text-slate-950 hover:bg-cyan-300 transition">
+                + Criar o Primeiro Curso
+              </button>
+            </div>
+          `;
+          return;
+        }
+
+        // Atualiza cache local de contingência
+        localStorage.setItem("senai_courses_catalog_cache", JSON.stringify(courses));
 
         courses.forEach((course) => {
           const card = document.createElement("article");
@@ -384,7 +363,7 @@
           <span class="inline-block rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${getTagStyle(t.color)}">
             ${t.text}
           </span>
-        `,
+        `
             )
             .join("");
 
@@ -408,7 +387,7 @@
             </div>
 
             <h2 class="text-xl font-bold text-white tracking-tight">${course.title}</h2>
-            <p class="text-sm text-slate-300 leading-relaxed">${course.description}</p>
+            <p class="text-sm text-slate-300 leading-relaxed">${course.description || ""}</p>
           </div>
 
           <div class="pt-6 mt-6 border-t border-slate-800/80 flex items-center justify-between">
@@ -436,20 +415,20 @@
           document.getElementById("editingCourseId").value = course.id;
           document.getElementById("courseTitle").value = course.title;
           document.getElementById("courseDescription").value =
-            course.description;
+            course.description || "";
           document.getElementById("courseImage").value = course.image || "";
 
           if (course.tags && course.tags[0]) {
-            document.getElementById("tag1Text").value = course.tags[0].text;
-            document.getElementById("tag1Color").value = course.tags[0].color;
+            document.getElementById("tag1Text").value = course.tags[0].text || "";
+            document.getElementById("tag1Color").value = course.tags[0].color || "cyan";
           }
           if (course.tags && course.tags[1]) {
-            document.getElementById("tag2Text").value = course.tags[1].text;
-            document.getElementById("tag2Color").value = course.tags[1].color;
+            document.getElementById("tag2Text").value = course.tags[1].text || "";
+            document.getElementById("tag2Color").value = course.tags[1].color || "indigo";
           }
           if (course.tags && course.tags[2]) {
-            document.getElementById("tag3Text").value = course.tags[2].text;
-            document.getElementById("tag3Color").value = course.tags[2].color;
+            document.getElementById("tag3Text").value = course.tags[2].text || "";
+            document.getElementById("tag3Color").value = course.tags[2].color || "emerald";
           }
         } else {
           document.getElementById("modalCourseTitle").textContent =
@@ -479,17 +458,44 @@
           deleteModal.classList.remove("flex");
         });
 
+      // 2. DELETE: Excluir Curso diretamente no D1
       document
         .getElementById("confirmDeleteBtn")
         .addEventListener("click", async () => {
           if (!courseToDeleteId) return;
-          let courses = await getCourses();
-          courses = courses.filter((c) => c.id !== courseToDeleteId);
-          await saveCourses(courses);
-          await renderCourses();
-          courseToDeleteId = null;
-          deleteModal.classList.add("hidden");
-          deleteModal.classList.remove("flex");
+
+          const confirmBtn = document.getElementById("confirmDeleteBtn");
+          const originalText = confirmBtn.textContent;
+          confirmBtn.disabled = true;
+          confirmBtn.textContent = "Excluindo...";
+
+          try {
+            const res = await fetch(
+              `${API_BASE_URL}/cursos/${encodeURIComponent(courseToDeleteId)}`,
+              {
+                method: "DELETE",
+                headers: {
+                  "X-Access-Key": API_KEY,
+                },
+              }
+            );
+
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData.error || `Erro ${res.status} ao excluir curso.`);
+            }
+
+            await renderCourses();
+            courseToDeleteId = null;
+            deleteModal.classList.add("hidden");
+            deleteModal.classList.remove("flex");
+          } catch (err) {
+            console.error("Erro ao excluir curso:", err);
+            alert("Não foi possível excluir o curso: " + err.message);
+          } finally {
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = originalText;
+          }
         });
 
       document
@@ -502,67 +508,86 @@
         .getElementById("cancelModalBtn")
         .addEventListener("click", () => modal.classList.add("hidden"));
 
+      // 3. POST: Salvar ou Atualizar Curso diretamente no D1
       document
         .getElementById("createCourseForm")
         .addEventListener("submit", async (e) => {
           e.preventDefault();
 
-          const editingId = document.getElementById("editingCourseId").value;
-          const title = document.getElementById("courseTitle").value.trim();
-          const description = document
-            .getElementById("courseDescription")
-            .value.trim();
-          const image =
-            document.getElementById("courseImage").value.trim() ||
-            DEFAULT_COVER;
+          const submitBtn = e.target.querySelector('button[type="submit"]');
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Salvando...";
 
-          const tags = [];
-          const t1 = document.getElementById("tag1Text").value.trim();
-          if (t1)
-            tags.push({
-              text: t1,
-              color: document.getElementById("tag1Color").value,
-            });
+          try {
+            const editingId = document.getElementById("editingCourseId").value.trim();
+            const title = document.getElementById("courseTitle").value.trim();
+            const description = document
+              .getElementById("courseDescription")
+              .value.trim();
+            const image =
+              document.getElementById("courseImage").value.trim() ||
+              DEFAULT_COVER;
 
-          const t2 = document.getElementById("tag2Text").value.trim();
-          if (t2)
-            tags.push({
-              text: t2,
-              color: document.getElementById("tag2Color").value,
-            });
+            const tags = [];
+            const t1 = document.getElementById("tag1Text").value.trim();
+            if (t1) {
+              tags.push({
+                text: t1,
+                color: document.getElementById("tag1Color").value,
+              });
+            }
 
-          const t3 = document.getElementById("tag3Text").value.trim();
-          if (t3)
-            tags.push({
-              text: t3,
-              color: document.getElementById("tag3Color").value,
-            });
+            const t2 = document.getElementById("tag2Text").value.trim();
+            if (t2) {
+              tags.push({
+                text: t2,
+                color: document.getElementById("tag2Color").value,
+              });
+            }
 
-          if (tags.length === 0)
-            tags.push({ text: "VIDEOAULAS", color: "cyan" });
+            const t3 = document.getElementById("tag3Text").value.trim();
+            if (t3) {
+              tags.push({
+                text: t3,
+                color: document.getElementById("tag3Color").value,
+              });
+            }
 
-          let courses = await getCourses();
+            if (tags.length === 0) {
+              tags.push({ text: "VIDEOAULAS", color: "cyan" });
+            }
 
-          if (editingId) {
-            courses = courses.map((c) =>
-              c.id === editingId
-                ? { ...c, title, description, image, tags }
-                : c,
-            );
-          } else {
-            courses.push({
-              id: "course_" + Date.now(),
+            const payload = {
+              ...(editingId ? { id: editingId } : {}),
               title,
               description,
               image,
               tags,
-              videos: [],
-            });
-          }
+            };
 
-          await saveCourses(courses);
-          await renderCourses();
-          modal.classList.add("hidden");
+            const res = await fetch(`${API_BASE_URL}/cursos`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-Access-Key": API_KEY,
+              },
+              body: JSON.stringify(payload),
+            });
+
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData.error || `Erro ${res.status} ao salvar curso.`);
+            }
+
+            await renderCourses();
+            modal.classList.add("hidden");
+          } catch (err) {
+            console.error("Erro ao salvar curso:", err);
+            alert("Erro ao salvar o curso: " + err.message);
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Salvar Curso";
+          }
         });
 
       document.addEventListener("DOMContentLoaded", renderCourses);
