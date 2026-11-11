@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual do Aluno: Desvendando o GraphQL</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Cabeçalho Principal (Hero) -->
+    <header class="header-hero">
+      <div class="hero-top-meta">
+        <span><span class="dot"></span> AULA ESPECIAL // MANUAL DO ALUNO</span>
+        <span>ZERO DESPERDÍCIO DE DADOS ℮ ALTA VELOCIDADE</span>
+      </div>
+
+      <h1>GRAPHQL<sup>®</sup></h1>
+
+      <div class="hero-subtitles">
+        <div class="left-col">
+          COMO BUSCAR DADOS COM PRECISÃO CIRÚRGICA<br>
+          SEM BAIXAR COISAS DESNECESSÁRIAS
+        </div>
+        <div class="right-col">
+          APRENDA DO ZERO AO PRIMEIRO CLIENTE<br>
+          USANDO APENAS HTML, CSS E JAVASCRIPT
+        </div>
+      </div>
+    </header>
+
+    <!-- Balão de Fala do Professor -->
+    <div class="teacher-speech-bubble">
+      <div class="teacher-avatar">👨‍🏫</div>
+      <div class="teacher-content">
+        <h3>Dica do seu Professor:</h3>
+        <p id="teacherTip">
+          Bem-vindo, meu aluno! Imagine o GraphQL como um restaurante self-service: em vez de aceitar um prato feito cheio de comida que você não gosta, você escolhe exatamente o que quer colocar no seu prato. No laboratório abaixo, você pode testar isso na prática agora mesmo!
+        </p>
+      </div>
+    </div>
+
+    <!-- Navegação em Abas -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-target="tab-lab">01 // LABORATÓRIO PRÁTICO</button>
+      <button class="tab-btn" data-target="tab-teoria">02 // MANUAL & TEORIA</button>
+      <button class="tab-btn" data-target="tab-dicionario">03 // DICIONÁRIO SIMPLES</button>
+      <button class="tab-btn" data-target="tab-desafios">04 // DESAFIOS PARA TREINAR</button>
+    </nav>
+
+    <!-- ABA 1: O Laboratório Prático -->
+    <main id="tab-lab" class="tab-pane active">
+      <div class="lab-layout">
+        
+        <!-- Coluna da Esquerda: A Comanda do Pedido (Consulta) -->
+        <section class="card">
+          <div class="card-title-row">
+            <h2 class="card-title">
+              <span class="spec-dot"></span> 1. MONTE SEU PEDIDO (CONSULTA)
+            </h2>
+          </div>
+
+          <!-- Seletor de Exemplos Prontos -->
+          <div class="preset-selector-group">
+            <label for="presetSelect">ESCOLHA UM EXEMPLO PRONTO PARA TESTAR:</label>
+            <select id="presetSelect" class="preset-selector">
+              <option value="paises">🌎 Exemplo 1: Países da América do Sul (Consulta Básica)</option>
+              <option value="paises_variavel">🎯 Exemplo 2: Buscar 1 País usando Variável ($codigo)</option>
+              <option value="rick_morty">🛸 Exemplo 3: Personagens de Desenho (Rick and Morty)</option>
+              <option value="simulador_local">🎓 Exemplo 4: Modo Sala de Aula (Funciona 100% Offline)</option>
+              <option value="simulador_mutation">✍️ Exemplo 5: Cadastrar Anotação na Aula (Mutation)</option>
+              <option value="fragments_directives">🧩 Exemplo 6: Reutilizar Campos (Fragments & Diretivas)</option>
+              <option value="marvel">🦸 Exemplo 7: Heróis da Marvel Comics (Imagens Oficiais)</option>
+            </select>
+          </div>
+
+          <!-- Endereço da API (Onde enviamos o pedido) -->
+          <div class="endpoint-box">
+            <span class="badge-post">POST</span>
+            <span id="endpointDisplay">https://countries.trevorblades.com/graphql</span>
+          </div>
+
+          <!-- Editor de Consulta -->
+          <div class="query-editor-wrapper">
+            <textarea id="queryEditor" class="query-editor" spellcheck="false" placeholder="Escreva sua consulta GraphQL aqui..."></textarea>
+          </div>
+
+          <!-- Painel Retrátil de Variáveis -->
+          <div class="variables-section">
+            <div class="variables-header" id="toggleVariables">
+              <span>⚙️ VARIÁVEIS DA CONSULTA (PARÂMETROS JSON)</span>
+              <span id="varToggleIcon">▼</span>
+            </div>
+            <div id="variablesWrapper" class="variables-wrapper">
+              <textarea id="variablesEditor" class="variables-editor" spellcheck="false" placeholder='{ "codigo": "BR" }'></textarea>
+            </div>
+          </div>
+
+          <!-- Botões de Ação -->
+          <div class="action-buttons">
+            <button id="btnExecute" class="btn-primary">
+              <span>EXECUTAR CONSULTA ➔</span>
+            </button>
+            <button id="btnReset" class="btn-secondary" title="Restaura a consulta original">
+              RESTAURAR
+            </button>
+          </div>
+        </section>
+
+        <!-- Coluna da Direita: Os Dados Que Chegaram da Cozinha -->
+        <section class="card">
+          <div class="card-title-row">
+            <h2 class="card-title">
+              <span class="spec-dot"></span> 2. DADOS RECEBIDOS DO SERVIDOR
+            </h2>
+            <div class="view-toggle">
+              <button id="btnViewCards" class="active">CARTÕES</button>
+              <button id="btnViewJson">{ } JSON BRUTO</button>
+            </div>
+          </div>
+
+          <div class="result-header">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: #94a3b8; letter-spacing: 0.08em; text-transform: uppercase;">STATUS DA CONEXÃO:</span>
+            <span id="statusPill" class="status-pill">AGUARDANDO CONSULTA</span>
+          </div>
+
+          <!-- Contêiner de Cards Visuais -->
+          <div id="cardsContainer" class="cards-grid">
+            <div class="empty-state">
+              <div class="empty-state-icon">🚀</div>
+              <p>Clique no botão <strong>"EXECUTAR CONSULTA ➔"</strong> para ver os dados chegarem da API!</p>
+            </div>
+          </div>
+
+          <!-- Visualizador de JSON formatado -->
+          <pre id="jsonViewer" class="json-viewer"></pre>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- ABA 2: O Manual Explicativo Completo -->
+    <section id="tab-teoria" class="tab-pane">
+      <div class="theory-section">
+        
+        <div class="concept-box">
+          <h2>🍽️ 1. O QUE É UMA API? (A ANALOGIA DO GARÇOM)</h2>
+          <p>
+            Imagine que você foi jantar em um restaurante:
+          </p>
+          <p>
+            • <strong>Você (Cliente / Navegador):</strong> Senta na mesa e quer comer.<br>
+            • <strong>A Cozinha (Servidor / Banco de Dados):</strong> Onde os alimentos ficam guardados e a comida é preparada. Você não pode entrar lá para mexer nos fogões por motivos de segurança.<br>
+            • <strong>O Garçom (A API):</strong> É a ponte! Você diz o que quer, ele anota na comanda, leva até a cozinha e traz o prato pronto para você.
+          </p>
+        </div>
+
+        <div class="concept-box">
+          <h2>🍔 2. POR QUE O GRAPHQL FOI CRIADO? (REST VS GRAPHQL)</h2>
+          <p>
+            No modelo tradicional (chamado <strong>REST</strong>), os pratos são do tipo <strong>"Prato Feito" (Combo fechado)</strong>. Você pede o Combo 1 e ele vem com arroz, feijão, bife, salada e refrigerante. Se você só queria o bife, todo o restante vira comida jogada fora!
+          </p>
+
+          <div class="comparison-grid">
+            <div class="comparison-card rest">
+              <h4>🍔 REST TRADICIONAL (PRATO PRONTO)</h4>
+              <ul>
+                <li><strong>Over-fetching (Excesso de dados):</strong> Você pede o nome de um usuário e a API te manda 40 coisas desnecessárias (CPF, endereço, tipo sanguíneo, senhas criptografadas). Isso gasta a internet móvel do usuário!</li>
+                <li><strong>Under-fetching (Falta de dados):</strong> Para montar a tela do perfil, você precisa chamar a API 3 vezes: uma para o usuário, outra para os pedidos e outra para os amigos.</li>
+                <li>Muitos endereços (URLs) diferentes para decorar.</li>
+              </ul>
+            </div>
+
+            <div class="comparison-card graphql">
+              <h4>🥗 GRAPHQL (SELF-SERVICE GOURMET)</h4>
+              <ul>
+                <li><strong>Zero Desperdício:</strong> Você entrega uma lista dizendo: <em>"Quero apenas o campo nome e a foto"</em>. O servidor só manda isso!</li>
+                <li><strong>Tudo em 1 Viagem:</strong> Você pode pedir dados de usuários, pedidos e amigos em uma única requisição.</li>
+                <li>Geralmente tem <strong>apenas 1 endereço central</strong> (ex: <code>/graphql</code>) usando o método POST.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h2>⚡ 3. COMO O JAVASCRIPT CONVERSA COM O GRAPHQL?</h2>
+          <p>
+            Você não precisa de bibliotecas pesadas para começar! Um simples <code>fetch()</code> do JavaScript faz todo o trabalho:
+          </p>
+          <div class="code-snippet">// Veja como é simples no JavaScript puro:
+fetch('https://countries.trevorblades.com/graphql', {
+  method: 'POST', // Sempre POST
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    query: `
+      query {
+        countries {
+          name
+          emoji
+        }
+      }
+    `
+  })
+})
+.then(resposta => resposta.json())
+.then(resultado => {
+  console.log("Dados recebidos da API:", resultado.data);
+});</div>
+          <p>
+            Viu só? Enviamos um objeto com a propriedade <code>query</code> contendo o texto da nossa consulta, e o servidor responde com um JSON contendo exatamente os dados pedidos!
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ABA 3: Dicionário Simples do GraphQL -->
+    <section id="tab-dicionario" class="tab-pane">
+      <div class="theory-section">
+        
+        <div class="concept-box">
+          <h2>📖 DICIONÁRIO DOS TERMOS QUE VOCÊ PRECISA SABER</h2>
+          
+          <h3>1. Query (Consulta)</h3>
+          <p>É a operação para <strong>buscar ou ler dados</strong>. Ela nunca altera nada no servidor (equivale ao <code>GET</code> do REST).</p>
+
+          <h3>2. Mutation (Mutação)</h3>
+          <p>É a operação para <strong>gravar, alterar ou apagar dados</strong> (como cadastrar um novo aluno ou curtir uma foto). Equivale ao <code>POST</code>, <code>PUT</code> ou <code>DELETE</code>.</p>
+
+          <h3>3. Subscription (Assinatura em Tempo Real)</h3>
+          <p>É como uma ligação contínua. Quando algo novo acontece no servidor (ex: uma nova mensagem no chat), o servidor envia a novidade na hora para a sua tela.</p>
+
+          <h3>4. Variables (Variáveis)</h3>
+          <p>Parâmetros dinâmicos que passamos para a consulta sem precisar colar texto dentro da query. No nosso laboratório, você viu o <code>$codigo: ID!</code> sendo preenchido por <code>{ "codigo": "BR" }</code>.</p>
+
+          <h3>5. Schema (O Contrato de Dados)</h3>
+          <p>É o manual de regras do servidor. Ele define com rigor quais tipos de dados existem (Texto, Número, Booleano) para evitar que o cliente peça campos inventados.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ABA 4: Desafios Práticos -->
+    <section id="tab-desafios" class="tab-pane">
+      <div class="theory-section">
+        
+        <div class="concept-box">
+          <h2>🎯 DESAFIOS PARA FIXAR O CONHECIMENTO</h2>
+          <p>Tente responder as perguntas abaixo na sua cabeça antes de clicar para ver a explicação do professor!</p>
+          
+          <div class="challenges-grid">
+            
+            <div class="challenge-card">
+              <div class="challenge-title">DESAFIO 1: O QUE É OVER-FETCHING?</div>
+              <div class="challenge-desc">
+                Seu aplicativo de celular só precisa mostrar o nome e a foto de um usuário na barra do topo. A API REST tradicional te entrega 50 campos, incluindo histórico médico e endereço completo. Qual o nome desse problema e como o GraphQL resolve?
+              </div>
+              <button class="challenge-btn" data-target="ans-1">VER RESPOSTA DO PROFESSOR</button>
+              <div id="ans-1" class="challenge-answer">
+RESPOSTA DO PROFESSOR:
+Esse problema se chama OVER-FETCHING (receber mais dados do que o necessário).
+O GraphQL resolve isso permitindo que o cliente escreva na consulta apenas:
+query {
+  usuario {
+    nome
+    foto
+  }
+}
+O servidor lê seu pedido e manda rigorosamente só esses dois campos, deixando a página leve e economizando o plano de internet do usuário!
+              </div>
+            </div>
+
+            <div class="challenge-card">
+              <div class="challenge-title">DESAFIO 2: QUERY OU MUTATION?</div>
+              <div class="challenge-desc">
+                Você está criando uma loja virtual. O usuário clica no botão "Finalizar Compra". Você deve usar uma QUERY ou uma MUTATION para essa ação?
+              </div>
+              <button class="challenge-btn" data-target="ans-2">VER RESPOSTA DO PROFESSOR</button>
+              <div id="ans-2" class="challenge-answer">
+RESPOSTA DO PROFESSOR:
+Você deve usar uma MUTATION!
+Porque finalizar uma compra altera o estado do sistema (cria um novo pedido no banco de dados e dá baixa no estoque).
+Lembre-se:
+• Para LER dados = Query
+• Para GRAVAR, ALTERAR ou DELETAR = Mutation
+              </div>
+            </div>
+
+            <div class="challenge-card">
+              <div class="challenge-title">DESAFIO 3: POR QUE O MÉTODO É POST?</div>
+              <div class="challenge-desc">
+                Se uma Query serve apenas para "buscar" dados, por que a requisição HTTP enviada pelo JavaScript é do tipo POST e não GET?
+              </div>
+              <button class="challenge-btn" data-target="ans-3">VER RESPOSTA DO PROFESSOR</button>
+              <div id="ans-3" class="challenge-answer">
+RESPOSTA DO PROFESSOR:
+Porque consultas GraphQL podem ser longas e cheias de campos aninhados.
+Se usássemos GET, a consulta inteira teria que ser colocada na URL da página, o que geraria URLs gigantescas e ultrapassaria o limite máximo de tamanho de links permitido pelos navegadores.
+Com o método POST, a consulta viaja tranquilamente dentro do corpo (body) da mensagem em formato JSON!
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Rodapé -->
+    <footer class="footer">
+      <p>MANUAL DE GRAPHQL DO PROFESSOR // CRIADO PARA ENSINAR COM SIMPLICIDADE E ELEGÂNCIA</p>
+      <p style="margin-top: 8px; color: var(--chrome-mid);">DICA: PRESSIONE <strong>F12</strong> NO SEU TECLADO PARA VER A REQUISIÇÃO ACONTECENDO NA ABA REDE (NETWORK)!</p>
+    </footer>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

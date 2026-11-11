@@ -1,8 +1,8 @@
 const trabalhos = [
     { id: "http-https", tema: "HTTP/HTTPS", aluno: "Arthur Santos", pasta: "trabalhos-data/http-https/arthur-santos" },
     { id: "sse-streaming", tema: "SSE Streaming", aluno: "Leticia", pasta: "trabalhos-data/sse-streaming/leticia" },
-    { id: "graphql-api-cliente", tema: "API cliente com GraphQL", aluno: "Raphael", pasta: "trabalhos-data/graphql-api-cliente/raphael" },
-    { id: "udp-datagramas", tema: "Datagramas UDP", aluno: "Marcos", pasta: "trabalhos-data/udp-datagramas/marcos" },
+    { id: "graphql-api-cliente", tema: "API cliente com GraphQL", aluno: "Raphael", pasta: "trabalhos-data/graphql-api-cliente/raphael", caminhoSlide: "trabalhos-data/graphql-api-cliente/raphael/index.html" },
+    { id: "udp-datagramas", tema: "Datagramas UDP", aluno: "Marcos", pasta: "trabalhos-data/udp-datagramas/marcos", caminhoSlide: "trabalhos-data/udp-datagramas/marcos/apresentacao_do_marcos.html" },
     { id: "smtp", tema: "SMTP", aluno: "Arthur Baptista", pasta: "trabalhos-data/smtp/arthur-baptista" },
     { id: "ftp-sftp", tema: "FTP/SFTP", aluno: "Pedro", pasta: "trabalhos-data/ftp-sftp/pedro", caminhoSlide: "trabalhos-data/ftp-sftp/pedro/index.html" },
     { id: "p2p", tema: "P2P", aluno: "Alessandro", pasta: "trabalhos-data/p2p/alessandro" },
