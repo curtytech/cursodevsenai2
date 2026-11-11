@@ -25,7 +25,9 @@ async function show(req, res) {
 
 async function create(req, res) {
   try {
+    console.log('Dados do usuário:', req.body);
     const user = await userService.createUser(req.body);
+    console.log('Usuário criado com sucesso:', user);
     res.status(201).json(user);
   } catch (error) {
     console.error('Erro ao criar usuário:', error);
