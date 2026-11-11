@@ -34,22 +34,34 @@
 
         trabalhos.forEach((trabalho) => {
             const card = document.createElement("article");
-            card.className = "flex flex-col rounded-3xl border border-slate-700 bg-slate-900/65 p-6 transition duration-300 hover:-translate-y-1 hover:border-cyan-400/60 hover:shadow-xl hover:shadow-cyan-950/20";
+            card.className = "flex min-h-56 flex-col rounded-2xl border border-slate-700 bg-slate-900/70 p-6 transition duration-200 hover:border-cyan-400/50 hover:bg-slate-900";
 
-            const label = document.createElement("p");
-            label.className = "text-xs font-semibold uppercase tracking-wider text-cyan-300";
-            label.textContent = trabalho.aluno;
+            const student = document.createElement("h2");
+            student.className = "text-2xl font-bold leading-tight tracking-tight text-white";
+            student.textContent = trabalho.aluno;
 
-            const title = document.createElement("h2");
-            title.className = "mt-3 text-xl font-semibold text-white";
-            title.textContent = trabalho.tema;
+            const topicBlock = document.createElement("div");
+            topicBlock.className = "mt-5 border-t border-slate-800 pt-4";
+
+            const topicLabel = document.createElement("p");
+            topicLabel.className = "text-xs font-medium text-slate-500";
+            topicLabel.textContent = "Tema";
+
+            const topic = document.createElement("p");
+            topic.className = "mt-1 text-base font-medium text-slate-300";
+            topic.textContent = trabalho.tema;
+            topicBlock.append(topicLabel, topic);
 
             const link = document.createElement("a");
-            link.className = "mt-6 inline-flex w-fit items-center rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300";
+            link.className = "mt-auto inline-flex w-fit items-center gap-2 pt-6 text-sm font-semibold text-cyan-300 transition hover:text-cyan-200";
             link.href = `trabalho-detalhes.html?modulo=${encodeURIComponent(trabalho.id)}`;
-            link.textContent = "Ver trabalho";
+            link.append(document.createTextNode("Ver trabalho"));
+            const arrow = document.createElement("span");
+            arrow.setAttribute("aria-hidden", "true");
+            arrow.textContent = "→";
+            link.append(arrow);
 
-            card.append(label, title, link);
+            card.append(student, topicBlock, link);
             grid.append(card);
         });
     </script>
