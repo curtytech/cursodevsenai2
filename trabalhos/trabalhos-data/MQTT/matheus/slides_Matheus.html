@@ -3,680 +3,458 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MQTT Protocol — Manual Técnico Completo</title>
+    <title>MQTT Protocol — Apresentação Técnica</title>
+    
+    <!-- Fontes modernas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --primary: #005696;
-            --secondary: #0083ca;
-            --dark: #0f172a;
-            --light: #f8fafc;
-            --card-bg: #1e293b;
+            --bg-color: #020617;
+            --panel-bg: rgba(15, 23, 42, 0.65);
+            --card-bg: rgba(30, 41, 59, 0.5);
+            --border-color: rgba(56, 189, 248, 0.2);
             --accent: #38bdf8;
-            --success: #22c55e;
+            --accent-glow: rgba(56, 189, 248, 0.4);
+            --success: #10b981;
             --warning: #f59e0b;
-            --danger: #ef4444;
-            --text: #f1f5f9;
-            --muted: #94a3b8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--dark);
-            color: var(--text);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
             overflow: hidden;
+            /* Grid Background Pattern */
+            background-image: 
+                linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+            background-position: center center;
         }
 
-        /* Top Bar Navigation */
-        header {
-            background: rgba(15, 23, 42, 0.95);
-            border-bottom: 1px solid #334155;
-            padding: 10px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* Top Header */
+        header { 
+            background: rgba(2, 6, 23, 0.8); 
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color); 
+            padding: 12px 28px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            z-index: 10;
         }
-
-        .brand {
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: var(--accent);
+        
+        .brand { 
+            font-weight: 800; 
+            font-size: 0.95rem; 
+            color: var(--text-main); 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
             letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        }
+        
+        .badge-senai { 
+            background: linear-gradient(135deg, #0284c7, #2563eb); 
+            color: white; 
+            padding: 4px 10px; 
+            border-radius: 6px; 
+            font-size: 0.75rem; 
+            font-weight: 800; 
+            box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
+        }
+        
+        .slide-dots { display: flex; gap: 8px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #334155; cursor: pointer; transition: all 0.3s ease; border: 1px solid transparent; }
+        .dot.active { background: var(--accent); transform: scale(1.3); box-shadow: 0 0 12px var(--accent-glow); border-color: #fff; }
+
+        /* Main Area & Glassmorphism Slide */
+        main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; z-index: 5; }
+        
+        .slide { 
+            display: none; 
+            width: 100%; 
+            max-width: 1040px; 
+            height: 580px; 
+            background: var(--panel-bg); 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 20px; 
+            padding: 36px 42px; 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1); 
+            flex-direction: column; 
+            justify-content: space-between; 
+            animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+        }
+        .slide.active { display: flex; }
+        
+        @keyframes slideIn { 
+            from { opacity: 0; transform: translateY(15px) scale(0.98); } 
+            to { opacity: 1; transform: translateY(0) scale(1); } 
         }
 
-        .badge-senai {
-            background: var(--primary);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
+        /* Typography */
+        .slide-header { border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 16px; }
+        .slide-tag { 
+            display: inline-block;
+            font-size: 0.75rem; 
+            color: var(--accent); 
+            background: rgba(56, 189, 248, 0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600; 
+            letter-spacing: 1.5px; 
+            font-family: 'Fira Code', monospace; 
+            margin-bottom: 8px;
+        }
+        
+        h1, h2 { 
+            font-size: 2.2rem; 
             font-weight: 800;
+            background: linear-gradient(to right, #f8fafc, #94a3b8);
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        
+        .slide-body { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 16px; margin: 16px 0; font-size: 1rem; color: #cbd5e1; font-weight: 300; line-height: 1.6; }
+        .slide-body strong { color: #f8fafc; font-weight: 600; }
+        
+        /* Layouts & Cards */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        
+        .card-box { 
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.4), rgba(15, 23, 42, 0.6)); 
+            border: 1px solid var(--border-color); 
+            padding: 20px; 
+            border-radius: 12px; 
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px var(--accent-glow);
+            border-color: rgba(56, 189, 248, 0.5);
+        }
+        
+        .card-box h3 { color: var(--accent); font-size: 1.05rem; margin-bottom: 8px; font-weight: 600; }
+        
+        .highlight-box { 
+            border-left: 4px solid var(--accent); 
+            background: rgba(15, 23, 42, 0.7); 
+            padding: 16px 20px; 
+            border-radius: 0 8px 8px 0; 
         }
 
-        .slide-dots {
-            display: flex;
-            gap: 6px;
-            max-width: 60%;
-            overflow-x: auto;
-            padding: 4px 0;
+        /* Tabela Premium */
+        table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.9rem; text-align: left; background: rgba(15, 23, 42, 0.5); border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); }
+        th, td { padding: 12px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        th { color: var(--accent); background: rgba(2, 6, 23, 0.8); font-family: 'Fira Code', monospace; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        tr:last-child td { border-bottom: none; }
+        tr.highlight { background: rgba(56, 189, 248, 0.1); }
+        tr.highlight td { color: #fff; font-weight: 600; }
+
+        /* Terminais & Código */
+        .diagram { 
+            background: #020617; 
+            color: var(--accent); 
+            font-family: 'Fira Code', monospace; 
+            padding: 20px; 
+            border-radius: 12px; 
+            font-size: 0.85rem; 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            box-shadow: inset 0 2px 15px rgba(0,0,0,0.5);
+            white-space: pre; 
+            overflow-x: auto; 
         }
 
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #334155;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
+        .code-box { 
+            background: #020617; 
+            border: 1px solid #334155; 
+            border-radius: 12px; 
+            overflow: hidden;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
         }
-
-        .dot.active {
-            background: var(--accent);
-            transform: scale(1.4);
-        }
-
-        /* Main Slide Viewer */
-        main {
-            flex: 1;
+        
+        .code-header {
+            background: #0f172a;
+            padding: 8px 14px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 16px;
-            position: relative;
+            gap: 6px;
+            border-bottom: 1px solid #1e293b;
         }
+        .mac-btn { width: 10px; height: 10px; border-radius: 50%; }
+        .mac-close { background: #ff5f56; }
+        .mac-min { background: #ffbd2e; }
+        .mac-max { background: #27c93f; }
+        .code-title { margin-left: 10px; font-family: 'Fira Code', monospace; font-size: 0.75rem; color: var(--text-muted); }
 
-        .slide {
-            display: none;
-            width: 100%;
-            max-width: 1000px;
-            height: 570px;
-            background: var(--card-bg);
-            border: 1px solid #334155;
-            border-radius: 16px;
-            padding: 32px 36px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            flex-direction: column;
-            justify-content: space-between;
-            animation: fadeIn 0.25s ease-in-out;
-            overflow: hidden;
-        }
-
-        .slide.active {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Slide Typography */
-        .slide-header {
-            border-bottom: 1px solid #334155;
-            padding-bottom: 12px;
-        }
-
-        .slide-tag {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            color: var(--accent);
-            font-weight: 700;
-            letter-spacing: 1.2px;
-            font-family: monospace;
-        }
-
-        h1 {
-            font-size: 2.1rem;
-            color: #ffffff;
-            margin-top: 2px;
-        }
-
-        h2 {
-            font-size: 1.6rem;
-            color: #ffffff;
-            margin-top: 2px;
-        }
-
-        .slide-body {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 14px;
-            margin: 14px 0;
-            font-size: 0.95rem;
-            color: #cbd5e1;
-            overflow-y: auto;
-        }
-
-        /* Components & Grids */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-        }
-
-        .card-box {
-            background: #0f172a;
-            border: 1px solid #334155;
-            padding: 16px;
-            border-radius: 8px;
-        }
-
-        .card-box h3 {
-            color: var(--accent);
-            font-size: 1rem;
-            margin-bottom: 6px;
-        }
-
-        .highlight-box {
-            border-left: 4px solid var(--accent);
-            background: #0f172a;
-            padding: 14px 16px;
-            border-radius: 6px;
-        }
-
-        /* Tables */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.88rem;
-            text-align: left;
-        }
-
-        th, td {
-            padding: 8px 10px;
-            border-bottom: 1px solid #334155;
-        }
-
-        th {
-            color: var(--accent);
-            background: #0f172a;
-            font-family: monospace;
-        }
-
-        tr.highlight {
-            background: rgba(56, 189, 248, 0.15);
-            font-weight: 600;
-            color: #ffffff;
-        }
-
-        /* Diagrams & Code Blocks */
-        .diagram {
-            background: #0f172a;
-            color: var(--accent);
-            font-family: "Courier New", Courier, monospace;
-            padding: 14px 18px;
-            border-radius: 8px;
-            font-size: 0.82rem;
-            line-height: 1.35;
-            white-space: pre;
-            border-left: 4px solid var(--secondary);
-            overflow-x: auto;
-        }
-
-        pre code {
-            font-family: "Courier New", monospace;
-            font-size: 0.8rem;
-            color: #e2e8f0;
-            line-height: 1.4;
-        }
-
-        .code-box {
-            background: #090e17;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            padding: 12px 14px;
-            overflow-x: auto;
-        }
+        pre { padding: 14px; overflow-x: auto; }
+        pre code { font-family: 'Fira Code', monospace; font-size: 0.85rem; color: #e2e8f0; line-height: 1.5; }
+        .syn-keyword { color: #ff7b72; }
+        .syn-string { color: #a5d6ff; }
+        .syn-func { color: #d2a8ff; }
 
         /* Slide Footer & Navigation */
-        .slide-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-            color: var(--muted);
-            border-top: 1px solid #334155;
-            padding-top: 10px;
-            font-family: monospace;
+        .slide-footer { 
+            display: flex; justify-content: space-between; align-items: center; 
+            font-size: 0.75rem; color: var(--text-muted); 
+            border-top: 1px solid rgba(255, 255, 255, 0.05); 
+            padding-top: 16px; font-family: 'Fira Code', monospace; 
         }
-
-        footer {
-            background: rgba(15, 23, 42, 0.95);
-            border-top: 1px solid #334155;
-            padding: 12px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        
+        footer { 
+            background: rgba(2, 6, 23, 0.8); 
+            backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border-color); 
+            padding: 14px 28px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            z-index: 10;
         }
-
-        .nav-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 18px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: background 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+        
+        .nav-btn { 
+            background: rgba(255, 255, 255, 0.05); 
+            color: white; 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            padding: 10px 24px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            font-size: 0.9rem; 
+            cursor: pointer; 
+            transition: all 0.2s; 
         }
-
-        .nav-btn:hover { background: var(--secondary); }
-        .nav-btn:disabled { background: #334155; cursor: not-allowed; opacity: 0.5; }
-
-        .key-hint { font-size: 0.78rem; color: var(--muted); font-family: monospace; }
+        .nav-btn:hover:not(:disabled) { 
+            background: var(--accent); 
+            border-color: var(--accent); 
+            box-shadow: 0 0 15px var(--accent-glow);
+            color: #020617;
+        }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        
+        .key-hint { font-size: 0.75rem; color: var(--text-muted); font-family: 'Fira Code', monospace; }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="brand">
-            <span class="badge-senai">SENAI</span> Manual Técnico · Protocolo MQTT
-        </div>
+        <div class="brand"><span class="badge-senai">SENAI</span> MANUAL TÉCNICO · PROTOCOLO MQTT</div>
         <div class="slide-dots" id="dotsContainer"></div>
     </header>
 
     <main>
-
-        <!-- SLIDE 1: CAPA & VISÃO GERAL -->
+        <!-- SLIDE 1 -->
         <div class="slide active">
-            <div class="slide-header">
-                <span class="slide-tag">00 / VISÃO GERAL</span>
-                <h1>Protocolo MQTT & Arquitetura Pub/Sub</h1>
-            </div>
+            <div class="slide-header"><span class="slide-tag">00_VISÃO_GERAL</span><h1>Protocolo MQTT & Arquitetura Pub/Sub</h1></div>
             <div class="slide-body">
-                <p style="font-size: 1.2rem; color: #ffffff;">Um guia técnico sobre o padrão de comunicação para Internet das Coisas (IoT) e Indústria 4.0.</p>
-                <div class="grid-2" style="margin-top: 6px;">
+                <p style="font-size: 1.3rem; color: #ffffff; font-weight: 400;">O padrão definitivo de comunicação para Internet das Coisas (IoT) e Indústria 4.0.</p>
+                <div class="grid-2" style="margin-top: 10px;">
                     <div class="card-box">
                         <h3>◈ CONCEITO CHAVE</h3>
-                        <p style="font-size: 0.9rem;">Protocolo de mensagens ultraleve baseado no modelo Publish/Subscribe via Broker central sobre a camada TCP/IP.</p>
+                        <p style="font-size: 0.9rem;">Protocolo ultraleve de mensagens. Substitui as conexões diretas por um modelo onde todos se comunicam via intermediário (Broker).</p>
                     </div>
                     <div class="card-box">
-                        <h3>◈ ESPECIFICAÇÃO</h3>
-                        <p style="font-size: 0.9rem;">Padrão internacional OASIS / ISO/IEC 20922. Projetado para redes de baixa largura de banda e alta latência.</p>
+                        <h3>◈ USO PRINCIPAL</h3>
+                        <p style="font-size: 0.9rem;">Ideal para redes instáveis e hardware com limitações de processamento (ESP32, Arduino, CLP Industriais).</p>
                     </div>
                 </div>
             </div>
-            <div class="slide-footer">
-                <span>SENAI — Análise e Desenvolvimento de Sistemas</span>
-                <span>01 / 11</span>
-            </div>
+            <div class="slide-footer"><span>AUTOR: MATHEUS BARROSO</span><span>01 / 08</span></div>
         </div>
 
-        <!-- SLIDE 2: O QUE É MQTT -->
+        <!-- SLIDE 2 -->
         <div class="slide">
-            <div class="slide-header">
-                <span class="slide-tag">01 / FUNDAMENTOS</span>
-                <h2>O que é MQTT?</h2>
-            </div>
+            <div class="slide-header"><span class="slide-tag">01_FUNDAMENTOS</span><h2>O que é MQTT e origem?</h2></div>
             <div class="slide-body">
-                <p>O <strong>MQTT (Message Queuing Telemetry Transport)</strong> é um protocolo de rede leve para troca de mensagens entre dispositivos com limitações de hardware e conectividade.</p>
-                <div class="highlight-box">
-                    <strong style="color: var(--accent);">Filosofia Central:</strong>
-                    <p style="margin-top: 4px;">Em vez do modelo tradicional Cliente-Servidor (como o HTTP), os dispositivos não conversam diretamente. Eles enviam mensagens a um intermediário chamado <strong>Broker</strong>, que distribui os dados aos interessados.</p>
-                </div>
-                <div class="grid-3">
+                <p>O <strong>MQTT</strong> (Message Queuing Telemetry Transport) foi criado em 1999 pela IBM para monitorar oleodutos no deserto via satélite, cenário onde a internet era cara e caía frequentemente.</p>
+                <div class="grid-3" style="margin-top: 10px;">
                     <div class="card-box">
-                        <h3 style="font-size: 0.9rem;">Cabeçalho Mínimo</h3>
-                        <p style="font-size: 0.82rem;">Apenas 2 Bytes de overhead no cabeçalho fixo. Ideal para pacotes de dados reduzidos.</p>
+                        <h3 style="color: #60a5fa;">Extremamente Leve</h3>
+                        <p style="font-size: 0.85rem;">Cabeçalho minúsculo de apenas <strong>2 Bytes</strong> (contra centenas do HTTP). Economia drástica de banda de rede.</p>
                     </div>
                     <div class="card-box">
-                        <h3 style="font-size: 0.9rem;">Baixo Consumo</h3>
-                        <p style="font-size: 0.82rem;">Preserva bateria e processamento de microcontroladores (ESP32, Arduino, Raspberry Pi).</p>
+                        <h3 style="color: #34d399;">Baixo Consumo</h3>
+                        <p style="font-size: 0.85rem;">Mantém sensores remotos e baterias operando por longos períodos sem a necessidade de recarga.</p>
                     </div>
                     <div class="card-box">
-                        <h3 style="font-size: 0.9rem;">Redes Instáveis</h3>
-                        <p style="font-size: 0.82rem;">Funciona em conexões 3G/4G instáveis, satélite ou redes de longa distância (LoRaWAN).</p>
+                        <h3 style="color: #fbbf24;">Redes Instáveis</h3>
+                        <p style="font-size: 0.85rem;">Projetado para manter a integridade dos dados em conexões oscilantes (3G, 4G, Satélite ou LoRa).</p>
                     </div>
                 </div>
             </div>
-            <div class="slide-footer">
-                <span>Comunicação assíncrona orientada a eventos</span>
-                <span>02 / 11</span>
-            </div>
+            <div class="slide-footer"><span>ISO/IEC 20922 Standard</span><span>02 / 08</span></div>
         </div>
 
-        <!-- SLIDE 3: ORIGEM E OBJETIVO -->
+        <!-- SLIDE 3 -->
         <div class="slide">
-            <div class="slide-header">
-                <span class="slide-tag">02 / CONTEXTO HISTÓRICO</span>
-                <h2>Origem e Propósito</h2>
-            </div>
+            <div class="slide-header"><span class="slide-tag">02_ARQUITETURA</span><h2>A Arquitetura Publish / Subscribe</h2></div>
             <div class="slide-body">
-                <p>Criado em 1999 por Andy Stanford-Clark (IBM) e Arlen Nipper (Arcom), o MQTT nasceu para resolver um problema industrial crítico: monitorar oleodutos no deserto usando conexões via satélite caras e instáveis.</p>
-                <div class="grid-3" style="margin: 10px 0;">
-                    <div class="card-box" style="text-align: center;">
-                        <strong style="font-size: 1.6rem; color: var(--accent);">1999</strong>
-                        <span style="display: block; font-size: 0.8rem; color: var(--muted); margin-top: 4px;">Criação por IBM & Arcom</span>
-                    </div>
-                    <div class="card-box" style="text-align: center;">
-                        <strong style="font-size: 1.6rem; color: var(--accent);">2014</strong>
-                        <span style="display: block; font-size: 0.8rem; color: var(--muted); margin-top: 4px;">Padronização OASIS</span>
-                    </div>
-                    <div class="card-box" style="text-align: center;">
-                        <strong style="font-size: 1.6rem; color: var(--accent);">ISO/IEC</strong>
-                        <span style="display: block; font-size: 0.8rem; color: var(--muted); margin-top: 4px;">Norma 20922 em 2016</span>
-                    </div>
-                </div>
-                <p><strong>Objetivo Principal:</strong> Maximizar a eficiência do uso da largura de banda e minimizar o consumo de energia do dispositivo mantendo uma conexão persistente e confiável via TCP/IP.</p>
-            </div>
-            <div class="slide-footer">
-                <span>Evoluiu de redes petrolíferas para o padrão da Indústria 4.0</span>
-                <span>03 / 11</span>
-            </div>
-        </div>
-
-        <!-- SLIDE 4: ARQUITETURA PUB/SUB -->
-        <div class="slide">
-            <div class="slide-header">
-                <span class="slide-tag">03 / ARQUITETURA</span>
-                <h2>Arquitetura Publish / Subscribe</h2>
-            </div>
-            <div class="slide-body">
+                <p>No MQTT, os dispositivos nunca conversam diretamente. Tudo é mediado pelo <strong>Broker</strong>.</p>
                 <div class="diagram">
-[ SENSOR DE TEMP. ]  --- PUBLICA no tópico "fabrica/temp" --->  [   BROKER   ]
- (Publicador / Client)                                         (Mosquitto / HiveMQ)
-                                                                       |
-[ PAINEL / DASHBOARD ] <--- ASSINA o tópico "fabrica/temp"  -----------+
- (Assinante / Client)
+ [ 🌡️ SENSOR TEMP. ] --- PUBLICA: "fabrica/temp" ---> [ ☁️ BROKER CENTRAL ]
+   (Publicador)                                       (Mosquitto / HiveMQ)
+                                                               │
+ [ 💻 PAINEL WEB  ] <--- ASSINA: "fabrica/temp"  <-------------┘
+   (Assinante)
                 </div>
-                <div class="grid-2">
-                    <div class="card-box">
-                        <h3>Desacoplamento de Espaço e Tempo</h3>
-                        <p style="font-size: 0.85rem;">Publicador e Assinante não precisam saber o IP um do outro nem estar ativos exatamente no mesmo instante.</p>
-                    </div>
-                    <div class="card-box">
-                        <h3>O Papel Central do Broker</h3>
-                        <p style="font-size: 0.85rem;">O Broker gerencia conexões, recebe mensagens, filtra por tópicos e distribui apenas aos clientes que assinaram.</p>
-                    </div>
+                <div class="highlight-box">
+                    <strong>Desacoplamento Absoluto:</strong> O sensor (Publisher) e o painel (Subscriber) não precisam conhecer o IP um do outro, nem estarem ativos no mesmo exato momento.
                 </div>
             </div>
-            <div class="slide-footer">
-                <span>Exemplos de Broker: Eclipse Mosquitto, HiveMQ, EMQX, VerneMQ</span>
-                <span>04 / 11</span>
-            </div>
+            <div class="slide-footer"><span>O Broker gerencia as filas e a distribuição</span><span>03 / 08</span></div>
         </div>
 
-        <!-- SLIDE 5: ESTRUTURA DE TÓPICOS -->
+        <!-- SLIDE 4 -->
         <div class="slide">
-            <div class="slide-header">
-                <span class="slide-tag">04 / ENDEREÇAMENTO</span>
-                <h2>Estrutura de Tópicos (Topics) & Wildcards</h2>
-            </div>
+            <div class="slide-header"><span class="slide-tag">03_ENDEREÇAMENTO</span><h2>Tópicos e Filtros (Wildcards)</h2></div>
             <div class="slide-body">
-                <p>O MQTT organiza as mensagens usando tópicos em formato hierárquico separados por barras (<code>/</code>):</p>
-                <div class="highlight-box font-mono" style="font-size: 1.1rem; color: var(--accent);">
+                <p>As mensagens são organizadas hierarquicamente usando barras, como diretórios de um PC:</p>
+                <div class="card-box" style="font-family: 'Fira Code', monospace; font-size: 1.15rem; color: var(--accent); text-align: center;">
                     senai / niteroi / galpao1 / motor3 / temperatura
                 </div>
                 <div class="grid-2">
-                    <div class="card-box">
-                        <h3>Wildcard de Nível Único ( + )</h3>
-                        <p style="font-size: 0.85rem;">Substitui um único nível na árvore do tópico.</p>
-                        <code style="color: var(--accent); font-size: 0.8rem; display: block; margin-top: 4px;">senai/niteroi/+/motor3/temperatura</code>
+                    <div class="card-box" style="border-left: 3px solid #f472b6;">
+                        <h3 style="color: #f472b6;">Sinal de Mais (+)</h3>
+                        <p style="font-size: 0.85rem;">Substitui <strong>um único</strong> nível da árvore.<br><br>Ex: <code>senai/+/galpao1/...</code> escuta os galpões 1 de todos os campi do Senai.</p>
                     </div>
-                    <div class="card-box">
-                        <h3>Wildcard Multinível ( # )</h3>
-                        <p style="font-size: 0.85rem;">Substitui múltiplos níveis subsequentes até o fim.</p>
-                        <code style="color: var(--accent); font-size: 0.8rem; display: block; margin-top: 4px;">senai/niteroi/galpao1/#</code>
+                    <div class="card-box" style="border-left: 3px solid #818cf8;">
+                        <h3 style="color: #818cf8;">Sinal de Cerquilha (#)</h3>
+                        <p style="font-size: 0.85rem;">Substitui <strong>todos</strong> os níveis seguintes.<br><br>Ex: <code>senai/niteroi/#</code> recebe absolutamente todos os dados do campus de Niterói.</p>
                     </div>
                 </div>
             </div>
-            <div class="slide-footer">
-                <span>Permite monitorar milhares de dispositivos organizados hierarquicamente</span>
-                <span>05 / 11</span>
-            </div>
+            <div class="slide-footer"><span>Wildcards tornam a assinatura de sensores escalável</span><span>04 / 08</span></div>
         </div>
 
-        <!-- SLIDE 6: QUALIDADE DE SERVIÇO (QoS) -->
+        <!-- SLIDE 5 -->
         <div class="slide">
-            <div class="slide-header">
-                <span class="slide-tag">05 / GARANTIA DE ENTREGA</span>
-                <h2>Níveis de Qualidade de Serviço (QoS)</h2>
-            </div>
+            <div class="slide-header"><span class="slide-tag">04_CONFIABILIDADE</span><h2>Níveis de Qualidade de Serviço (QoS)</h2></div>
             <div class="slide-body">
-                <p>O MQTT oferece 3 níveis de garantia na entrega das mensagens, ajustáveis conforme a criticidade:</p>
+                <p>O MQTT permite ajustar o rigor da entrega de cada mensagem através do QoS:</p>
                 <div class="grid-3">
-                    <div class="card-box" style="border-top: 3px solid var(--muted);">
-                        <strong style="color: var(--accent);">QoS 0 — At most once</strong>
-                        <p style="font-size: 0.82rem; margin-top: 6px;">"Dispara e esquece". A mensagem é enviada sem confirmação. Maior velocidade, sem garantia.</p>
+                    <div class="card-box" style="border-top: 3px solid var(--text-muted);">
+                        <strong style="color: #cbd5e1; font-size: 1.1rem;">QoS 0</strong><br><span style="font-size:0.8rem; opacity:0.7">At most once</span>
+                        <p style="font-size: 0.82rem; margin-top: 10px;">"Dispara e esquece". Alta performance, mas se a conexão falhar no momento, o dado é perdido.</p>
                     </div>
                     <div class="card-box" style="border-top: 3px solid var(--warning);">
-                        <strong style="color: var(--warning);">QoS 1 — At least once</strong>
-                        <p style="font-size: 0.82rem; margin-top: 6px;">Garante a entrega (requer confirmação PUBACK). Pode haver duplicação de mensagem.</p>
+                        <strong style="color: var(--warning); font-size: 1.1rem;">QoS 1</strong><br><span style="font-size:0.8rem; opacity:0.7">At least once</span>
+                        <p style="font-size: 0.82rem; margin-top: 10px;">Garante a entrega (requer PUBACK). Por conta de reenvios, a mesma mensagem pode chegar duplicada.</p>
                     </div>
                     <div class="card-box" style="border-top: 3px solid var(--success);">
-                        <strong style="color: var(--success);">QoS 2 — Exactly once</strong>
-                        <p style="font-size: 0.82rem; margin-top: 6px;">Garante que a mensagem chegue exatamente uma vez (handshake em 4 etapas). Mais seguro.</p>
+                        <strong style="color: var(--success); font-size: 1.1rem;">QoS 2</strong><br><span style="font-size:0.8rem; opacity:0.7">Exactly once</span>
+                        <p style="font-size: 0.82rem; margin-top: 10px;">Entrega mais segura. Usa handshake de 4 vias para garantir que a mensagem chegue uma única vez.</p>
                     </div>
                 </div>
-                <div class="highlight-box" style="font-size: 0.85rem;">
-                    💡 <strong>Escolha Técnica:</strong> Sensores de temperatura contínuos usam QoS 0. Disparos de alarmes de incêndio ou desligamento de máquinas usam QoS 1 ou 2.
-                </div>
             </div>
-            <div class="slide-footer">
-                <span>Flexibilidade entre velocidade de transmissão e confiabilidade absoluta</span>
-                <span>06 / 11</span>
-            </div>
+            <div class="slide-footer"><span>Adapte o QoS conforme a criticidade do sistema</span><span>05 / 08</span></div>
         </div>
 
-        <!-- SLIDE 7: MATRIZ COMPARATIVA -->
+        <!-- SLIDE 6 -->
         <div class="slide">
-            <div class="slide-header">
-                <span class="slide-tag">06 / MATRIZ COMPARATIVA</span>
-                <h2>MQTT vs. Outros Protocolos</h2>
-            </div>
+            <div class="slide-header"><span class="slide-tag">05_COMPARAÇÃO</span><h2>Matriz: MQTT vs. WebSocket vs. HTTP</h2></div>
             <div class="slide-body">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>CARACTERÍSTICA</th>
-                            <th>MQTT</th>
-                            <th>WEBSOCKET</th>
-                            <th>HTTP / REST</th>
-                            <th>AMQP</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Característica</th><th>MQTT</th><th>WebSocket</th><th>HTTP / REST</th></tr></thead>
                     <tbody>
-                        <tr class="highlight">
-                            <td>Arquitetura</td>
-                            <td>Pub / Sub (Broker)</td>
-                            <td>Full-Duplex (P2P)</td>
-                            <td>Request / Response</td>
-                            <td>Pub / Sub (Filas)</td>
-                        </tr>
-                        <tr>
-                            <td>Overhead Cabeçalho</td>
-                            <td>Mínimo (~2 Bytes)</td>
-                            <td>Baixo (~2-10 Bytes)</td>
-                            <td>Alto (Centenas de Bytes)</td>
-                            <td>Médio (~8 Bytes)</td>
-                        </tr>
-                        <tr>
-                            <td>Foco de Aplicação</td>
-                            <td>IoT, Sensores, Indústria</td>
-                            <td>Webapps, Chats, Jogos</td>
-                            <td>Sites, APIs REST</td>
-                            <td>Enterprise Mensageria</td>
-                        </tr>
-                        <tr>
-                            <td>Consumo Bateria</td>
-                            <td>Extremamente Baixo</td>
-                            <td>Médio</td>
-                            <td>Alto</td>
-                            <td>Médio / Alto</td>
-                        </tr>
+                        <tr class="highlight"><td>Padrão</td><td>Pub/Sub (via Broker)</td><td>Bidirecional (P2P)</td><td>Request/Response</td></tr>
+                        <tr><td>Overhead / Tamanho</td><td>Micro (2 Bytes)</td><td>Pequeno (2-10 B)</td><td>Pesado (Centenas B)</td></tr>
+                        <tr><td>Uso Principal</td><td>Chão de Fábrica, IoT</td><td>Apps Web, Chats</td><td>APIs, Sites comuns</td></tr>
+                        <tr><td>Gasto Energético</td><td>Extremamente Baixo</td><td>Médio</td><td>Alto</td></tr>
                     </tbody>
                 </table>
-            </div>
-            <div class="slide-footer">
-                <span>Diferencial: Desacoplamento completo entre emissor e receptor via Broker</span>
-                <span>07 / 11</span>
-            </div>
-        </div>
-
-        <!-- SLIDE 8: PRÓS E CONTRAS -->
-        <div class="slide">
-            <div class="slide-header">
-                <span class="slide-tag">07 / ANÁLISE TÉCNICA</span>
-                <h2>Vantagens e Desafios</h2>
-            </div>
-            <div class="slide-body">
-                <div class="grid-2">
-                    <div class="card-box" style="border-top: 3px solid var(--success);">
-                        <h3 style="color: var(--success);">✓ Vantagens</h3>
-                        <ul style="font-size: 0.85rem; margin-left: 16px; line-height: 1.6;">
-                            <li>Excelente economia de banda e bateria.</li>
-                            <li>Comunicação em tempo real bidirecional.</li>
-                            <li>Tópicos dinâmicos e expansíveis.</li>
-                            <li>Suporta conexões intermitentes (Last Will & Testament).</li>
-                            <li>Padrão global adotado por grandes provedores (AWS IoT, Azure IoT).</li>
-                        </ul>
-                    </div>
-                    <div class="card-box" style="border-top: 3px solid var(--danger);">
-                        <h3 style="color: var(--danger);">✗ Desafios</h3>
-                        <ul style="font-size: 0.85rem; margin-left: 16px; line-height: 1.6;">
-                            <li>Exige a manutenção e escala de um Broker central.</li>
-                            <li>Sem criptografia nativa no protocolo (requer TLS/SSL).</li>
-                            <li>Não possui formato de payload padronizado (JSON, String, Binário).</li>
-                            <li>Requer planejamento cuidadoso da estrutura de tópicos.</li>
-                        </ul>
-                    </div>
+                <div class="highlight-box" style="font-size: 0.85rem; margin-top: 10px;">
+                    <strong>Insight Arquitetural:</strong> Em aplicações modernas, os sensores transmitem para o servidor via <strong>MQTT</strong>, e o servidor atualiza o navegador do usuário via <strong>WebSocket</strong>.
                 </div>
             </div>
-            <div class="slide-footer">
-                <span>Avaliação de arquitetura recomendada antes da escolha</span>
-                <span>08 / 11</span>
-            </div>
+            <div class="slide-footer"><span>Tecnologias complementares, não excludentes</span><span>06 / 08</span></div>
         </div>
 
-        <!-- SLIDE 9: CASO PRÁTICO -->
+        <!-- SLIDE 7 -->
         <div class="slide">
-            <div class="slide-header">
-                <span class="slide-tag">08 / APLICAÇÕES PRÁTICAS</span>
-                <h2>Onde o MQTT é utilizado?</h2>
-            </div>
-            <div class="slide-body">
-                <div class="grid-2">
-                    <div class="card-box">
-                        <h3>🏬 Indústria 4.0 & Manutenção Preditiva</h3>
-                        <p style="font-size: 0.85rem;">Sensores de vibração em motores industriais transmitem telemetria para Brokers Mosquitto acoplados ao Node-RED e sistemas de emergência.</p>
-                    </div>
-                    <div class="card-box">
-                        <h3>🏡 Automação Residencial (Home Assistant)</h3>
-                        <p style="font-size: 0.85rem;">Interruptores inteligentes, lâmpadas Zigbee/Wi-Fi e sensores de presença comunicam-se em milissegundos pela rede local.</p>
-                    </div>
-                    <div class="card-box">
-                        <h3>🚗 Monitoramento de Frotas & Telemetria</h3>
-                        <p style="font-size: 0.85rem;">Rastreamento de veículos comerciais enviando dados de GPS e telemetria de consumo via redes celulares 3G/4G.</p>
-                    </div>
-                    <div class="card-box">
-                        <h3>🏥 Dispositivos Médicos Remotos</h3>
-                        <p style="font-size: 0.85rem;">Monitoramento contínuo de sinais vitais de pacientes em home care enviando alertas diretos a centrais médicas.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="slide-footer">
-                <span>Conexões contínuas e seguras em diversos setores estratégicos</span>
-                <span>09 / 11</span>
-            </div>
-        </div>
-
-        <!-- SLIDE 10: IMPLEMENTAÇÃO EM CÓDIGO -->
-        <div class="slide">
-            <div class="slide-header">
-                <span class="slide-tag">09 / IMPLEMENTAÇÃO PRÁTICA</span>
-                <h2>Exemplo Prático (JavaScript / Node.js)</h2>
-            </div>
+            <div class="slide-header"><span class="slide-tag">06_CÓDIGO_FONTE</span><h2>Implementação (Node.js)</h2></div>
             <div class="slide-body">
                 <div class="grid-2">
                     <div class="code-box">
-                        <span style="color: var(--accent); font-family: monospace; font-size: 0.75rem; display: block; margin-bottom: 4px;">// PUBLISHER (publisher.js)</span>
-                        <pre><code>const mqtt = require('mqtt');
-const client = mqtt.connect('mqtt://broker.hivemq.com');
+                        <div class="code-header">
+                            <div class="mac-btn mac-close"></div><div class="mac-btn mac-min"></div><div class="mac-btn mac-max"></div>
+                            <span class="code-title">publisher.js</span>
+                        </div>
+                        <pre><code><span class="syn-keyword">const</span> mqtt = <span class="syn-func">require</span>(<span class="syn-string">'mqtt'</span>);
+<span class="syn-keyword">const</span> client = mqtt.<span class="syn-func">connect</span>(<span class="syn-string">'mqtt://broker.hivemq.com'</span>);
 
-client.on('connect', () => {
-  console.log('Conectado ao Broker!');
-  setInterval(() => {
-    const temp = (20 + Math.random() * 5).toFixed(2);
-    client.publish('senai/fabrica/temp', JSON.stringify({ temp }));
-    console.log(`Temp enviada: ${temp}°C`);
-  }, 2000);
+client.<span class="syn-func">on</span>(<span class="syn-string">'connect'</span>, () => {
+  <span class="syn-comment">// Publica a temperatura a cada 2 seg</span>
+  <span class="syn-func">setInterval</span>(() => {
+    client.<span class="syn-func">publish</span>(<span class="syn-string">'senai/fabrica/temp'</span>, <span class="syn-string">'24.5'</span>);
+  }, <span class="syn-keyword">2000</span>);
 });</code></pre>
                     </div>
-
                     <div class="code-box">
-                        <span style="color: var(--success); font-family: monospace; font-size: 0.75rem; display: block; margin-bottom: 4px;">// SUBSCRIBER (subscriber.js)</span>
-                        <pre><code>const mqtt = require('mqtt');
-const client = mqtt.connect('mqtt://broker.hivemq.com');
+                        <div class="code-header">
+                            <div class="mac-btn mac-close"></div><div class="mac-btn mac-min"></div><div class="mac-btn mac-max"></div>
+                            <span class="code-title">subscriber.js</span>
+                        </div>
+                        <pre><code><span class="syn-keyword">const</span> mqtt = <span class="syn-func">require</span>(<span class="syn-string">'mqtt'</span>);
+<span class="syn-keyword">const</span> client = mqtt.<span class="syn-func">connect</span>(<span class="syn-string">'mqtt://broker.hivemq.com'</span>);
 
-client.on('connect', () => {
-  client.subscribe('senai/fabrica/temp');
-  console.log('Inscrito no tópico!');
+client.<span class="syn-func">on</span>(<span class="syn-string">'connect'</span>, () => {
+  <span class="syn-comment">// Assina o tópico desejado</span>
+  client.<span class="syn-func">subscribe</span>(<span class="syn-string">'senai/fabrica/temp'</span>);
 });
 
-client.on('message', (topic, message) => {
-  console.log(`Recebido em ${topic}:`, message.toString());
+client.<span class="syn-func">on</span>(<span class="syn-string">'message'</span>, (topic, msg) => {
+  <span class="syn-func">console</span>.log(<span class="syn-string">`Temp recebida: ${msg} °C`</span>);
 });</code></pre>
                     </div>
                 </div>
             </div>
-            <div class="slide-footer">
-                <span>Biblioteca: `npm install mqtt` · Testes com Broker público HiveMQ</span>
-                <span>10 / 11</span>
-            </div>
+            <div class="slide-footer"><span>Requisito: npm install mqtt</span><span>07 / 08</span></div>
         </div>
 
-        <!-- SLIDE 11: CONCLUSÃO & SEGURANÇA -->
+        <!-- SLIDE 8 -->
         <div class="slide">
-            <div class="slide-header">
-                <span class="slide-tag">10 / ENCERRAMENTO</span>
-                <h2>Conclusão & Segurança em Produção</h2>
-            </div>
+            <div class="slide-header"><span class="slide-tag">07_ENCERRAMENTO</span><h2>Aplicações Reais & Segurança</h2></div>
             <div class="slide-body">
-                <p>O MQTT consolidou-se como a espinha dorsal da comunicação de dados na Internet das Coisas e na automação industrial moderna devido à sua leveza, flexibilidade e baixo consumo.</p>
-                <div class="card-box" style="border-left: 4px solid var(--warning);">
-                    <h3 style="color: var(--warning);">🛡️ Boas Práticas de Segurança em Produção:</h3>
-                    <ul style="font-size: 0.85rem; margin-left: 16px; margin-top: 6px; line-height: 1.5;">
-                        <li><strong>Criptografia TLS/SSL:</strong> Utilize a porta padrão segura 8883 (MQTTS) em vez do porto aberto 1883.</li>
-                        <li><strong>Autenticação & ACLs:</strong> Exija usuário/senha ou certificado digital X.509 e restrinja permissões por tópico.</li>
-                        <li><strong>Validação de Payloads:</strong> Garanta a sanitização de payloads recebidos no backend antes de persistir em banco.</li>
-                    </ul>
+                <div class="grid-2">
+                    <div class="card-box">
+                        <h3 style="color: var(--accent);">🌐 Onde é usado?</h3>
+                        <ul style="font-size: 0.85rem; margin-left: 18px; line-height: 1.8; color: var(--text-muted); margin-top: 10px;">
+                            <li><strong>Indústria 4.0:</strong> Monitoramento de motores e CLP.</li>
+                            <li><strong>Smart Homes:</strong> Dispositivos no Home Assistant.</li>
+                            <li><strong>Telemetria:</strong> Rastreadores GPS em Frotas.</li>
+                            <li><strong>Saúde:</strong> Monitoramento de pacientes à distância.</li>
+                        </ul>
+                    </div>
+                    <div class="card-box" style="border-left: 4px solid var(--warning);">
+                        <h3 style="color: var(--warning);">🔒 Segurança em Produção</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 10px;">
+                            O MQTT padrão trafega em texto puro. Em sistemas de produção, é imperativo usar a porta <strong>8883 (MQTTS)</strong> com criptografia <strong>SSL/TLS</strong>, garantindo autenticação com login e senha no acesso ao Broker.
+                        </p>
+                    </div>
+                </div>
+                <div class="highlight-box" style="text-align: center; margin-top: 10px; border-left: none; background: rgba(56, 189, 248, 0.1);">
+                    <p style="font-size: 1.2rem; color: #ffffff; font-weight: 600;">Obrigado! Perguntas?</p>
                 </div>
             </div>
-            <div class="slide-footer">
-                <span>Obrigado! Perguntas e dúvidas?</span>
-                <span>11 / 11</span>
-            </div>
+            <div class="slide-footer"><span>MQTT: O protocolo base da internet física</span><span>08 / 08</span></div>
         </div>
 
     </main>
 
     <footer>
         <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Anterior</button>
-        <span class="key-hint">Use as setas do teclado (← / →) para navegar</span>
+        <span class="key-hint">⌨️ Use as setas do teclado para navegar</span>
         <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Próximo →</button>
     </footer>
 
@@ -685,6 +463,7 @@ client.on('message', (topic, message) => {
         const slides = document.querySelectorAll('.slide');
         const dotsContainer = document.getElementById('dotsContainer');
 
+        // Criação dinâmica dos botões (dots)
         slides.forEach((_, index) => {
             const dot = document.createElement('div');
             dot.classList.add('dot');
@@ -696,13 +475,8 @@ client.on('message', (topic, message) => {
         const dots = document.querySelectorAll('.dot');
 
         function updateSlide() {
-            slides.forEach((slide, index) => {
-                slide.classList.toggle('active', index === currentSlide);
-            });
-            dots.forEach((dot, index) => {
-                dot.classList.toggle('active', index === currentSlide);
-            });
-
+            slides.forEach((slide, index) => slide.classList.toggle('active', index === currentSlide));
+            dots.forEach((dot, index) => dot.classList.toggle('active', index === currentSlide));
             document.getElementById('prevBtn').disabled = currentSlide === 0;
             document.getElementById('nextBtn').disabled = currentSlide === slides.length - 1;
         }
@@ -719,12 +493,10 @@ client.on('message', (topic, message) => {
             updateSlide();
         }
 
+        // Navegação pelo teclado
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight' || e.key === ' ') {
-                changeSlide(1);
-            } else if (e.key === 'ArrowLeft') {
-                changeSlide(-1);
-            }
+            if (e.key === 'ArrowRight' || e.key === ' ') changeSlide(1);
+            else if (e.key === 'ArrowLeft') changeSlide(-1);
         });
 
         updateSlide();
