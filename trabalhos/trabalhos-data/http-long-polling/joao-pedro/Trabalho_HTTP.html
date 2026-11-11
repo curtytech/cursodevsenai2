@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual Técnico & Guia Interativo: HTTP Long Polling</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f5ff',
+              100: '#e0ebff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#1e1b4b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Estilização da barra de rolagem customizada */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+
+    /* Transição suave entre páginas */
+    .page-section {
+      display: none;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    }
+    .page-section.active-page {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Efeito de pulso e fluxo de dados */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .animate-pulse-ring {
+      animation: pulse-ring 2s infinite ease-in-out;
+    }
+
+    @keyframes data-flow {
+      0% { left: 10%; opacity: 0; }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { left: 85%; opacity: 0; }
+    }
+    .animate-flow-right {
+      animation: data-flow 1.8s infinite linear;
+    }
+    
+    @keyframes data-flow-reverse {
+      0% { left: 85%; opacity: 0; }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { left: 10%; opacity: 0; }
+    }
+    .animate-flow-left {
+      animation: data-flow-reverse 1.8s infinite linear;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+  <!-- BARRA DE PROGRESSO DE NAVEGAÇÃO -->
+  <div class="fixed top-0 left-0 right-0 h-1 bg-slate-800 z-50">
+    <div id="page-progress-bar" class="h-full bg-gradient-to-r from-indigo-500 via-cyan-400 to-emerald-400 w-1/5 transition-all duration-300"></div>
+  </div>
+
+  <!-- CABEÇALHO SUPERIOR -->
+  <header class="sticky top-1 z-40 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-4 lg:px-8 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <button id="toggle-sidebar" class="lg:hidden p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg" aria-label="Abrir Menu">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+      </button>
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-400 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20">
+          LP
+        </div>
+        <div>
+          <span class="font-extrabold text-base sm:text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent block">
+            HTTP Long Polling
+          </span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-indigo-400 block -mt-1">
+            Manual Interativo & Simulador
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAVEGAÇÃO DE PÁGINA CENTRAL -->
+    <div class="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+      <button onclick="prevPage()" id="header-prev-btn" class="p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed" title="Página Anterior (Seta Esquerda)">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      </button>
+      
+      <span id="page-counter-badge" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+        Página 1 de 5
+      </span>
+
+      <button onclick="nextPage()" id="header-next-btn" class="p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed" title="Próxima Página (Seta Direita)">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+      </button>
+    </div>
+
+    <!-- DICA TECLAS -->
+    <div class="hidden md:flex items-center gap-2 text-xs text-slate-400 font-mono">
+      <span>Navegue com</span>
+      <kbd class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-300 text-[11px] shadow">◀ Seta ESQ</kbd>
+      <kbd class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-300 text-[11px] shadow">Seta DIR ▶</kbd>
+    </div>
+  </header>
+
+  <div class="flex-1 flex max-w-7xl w-full mx-auto">
+    
+    <!-- MENU LATERAL (SIDEBAR) -->
+    <aside id="sidebar" class="fixed lg:sticky top-16 z-30 w-64 h-[calc(100vh-4rem)] bg-slate-900/90 border-r border-slate-800/80 p-4 shrink-0 transition-transform -translate-x-full lg:translate-x-0 overflow-y-auto backdrop-blur-md">
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Índice do Manual</h3>
+          <nav class="space-y-1.5 text-xs font-medium" id="nav-links">
+            <button onclick="goToPage(1)" id="nav-item-1" class="w-full text-left flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all">
+              <span class="w-5 h-5 rounded-md bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-[10px]">1</span>
+              <span>1. Introdução & Conceito</span>
+            </button>
+            <button onclick="goToPage(2)" id="nav-item-2" class="w-full text-left flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all">
+              <span class="w-5 h-5 rounded-md bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-[10px]">2</span>
+              <span>2. Simulador Interativo</span>
+            </button>
+            <button onclick="goToPage(3)" id="nav-item-3" class="w-full text-left flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all">
+              <span class="w-5 h-5 rounded-md bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px]">3</span>
+              <span>3. Casos, Prós & Contras</span>
+            </button>
+            <button onclick="goToPage(4)" id="nav-item-4" class="w-full text-left flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all">
+              <span class="w-5 h-5 rounded-md bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-[10px]">4</span>
+              <span>4. Tabela Comparativa</span>
+            </button>
+            <button onclick="goToPage(5)" id="nav-item-5" class="w-full text-left flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all">
+              <span class="w-5 h-5 rounded-md bg-pink-500/20 text-pink-400 flex items-center justify-center font-bold text-[10px]">5</span>
+              <span>5. Códigos Práticos</span>
+            </button>
+          </nav>
+        </div>
+
+        <div class="p-3 bg-slate-950/80 border border-slate-800/80 rounded-xl space-y-2">
+          <span class="text-[11px] font-semibold text-slate-300 uppercase tracking-wider block">Atalhos de Teclado</span>
+          <div class="text-[11px] text-slate-400 space-y-1 font-mono">
+            <div class="flex justify-between"><span>Próxima pág:</span> <span class="text-indigo-400">➔ / PgDn</span></div>
+            <div class="flex justify-between"><span>Pág anterior:</span> <span class="text-indigo-400">⬅ / PgUp</span></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL (PÁGINAS SEPARADAS) -->
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden flex flex-col justify-between">
+      
+      <div id="pages-container">
+        
+        <!-- PÁGINA 1: INTRODUÇÃO & CONCEITO -->
+        <section id="page-1" class="page-section active-page space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-medium">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            Página 1 de 5 — Conceitos Fundamentais
+          </div>
+          
+          <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight text-white">
+            O que é o <span class="bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">HTTP Long Polling</span>?
+          </h1>
+          
+          <p class="text-base text-slate-300 leading-relaxed max-w-3xl">
+            O <strong>HTTP Long Polling</strong> é uma técnica avançada de comunicação cliente-servidor projetada para emular o envio de dados em tempo real (<em>Push</em>) utilizando o protocolo HTTP padrão, superando a limitação nativa onde apenas o cliente pode iniciar uma comunicação.
+          </p>
+
+          <!-- CARDS EXPLICATIVOS DO CICLO -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
+            <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500/50 transition-all space-y-2">
+              <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold">
+                1
+              </div>
+              <h3 class="font-bold text-slate-100 text-base">1. Requisição Suspensa</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                O cliente faz uma requisição HTTP solicitando atualização. O servidor **não responde de imediato**: ele retém a chamada aberta aguardando novos dados.
+              </p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-cyan-500/50 transition-all space-y-2">
+              <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold">
+                2
+              </div>
+              <h3 class="font-bold text-slate-100 text-base">2. Resposta Instantânea</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                No exato momento em que um evento ocorre no servidor (ou ao atingir um tempo limite de *timeout*), os dados são empacotados e enviados de volta.
+              </p>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-emerald-500/50 transition-all space-y-2">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
+                3
+              </div>
+              <h3 class="font-bold text-slate-100 text-base">3. Reconexão Imediata</h3>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Assim que recebe a resposta, o cliente processa as informações e **abre imediatamente uma nova requisição**, reiniciando a escuta ativa sem pausas.
+              </p>
+            </div>
+          </div>
+
+          <!-- CAIXA DE DESTAQUE TÉCNICO -->
+          <div class="p-5 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-slate-900 to-slate-900 border border-indigo-500/20 space-y-2">
+            <h4 class="text-sm font-bold text-indigo-300 flex items-center gap-2">
+              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              Por que usar Long Polling ao invés de Polling Tradicional?
+            </h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              No <em>Polling Tradicional</em>, o cliente faz requisições em intervalos fixos (ex: a cada 2 segundos), gerando centenas de respostas `HTTP 200/304` vazias que consomem banda e processamento sem necessidade. O <strong>Long Polling</strong> elimina esse desperdício, mantendo o canal silencioso até que haja algo relevante a ser entregue.
+            </p>
+          </div>
+        </section>
+
+        <!-- PÁGINA 2: SIMULADOR INTERATIVO -->
+        <section id="page-2" class="page-section space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-medium">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg>
+            Página 2 de 5 — Teste Prático
+          </div>
+
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              Simulador Visual de Long Polling em Tempo Real
+            </h2>
+            <p class="text-slate-400 text-xs sm:text-sm mt-1">
+              Testes práticos da retenção da requisição HTTP, disparo manual de eventos e reconexão automática.
+            </p>
+          </div>
+
+          <!-- CAIXA DO SIMULADOR -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-5">
+            
+            <!-- Painel de Controles -->
+            <div class="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-slate-950/80 rounded-xl border border-slate-800">
+              <div class="flex flex-wrap items-center gap-2.5">
+                <button id="sim-start-btn" onclick="startSimulation()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs rounded-lg transition-all shadow-md shadow-indigo-600/30 flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg>
+                  Iniciar Long Polling
+                </button>
+                
+                <button id="sim-event-btn" onclick="triggerServerEvent()" disabled class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium text-xs rounded-lg transition-all flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                  Disparar Evento no Servidor
+                </button>
+
+                <button onclick="resetSimulation()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-lg transition-all">
+                  Resetar
+                </button>
+              </div>
+
+              <!-- Timeout -->
+              <div class="flex items-center gap-2 text-xs text-slate-300">
+                <label for="sim-timeout" class="font-medium">Timeout:</label>
+                <select id="sim-timeout" class="bg-slate-800 border border-slate-700 rounded-md px-2 py-1 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
+                  <option value="5">5 segundos</option>
+                  <option value="8" selected>8 segundos</option>
+                  <option value="12">12 segundos</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- ÁREA VISUAL CLIENTE / SERVIDOR -->
+            <div class="relative bg-slate-950 rounded-xl border border-slate-800/80 p-6 min-h-[200px] flex flex-col justify-between overflow-hidden">
+              
+              <!-- Linha Central de Rede -->
+              <div class="absolute inset-x-12 top-1/2 -translate-y-1/2 h-1 bg-slate-800 rounded-full z-0"></div>
+              
+              <!-- Pacote Animado -->
+              <div id="packet-indicator" class="hidden absolute top-1/2 -translate-y-1/2 z-20 transition-all duration-700">
+                <span id="packet-badge" class="px-2 py-1 rounded-md text-[10px] font-mono font-bold text-white shadow-lg flex items-center gap-1 bg-cyan-600">
+                  <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                  <span id="packet-label">GET /updates</span>
+                </span>
+              </div>
+
+              <!-- Nós de Comunicação -->
+              <div class="relative z-10 flex justify-between items-center my-auto">
+                
+                <!-- Cliente -->
+                <div class="flex flex-col items-center gap-2 w-32">
+                  <div id="node-client" class="w-14 h-14 rounded-2xl bg-slate-900 border-2 border-slate-700 flex flex-col items-center justify-center text-slate-300 shadow-md transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                  </div>
+                  <span class="text-xs font-semibold text-slate-300">Cliente Web</span>
+                  <span id="client-status" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Inativo</span>
+                </div>
+
+                <!-- Estado Conexão -->
+                <div class="flex flex-col items-center gap-1 z-10 bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 shadow-inner">
+                  <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Conexão HTTP</span>
+                  <div class="flex items-center gap-1.5">
+                    <span id="conn-state-dot" class="w-2.5 h-2.5 rounded-full bg-slate-600"></span>
+                    <span id="conn-state-text" class="text-xs font-mono font-bold text-slate-300">Fechada</span>
+                  </div>
+                  <div class="w-28 bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1">
+                    <div id="timer-progress" class="bg-indigo-500 h-full w-0 transition-all duration-300"></div>
+                  </div>
+                  <span id="timer-text" class="text-[10px] font-mono text-slate-400">0.0s / 8.0s</span>
+                </div>
+
+                <!-- Servidor -->
+                <div class="flex flex-col items-center gap-2 w-32">
+                  <div id="node-server" class="w-14 h-14 rounded-2xl bg-slate-900 border-2 border-slate-700 flex flex-col items-center justify-center text-slate-300 shadow-md transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path></svg>
+                  </div>
+                  <span class="text-xs font-semibold text-slate-300">Servidor API</span>
+                  <span id="server-status" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">Aguardando</span>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Console de Logs -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 text-[11px]">
+                  <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                  Log de Comunicação da Rede
+                </span>
+                <button onclick="clearLogs()" class="text-slate-400 hover:text-slate-200 underline text-[11px]">Limpar Console</button>
+              </div>
+              
+              <div id="sim-console" class="h-32 bg-slate-950 font-mono text-xs text-slate-300 p-3 rounded-xl border border-slate-800 overflow-y-auto space-y-1">
+                <div class="text-slate-500">// Clique em "Iniciar Long Polling" para começar a testar.</div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- PÁGINA 3: CASOS DE USO, VANTAGENS E LIMITAÇÕES -->
+        <section id="page-3" class="page-section space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            Página 3 de 5 — Aplicações & Análise Técnica
+          </div>
+
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              Casos de Uso Práticos & Análise da Arquitetura
+            </h2>
+            <p class="text-slate-400 text-xs sm:text-sm mt-1">
+              Descubra onde o Long Polling se destaca e conheça suas vantagens e pontos de atenção.
+            </p>
+          </div>
+
+          <!-- GRID CASOS DE USO -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all space-y-2">
+              <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+              </div>
+              <h3 class="font-bold text-white text-sm">Chats Web</h3>
+              <p class="text-[11px] text-slate-400 leading-relaxed">
+                Mensagens entregues no momento em que são enviadas, muito usado em suporte ao cliente.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all space-y-2">
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+              </div>
+              <h3 class="font-bold text-white text-sm">Notificações In-App</h3>
+              <p class="text-[11px] text-slate-400 leading-relaxed">
+                Alertas de novos e-mails, curtidas e avisos em painéis de usuários.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all space-y-2">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+              </div>
+              <h3 class="font-bold text-white text-sm">Status de Tarefas</h3>
+              <p class="text-[11px] text-slate-400 leading-relaxed">
+                Acompanhamento de relatórios pesados e conversões de arquivos no servidor.
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all space-y-2">
+              <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+              </div>
+              <h3 class="font-bold text-white text-sm">Rastreamento GPS</h3>
+              <p class="text-[11px] text-slate-400 leading-relaxed">
+                Atualização periódica da posição de entregadores sem necessidade de WebSockets.
+              </p>
+            </div>
+          </div>
+
+          <!-- COMPARATIVO PRÓS E CONTRAS -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+            <!-- Vantagens -->
+            <div class="bg-slate-900/80 border border-emerald-500/20 rounded-2xl p-5 space-y-3">
+              <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                <span class="w-6 h-6 rounded-md bg-emerald-500/10 flex items-center justify-center text-xs">✓</span>
+                Vantagens Principais
+              </div>
+              <ul class="space-y-2 text-xs text-slate-300">
+                <li class="flex items-start gap-2">
+                  <span class="text-emerald-400 font-bold">•</span>
+                  <span><strong>Compatibilidade Total:</strong> Funciona em qualquer servidor proxy, firewall ou CDN sem requerer suporte a WebSockets.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-emerald-400 font-bold">•</span>
+                  <span><strong>Sem Requisições Inúteis:</strong> Não desperdiça conexões enviando dados vazios a cada segundo.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-emerald-400 font-bold">•</span>
+                  <span><strong>Fácil Implementação:</strong> Utiliza o comando `fetch()` padrão no frontend sem bibliotecas externas.</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Limitações -->
+            <div class="bg-slate-900/80 border border-rose-500/20 rounded-2xl p-5 space-y-3">
+              <div class="flex items-center gap-2 text-rose-400 font-bold text-sm">
+                <span class="w-6 h-6 rounded-md bg-rose-500/10 flex items-center justify-center text-xs">✕</span>
+                Limitações & Desafios
+              </div>
+              <ul class="space-y-2 text-xs text-slate-300">
+                <li class="flex items-start gap-2">
+                  <span class="text-rose-400 font-bold">•</span>
+                  <span><strong>Overhead de Cabeçalhos:</strong> A cada reconexão, dados HTTP (cookies/tokens) precisam ser reenviados.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-rose-400 font-bold">•</span>
+                  <span><strong>Carga no Backend:</strong> Exige que o servidor consiga manter milhares de conexões assíncronas em espera simultaneamente.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-rose-400 font-bold">•</span>
+                  <span><strong>Canal Unidirecional:</strong> Para o cliente enviar dados enquanto escuta, ele precisa abrir uma nova requisição paralela.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- PÁGINA 4: TABELA COMPARATIVA COMPLETA -->
+        <section id="page-4" class="page-section space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-medium">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            Página 4 de 5 — Matriz Tecnológica
+          </div>
+
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              Tabela Comparativa de Tecnologias em Tempo Real
+            </h2>
+            <p class="text-slate-400 text-xs sm:text-sm mt-1">
+              Matriz comparativa para escolha da arquitetura ideal do seu projeto.
+            </p>
+          </div>
+
+          <!-- TABELA -->
+          <div class="overflow-x-auto bg-slate-900 border border-slate-800 rounded-2xl shadow-xl">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-950 text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-800">
+                <tr>
+                  <th class="p-3.5">Tecnologia</th>
+                  <th class="p-3.5">Direção</th>
+                  <th class="p-3.5">Latência</th>
+                  <th class="p-3.5">Overhead de Rede</th>
+                  <th class="p-3.5">Compatibilidade HTTP</th>
+                  <th class="p-3.5">Complexidade</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/60 font-mono">
+                <tr class="hover:bg-slate-800/30">
+                  <td class="p-3.5 font-bold text-slate-200">Polling Tradicional</td>
+                  <td class="p-3.5">Pull (Cliente)</td>
+                  <td class="p-3.5 text-amber-400">Alta</td>
+                  <td class="p-3.5 text-rose-400">Muito Alto</td>
+                  <td class="p-3.5 text-emerald-400">100% Nativo</td>
+                  <td class="p-3.5 text-emerald-400">Muito Baixa</td>
+                </tr>
+
+                <tr class="bg-indigo-950/30 border-l-4 border-indigo-500 font-semibold text-slate-100">
+                  <td class="p-3.5 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+                    HTTP Long Polling
+                  </td>
+                  <td class="p-3.5">Push Simulado</td>
+                  <td class="p-3.5 text-emerald-400">Baixa</td>
+                  <td class="p-3.5 text-amber-400">Moderado</td>
+                  <td class="p-3.5 text-emerald-400">100% Nativo</td>
+                  <td class="p-3.5 text-indigo-300">Baixa / Moderada</td>
+                </tr>
+
+                <tr class="hover:bg-slate-800/30">
+                  <td class="p-3.5 font-bold text-slate-200">WebSockets</td>
+                  <td class="p-3.5 text-emerald-400">Full-Duplex (2 Vias)</td>
+                  <td class="p-3.5 text-emerald-400">Mínima (&lt;1ms)</td>
+                  <td class="p-3.5 text-emerald-400">Mínimo</td>
+                  <td class="p-3.5 text-amber-400">Requer Protocol Upgrade</td>
+                  <td class="p-3.5 text-rose-400">Alta</td>
+                </tr>
+
+                <tr class="hover:bg-slate-800/30">
+                  <td class="p-3.5 font-bold text-slate-200">Server-Sent Events (SSE)</td>
+                  <td class="p-3.5">Server -> Client</td>
+                  <td class="p-3.5 text-emerald-400">Baixa</td>
+                  <td class="p-3.5 text-emerald-400">Baixo</td>
+                  <td class="p-3.5 text-emerald-400">100% Nativo</td>
+                  <td class="p-3.5 text-indigo-300">Baixa</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- PÁGINA 5: EXEMPLOS PRÁTICOS DE CÓDIGO -->
+        <section id="page-5" class="page-section space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-xs font-medium">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+            Página 5 de 5 — Códigos Práticos
+          </div>
+
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              Exemplos de Código Prático
+            </h2>
+            <p class="text-slate-400 text-xs sm:text-sm mt-1">
+              Implementação básica no Cliente (JavaScript Vanilla) e no Servidor (Node.js + Express).
+            </p>
+          </div>
+
+          <!-- CONTAINER DE CÓDIGO -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+            
+            <!-- Abas -->
+            <div class="flex items-center justify-between bg-slate-950 px-4 pt-3 border-b border-slate-800">
+              <div class="flex gap-2">
+                <button onclick="switchTab('client')" id="tab-client" class="px-3.5 py-2 text-xs font-medium rounded-t-lg bg-slate-900 text-indigo-400 border-t-2 border-indigo-500 flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                  Cliente (JavaScript)
+                </button>
+                <button onclick="switchTab('server')" id="tab-server" class="px-3.5 py-2 text-xs font-medium rounded-t-lg bg-slate-950 text-slate-400 hover:text-white flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path></svg>
+                  Servidor (Node.js Express)
+                </button>
+              </div>
+
+              <button id="copy-btn" onclick="copyActiveCode()" class="text-xs text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 mb-2">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                Copiar
+              </button>
+            </div>
+
+            <!-- BLOCOS DE CÓDIGO -->
+            <div class="p-4 bg-slate-950 font-mono text-xs overflow-x-auto">
+              
+              <!-- CLIENT CODE -->
+              <pre id="code-block-client" class="text-slate-200 leading-relaxed"><code><span class="text-slate-500">// Função assíncrona recursiva para escuta contínua</span>
+<span class="text-purple-400">async function</span> <span class="text-blue-400">subscribeToUpdates</span>() {
+  <span class="text-purple-400">try</span> {
+    <span class="text-slate-500">// 1. Abre a requisição HTTP e aguarda o servidor responder</span>
+    <span class="text-purple-400">const</span> response = <span class="text-purple-400">await</span> <span class="text-blue-400">fetch</span>(<span class="text-emerald-300">'/api/stream-updates'</span>);
+
+    <span class="text-purple-400">if</span> (response.status === <span class="text-amber-300">504</span>) {
+      <span class="text-slate-500">// Timeout de Gateway - reconecta sem erro</span>
+      <span class="text-purple-400">await</span> <span class="text-blue-400">subscribeToUpdates</span>();
+      <span class="text-purple-400">return</span>;
+    }
+
+    <span class="text-purple-400">if</span> (response.ok) {
+      <span class="text-slate-500">// 2. Processa o dado entregue pelo servidor</span>
+      <span class="text-purple-400">const</span> data = <span class="text-purple-400">await</span> response.<span class="text-blue-400">json</span>();
+      <span class="text-blue-400">renderData</span>(data);
+    }
+  } <span class="text-purple-400">catch</span> (error) {
+    <span class="text-slate-500">// Aguarda 3s antes de tentar em caso de queda de rede</span>
+    <span class="text-purple-400">await new</span> <span class="text-yellow-300">Promise</span>(res => <span class="text-blue-400">setTimeout</span>(res, <span class="text-amber-300">3000</span>));
+  } <span class="text-purple-400">finally</span> {
+    <span class="text-slate-500">// 3. RECONEXÃO IMEDIATA: inicia um novo ciclo sem pausa</span>
+    <span class="text-purple-400">await</span> <span class="text-blue-400">subscribeToUpdates</span>();
+  }
+}
+
+<span class="text-blue-400">subscribeToUpdates</span>();</code></pre>
+
+              <!-- SERVER CODE -->
+              <pre id="code-block-server" class="hidden text-slate-200 leading-relaxed"><code><span class="text-purple-400">const</span> express = <span class="text-blue-400">require</span>(<span class="text-emerald-300">'express'</span>);
+<span class="text-purple-400">const</span> app = <span class="text-blue-400">express</span>();
+
+<span class="text-purple-400">let</span> pendingConnections = [];
+
+app.<span class="text-blue-400">get</span>(<span class="text-emerald-300">'/api/stream-updates'</span>, (req, res) => {
+  <span class="text-slate-500">// 1. Retém o objeto de resposta `res` na fila de pendências</span>
+  pendingConnections.<span class="text-blue-400">push</span>(res);
+
+  <span class="text-slate-500">// 2. Timeout de segurança (ex: 30s)</span>
+  <span class="text-purple-400">const</span> timeoutId = <span class="text-blue-400">setTimeout</span>(() => {
+    pendingConnections = pendingConnections.<span class="text-blue-400">filter</span>(conn => conn !== res);
+    res.<span class="text-blue-400">status</span>(<span class="text-amber-300">204</span>).<span class="text-blue-400">end</span>();
+  }, <span class="text-amber-300">30000</span>);
+
+  req.<span class="text-blue-400">on</span>(<span class="text-emerald-300">'close'</span>, () => {
+    <span class="text-blue-400">clearTimeout</span>(timeoutId);
+    pendingConnections = pendingConnections.<span class="text-blue-400">filter</span>(conn => conn !== res);
+  });
+});
+
+<span class="text-slate-500">// Disparado quando ocorre um evento real no backend</span>
+<span class="text-purple-400">function</span> <span class="text-blue-400">broadcastEvent</span>(payload) {
+  pendingConnections.<span class="text-blue-400">forEach</span>(res => res.<span class="text-blue-400">json</span>(payload));
+  pendingConnections = [];
+}
+
+app.<span class="text-blue-400">listen</span>(<span class="text-amber-300">3000</span>, () => console.<span class="text-blue-400">log</span>(<span class="text-emerald-300">'Servidor pronto!'</span>));</code></pre>
+
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- PAINEL FIXO / FLUTUANTE DE NAVEGAÇÃO NO RODAPÉ -->
+      <footer class="mt-8 pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4">
+        <button onclick="prevPage()" id="footer-prev-btn" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-xl text-xs font-semibold text-slate-200 transition-all flex items-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+          Anterior <span class="hidden sm:inline font-mono text-[10px] text-slate-400">(Seta Esquerda)</span>
+        </button>
+
+        <span id="footer-page-indicator" class="text-xs font-mono text-slate-400 font-medium">
+          Página 1 de 5
+        </span>
+
+        <button onclick="nextPage()" id="footer-next-btn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition-all shadow-lg shadow-indigo-600/30 flex items-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed">
+          Próximo <span class="hidden sm:inline font-mono text-[10px] text-indigo-200">(Seta Direita)</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- SCRIPT DE GERENCIAMENTO DE PÁGINAS, TECLADO E SIMULADOR -->
+  <script>
+    // ESTADO DE NAVEGAÇÃO
+    let currentPage = 1;
+    const totalPages = 5;
+
+    // Função de Troca de Página
+    function goToPage(pageNumber) {
+      if (pageNumber < 1 || pageNumber > totalPages) return;
+
+      // Desativa página atual
+      const currentEl = document.getElementById(`page-${currentPage}`);
+      if (currentEl) currentEl.classList.remove('active-page');
+
+      // Atualiza estado
+      currentPage = pageNumber;
+
+      // Ativa nova página
+      const nextEl = document.getElementById(`page-${currentPage}`);
+      if (nextEl) nextEl.classList.add('active-page');
+
+      // Atualiza Indicadores e Barra de Progresso
+      const pct = (currentPage / totalPages) * 100;
+      document.getElementById('page-progress-bar').style.width = `${pct}%`;
+      
+      const badge = document.getElementById('page-counter-badge');
+      const footerIndicator = document.getElementById('footer-page-indicator');
+      if (badge) badge.textContent = `Página ${currentPage} de ${totalPages}`;
+      if (footerIndicator) footerIndicator.textContent = `Página ${currentPage} de ${totalPages}`;
+
+      // Atualiza botões
+      const prevDisabled = currentPage === 1;
+      const nextDisabled = currentPage === totalPages;
+
+      document.getElementById('header-prev-btn').disabled = prevDisabled;
+      document.getElementById('footer-prev-btn').disabled = prevDisabled;
+      document.getElementById('header-next-btn').disabled = nextDisabled;
+      document.getElementById('footer-next-btn').disabled = nextDisabled;
+
+      // Atualiza itens do menu lateral
+      for (let i = 1; i <= totalPages; i++) {
+        const item = document.getElementById(`nav-item-${i}`);
+        if (item) {
+          if (i === currentPage) {
+            item.className = 'w-full text-left flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-indigo-600 text-white font-bold transition-all shadow-md shadow-indigo-600/30';
+          } else {
+            item.className = 'w-full text-left flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-all';
+          }
+        }
+      }
+
+      // Rola suavemente para o topo da página ao trocar
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function nextPage() {
+      goToPage(currentPage + 1);
+    }
+
+    function prevPage() {
+      goToPage(currentPage - 1);
+    }
+
+    // LISTENER DAS TECLAS DO TECLADO (SETA DIREITA / ESQUERDA)
+    window.addEventListener('keydown', (e) => {
+      // Ignora se estiver digitando em inputs ou selects
+      const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+      if (activeTag === 'input' || activeTag === 'select' || activeTag === 'textarea') return;
+
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextPage();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevPage();
+      }
+    });
+
+    // ESTADO DO SIMULADOR (PÁGINA 2)
+    let isSimulating = false;
+    let timerInterval = null;
+    let currentSeconds = 0;
+    let maxTimeout = 8;
+    let activeTab = 'client';
+
+    const startBtn = document.getElementById('sim-start-btn');
+    const eventBtn = document.getElementById('sim-event-btn');
+    const timeoutSelect = document.getElementById('sim-timeout');
+    const consoleDiv = document.getElementById('sim-console');
+    
+    const packet = document.getElementById('packet-indicator');
+    const packetLabel = document.getElementById('packet-label');
+    const packetBadge = document.getElementById('packet-badge');
+    
+    const nodeClient = document.getElementById('node-client');
+    const nodeServer = document.getElementById('node-server');
+    const clientStatus = document.getElementById('client-status');
+    const serverStatus = document.getElementById('server-status');
+    
+    const connStateDot = document.getElementById('conn-state-dot');
+    const connStateText = document.getElementById('conn-state-text');
+    const timerProgress = document.getElementById('timer-progress');
+    const timerText = document.getElementById('timer-text');
+
+    function logEvent(msg, type = 'info') {
+      if (!consoleDiv) return;
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
+      
+      let colorClass = 'text-slate-300';
+      if (type === 'req') colorClass = 'text-cyan-400';
+      if (type === 'hold') colorClass = 'text-amber-400';
+      if (type === 'event') colorClass = 'text-emerald-400';
+      if (type === 'timeout') colorClass = 'text-rose-400';
+      if (type === 'recon') colorClass = 'text-indigo-400';
+
+      const line = document.createElement('div');
+      line.className = `leading-relaxed ${colorClass}`;
+      line.innerHTML = `<span class="text-slate-600">[${timeStr}]</span> ${msg}`;
+      
+      consoleDiv.appendChild(line);
+      consoleDiv.scrollTop = consoleDiv.scrollHeight;
+    }
+
+    function clearLogs() {
+      if (consoleDiv) consoleDiv.innerHTML = '<div class="text-slate-500">// Console limpo. Aguardando eventos...</div>';
+    }
+
+    function startSimulation() {
+      if (isSimulating) return;
+      isSimulating = true;
+      maxTimeout = parseFloat(timeoutSelect.value);
+      startBtn.disabled = true;
+      startBtn.classList.add('opacity-50');
+      eventBtn.disabled = false;
+      logEvent('Iniciando ciclo Long Polling...', 'info');
+      sendRequestCycle();
+    }
+
+    function sendRequestCycle() {
+      if (!isSimulating) return;
+      currentSeconds = 0;
+      updateTimerUI();
+
+      clientStatus.textContent = 'Enviando GET';
+      clientStatus.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-700';
+      nodeClient.className = 'w-14 h-14 rounded-2xl bg-slate-900 border-2 border-cyan-500 flex flex-col items-center justify-center text-cyan-400 shadow-lg shadow-cyan-500/20 transition-all';
+
+      packet.classList.remove('hidden', 'animate-flow-left');
+      packet.classList.add('animate-flow-right');
+      packetBadge.className = 'px-2 py-1 rounded-md text-[10px] font-mono font-bold text-white shadow-lg flex items-center gap-1 bg-cyan-600 shadow-cyan-500/50';
+      packetLabel.textContent = 'GET /api/stream';
+
+      logEvent('<strong>CLIENTE:</strong> Enviou GET /api/stream', 'req');
+
+      setTimeout(() => {
+        if (!isSimulating) return;
+        packet.classList.add('hidden');
+        
+        serverStatus.textContent = 'Retendo (Hold)';
+        serverStatus.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700 animate-pulse';
+        nodeServer.className = 'w-14 h-14 rounded-2xl bg-slate-900 border-2 border-amber-500 flex flex-col items-center justify-center text-amber-400 shadow-lg shadow-amber-500/20 transition-all';
+        
+        clientStatus.textContent = 'Aguardando';
+        clientStatus.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700';
+
+        connStateDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping';
+        connStateText.textContent = 'Aberta (Em Espera)';
+        connStateText.className = 'text-xs font-mono font-bold text-amber-400';
+
+        logEvent('<strong>SERVIDOR:</strong> Requisição retida! Aguardando evento...', 'hold');
+
+        timerInterval = setInterval(() => {
+          currentSeconds += 0.5;
+          updateTimerUI();
+          if (currentSeconds >= maxTimeout) handleTimeout();
+        }, 500);
+
+      }, 1000);
+    }
+
+    function updateTimerUI() {
+      const pct = Math.min((currentSeconds / maxTimeout) * 100, 100);
+      timerProgress.style.width = `${pct}%`;
+      timerText.textContent = `${currentSeconds.toFixed(1)}s / ${maxTimeout.toFixed(1)}s`;
+    }
+
+    function triggerServerEvent() {
+      if (!isSimulating || !timerInterval) return;
+      clearInterval(timerInterval);
+      timerInterval = null;
+
+      logEvent('⚡ <strong>EVENTO REGISTRADO:</strong> Novo dado no backend!', 'event');
+
+      packet.classList.remove('hidden', 'animate-flow-right');
+      packet.classList.add('animate-flow-left');
+      packetBadge.className = 'px-2 py-1 rounded-md text-[10px] font-mono font-bold text-white shadow-lg flex items-center gap-1 bg-emerald-600 shadow-emerald-500/50';
+      packetLabel.textContent = '200 OK (Payload)';
+
+      serverStatus.textContent = 'Enviando Data';
+      serverStatus.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700';
+      nodeServer.className = 'w-14 h-14 rounded-2xl bg-slate-900 border-2 border-emerald-500 flex flex-col items-center justify-center text-emerald-400 shadow-lg shadow-emerald-500/20 transition-all';
+
+      setTimeout(() => {
+        packet.classList.add('hidden');
+        logEvent('<strong>CLIENTE:</strong> Dados recebidos! Processando...', 'event');
+        logEvent('<strong>CLIENTE:</strong> 🔄 Reconectando imediatamente...', 'recon');
+        setTimeout(() => { if (isSimulating) sendRequestCycle(); }, 800);
+      }, 1000);
+    }
+
+    function handleTimeout() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      logEvent(`⏱️ <strong>TIMEOUT (${maxTimeout}s):</strong> Nenhuma novidade. Responded HTTP 204.`, 'timeout');
+
+      packet.classList.remove('hidden', 'animate-flow-right');
+      packet.classList.add('animate-flow-left');
+      packetBadge.className = 'px-2 py-1 rounded-md text-[10px] font-mono font-bold text-white shadow-lg flex items-center gap-1 bg-amber-600 shadow-amber-500/50';
+      packetLabel.textContent = '204 No Content';
+
+      setTimeout(() => {
+        packet.classList.add('hidden');
+        logEvent('<strong>CLIENTE:</strong> Timeout finalizado. 🔄 Reconectando...', 'recon');
+        setTimeout(() => { if (isSimulating) sendRequestCycle(); }, 800);
+      }, 1000);
+    }
+
+    function resetSimulation() {
+      isSimulating = false;
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+
+      startBtn.disabled = false;
+      startBtn.classList.remove('opacity-50');
+      eventBtn.disabled = true;
+
+      packet.classList.add('hidden');
+      nodeClient.className = 'w-14 h-14 rounded-2xl bg-slate-900 border-2 border-slate-700 flex flex-col items-center justify-center text-slate-300 shadow-md transition-all';
+      nodeServer.className = 'w-14 h-14 rounded-2xl bg-slate-900 border-2 border-slate-700 flex flex-col items-center justify-center text-slate-300 shadow-md transition-all';
+      
+      clientStatus.textContent = 'Inativo';
+      clientStatus.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700';
+
+      serverStatus.textContent = 'Aguardando';
+      serverStatus.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700';
+
+      connStateDot.className = 'w-2.5 h-2.5 rounded-full bg-slate-600';
+      connStateText.textContent = 'Fechada';
+      connStateText.className = 'text-xs font-mono font-bold text-slate-300';
+
+      timerProgress.style.width = '0%';
+      timerText.textContent = '0.0s / 8.0s';
+      logEvent('Simulação resetada.', 'info');
+    }
+
+    // ABAS DE CÓDIGO
+    function switchTab(tab) {
+      activeTab = tab;
+      const clientBtn = document.getElementById('tab-client');
+      const serverBtn = document.getElementById('tab-server');
+      const clientCode = document.getElementById('code-block-client');
+      const serverCode = document.getElementById('code-block-server');
+
+      if (tab === 'client') {
+        clientBtn.className = 'px-3.5 py-2 text-xs font-medium rounded-t-lg bg-slate-900 text-indigo-400 border-t-2 border-indigo-500 flex items-center gap-2';
+        serverBtn.className = 'px-3.5 py-2 text-xs font-medium rounded-t-lg bg-slate-950 text-slate-400 hover:text-white flex items-center gap-2';
+        clientCode.classList.remove('hidden');
+        serverCode.classList.add('hidden');
+      } else {
+        serverBtn.className = 'px-3.5 py-2 text-xs font-medium rounded-t-lg bg-slate-900 text-indigo-400 border-t-2 border-indigo-500 flex items-center gap-2';
+        clientBtn.className = 'px-3.5 py-2 text-xs font-medium rounded-t-lg bg-slate-950 text-slate-400 hover:text-white flex items-center gap-2';
+        serverCode.classList.remove('hidden');
+        clientCode.classList.add('hidden');
+      }
+    }
+
+    function copyActiveCode() {
+      const codeId = activeTab === 'client' ? 'code-block-client' : 'code-block-server';
+      const codeText = document.getElementById(codeId).innerText;
+      
+      const textarea = document.createElement('textarea');
+      textarea.value = codeText;
+      document.body.appendChild(textarea);
+      textarea.select();
+      
+      try {
+        document.execCommand('copy');
+        const copyBtn = document.getElementById('copy-btn');
+        const originalHTML = copyBtn.innerHTML;
+        copyBtn.innerHTML = '✓ Copiado!';
+        copyBtn.classList.add('text-emerald-400');
+        setTimeout(() => {
+          copyBtn.innerHTML = originalHTML;
+          copyBtn.classList.remove('text-emerald-400');
+        }, 2000);
+      } catch (err) {
+        console.error(err);
+      }
+      document.body.removeChild(textarea);
+    }
+
+    // TOGGLE SIDEBAR MOBILE
+    const toggleSidebarBtn = document.getElementById('toggle-sidebar');
+    const sidebar = document.getElementById('sidebar');
+    if (toggleSidebarBtn && sidebar) {
+      toggleSidebarBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('-translate-x-full');
+      });
+    }
+
+    // Inicialização da primeira página
+    goToPage(1);
+  </script>
+</body>
+</html>

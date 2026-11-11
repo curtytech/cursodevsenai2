@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Manual didático de STOMP: protocolo de mensageria, frames, comandos, WebSocket e exemplos em JavaScript.">
+  <title>STOMP — Manual de Mensageria</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="progress" id="progress"></div>
+  <header class="topbar"><button class="mobile-menu" id="menuBtn" aria-label="Abrir menu">☰</button>
+    <div class="brand">ST<span>O</span>MP / FIELD GUIDE</div>
+    <div class="topmeta">MANUAL TÉCNICO · VERSÃO 1.2 · LEIA / CONECTE / ENVIE</div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="side-label">ÍNDICE DO MANUAL</div>
+      <nav class="nav">
+        <a href="#inicio" class="active"><b>00</b> Visão geral</a><a href="#fundamentos"><b>01</b> O que é STOMP?</a><a
+          href="#arquitetura"><b>02</b> Arquitetura</a><a href="#frames"><b>03</b> Anatomia dos frames</a><a
+          href="#comandos"><b>04</b> Comandos</a><a href="#fluxo"><b>05</b> Ciclo de comunicação</a><a
+          href="#websocket"><b>06</b> STOMP + WebSocket</a><a href="#codigo"><b>07</b> Exemplo em JavaScript</a><a
+          href="#boas-praticas"><b>08</b> Boas práticas</a><a href="#erros"><b>09</b> Problemas comuns</a><a
+          href="#revisao"><b>10</b> Revisão + quiz</a><a href="#referencias"><b>11</b> Referências</a>
+      </nav>
+    </aside>
+    <main>
+      <section class="hero" id="inicio">
+        <div>
+          <div class="eyebrow">Protocolo de mensageria · Guia de estudo</div>
+          <h1>STOMP<span>MESSAGING PROTOCOL</span></h1>
+          <p>Um guia direto ao ponto para entender como aplicações trocam mensagens em tempo real usando destinos,
+            assinaturas e frames — da primeira conexão até o recebimento de uma mensagem.</p>
+          <div class="hero-actions"><a class="btn primary" href="#fundamentos">COMEÇAR A APRENDER ↘</a><a class="btn"
+              href="#frames">EXPLORAR OS FRAMES</a></div>
+          <div class="stats">
+            <div class="stat"><strong>1.2</strong><span>Versão de referência</span></div>
+            <div class="stat"><strong>11</strong><span>Capítulos</span></div>
+            <div class="stat"><strong>100%</strong><span>HTML · CSS · JS</span></div>
+          </div>
+        </div>
+        <div class="hero-art">
+          <div class="orb"><strong>STMP</strong><small>CONNECT // TRANSMIT // ACK</small></div>
+        </div>
+      </section>
+      <section id="fundamentos">
+        <div class="chapter">01 / FUNDAMENTOS</div>
+        <h2 class="section-title">O que é STOMP?</h2>
+        <p class="lead"><strong>STOMP</strong> significa <em>Simple (ou Streaming) Text Orientated Messaging
+            Protocol</em>. É um protocolo de texto, simples e interoperável, usado para permitir que clientes e
+          servidores de mensageria troquem mensagens por meio de uma conexão.</p>
+        <div class="grid">
+          <article class="card">
+            <div class="icon">01 //</div>
+            <h3>Protocolo</h3>
+            <p>Define um formato comum para estruturar comandos, cabeçalhos e corpos de mensagens.</p>
+          </article>
+          <article class="card">
+            <div class="icon">02 //</div>
+            <h3>Mensageria</h3>
+            <p>Permite que produtores enviem mensagens e consumidores recebam atualizações por destinos.</p>
+          </article>
+          <article class="card">
+            <div class="icon">03 //</div>
+            <h3>Interoperável</h3>
+            <p>Clientes escritos em linguagens diferentes podem conversar com um broker compatível.</p>
+          </article>
+        </div>
+        <div class="callout"><strong>Importante:</strong> STOMP não é, por si só, um servidor nem um transporte de rede.
+          Ele define o formato e os comandos das mensagens. Normalmente funciona sobre TCP ou sobre WebSocket, com um
+          broker fazendo a intermediação.</div>
+        <h3>Uma comparação simples</h3>
+        <p class="lead">Imagine uma central de distribuição: você não precisa conhecer cada pessoa que receberá o aviso.
+          Envia a mensagem para um endereço (destino), e o sistema de mensageria cuida da distribuição conforme as
+          regras daquele destino.</p>
+      </section>
+      <section id="arquitetura">
+        <div class="chapter">02 / ARQUITETURA</div>
+        <h2 class="section-title">Quem conversa com quem?</h2>
+        <p class="lead">Em uma arquitetura comum, o cliente não precisa enviar a mensagem diretamente para cada outro
+          cliente. O broker recebe, encaminha e entrega mensagens aos consumidores inscritos.</p>
+        <div class="diagram">
+          <div class="node"><strong>Produtor</strong><small>envia SEND</small></div>
+          <div class="arrow">──▶</div>
+          <div class="node"><strong>Broker</strong><small>roteia mensagens</small></div>
+          <div class="arrow">──▶</div>
+          <div class="node"><strong>Consumidor</strong><small>recebe MESSAGE</small></div>
+        </div>
+        <div class="caption">FLUXO SIMPLIFICADO DE UMA MENSAGEM</div>
+        <div class="two" style="margin-top:22px">
+          <article class="card">
+            <h3>Produtor (publisher)</h3>
+            <p>Aplicação que publica uma mensagem em um destino usando o comando <code>SEND</code>.</p>
+          </article>
+          <article class="card">
+            <h3>Consumidor (subscriber)</h3>
+            <p>Aplicação que se inscreve em um destino com <code>SUBSCRIBE</code> para receber mensagens.</p>
+          </article>
+        </div>
+        <div class="callout">O broker é responsável por intermediar a comunicação. O significado de destinos como
+          <code>/topic/...</code> e <code>/queue/...</code>, assim como suas garantias de entrega, depende da
+          implementação do servidor.</div>
+      </section>
+      <section id="frames">
+        <div class="chapter">03 / ESTRUTURA</div>
+        <h2 class="section-title">Anatomia de um frame</h2>
+        <p class="lead">A unidade básica do STOMP é o <strong>frame</strong>. Ele contém um comando, cabeçalhos
+          opcionais, uma linha em branco e, quando permitido, um corpo. O frame termina com um byte NULL.</p>
+        <div class="code-head"><span>ESTRUTURA GERAL · STOMP 1.2</span><button class="copy"
+            data-copy="COMMAND&#10;header1:value1&#10;header2:value2&#10;&#10;Corpo da mensagem^@">COPIAR</button></div>
+        <pre><span class="kw">COMMAND</span>
+<span class="prop">header1</span>:value1
+<span class="prop">header2</span>:value2
+
+<span class="str">Corpo da mensagem</span>^@</pre>
+        <div class="grid" style="margin-top:16px">
+          <article class="card">
+            <h3>1. Comando</h3>
+            <p>Indica a ação, por exemplo <code>SEND</code>, <code>SUBSCRIBE</code> ou <code>MESSAGE</code>.</p>
+          </article>
+          <article class="card">
+            <h3>2. Cabeçalhos</h3>
+            <p>Metadados no formato <code>chave:valor</code>, como destino, ID e tipo do conteúdo.</p>
+          </article>
+          <article class="card">
+            <h3>3. Corpo</h3>
+            <p>Conteúdo da mensagem. É separado dos cabeçalhos por uma linha em branco.</p>
+          </article>
+        </div>
+        <div class="callout"><strong>Detalhe técnico:</strong> em STOMP 1.2, as linhas terminam com LF ou CRLF. O
+          terminador NULL é representado nos exemplos como <code>^@</code>; essa representação é apenas ilustrativa.
+        </div>
+        <h3>Exemplo: enviar uma mensagem</h3>
+        <div class="code-head"><span>FRAME SEND</span><button class="copy"
+            data-copy="SEND&#10;destination:/queue/avisos&#10;content-type:text/plain&#10;&#10;Olá, equipe!^@">COPIAR</button>
+        </div>
+        <pre><span class="kw">SEND</span>
+<span class="prop">destination</span>:/queue/avisos
+<span class="prop">content-type</span>:text/plain
+
+<span class="str">Olá, equipe!</span>^@</pre>
+        <p class="lead" style="margin-top:15px">Leitura: o comando <code>SEND</code> envia o corpo “Olá, equipe!” para o
+          destino <code>/queue/avisos</code>. O broker interpreta o destino conforme sua configuração.</p>
+      </section>
+      <section id="comandos">
+        <div class="chapter">04 / COMANDOS</div>
+        <h2 class="section-title">O vocabulário do protocolo</h2>
+        <p class="lead">Os comandos são palavras-chave que definem o que o cliente ou o servidor está fazendo. Estes são
+          os principais comandos da especificação STOMP 1.2.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Comando</th>
+                <th>Direção típica</th>
+                <th>Função</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>CONNECT</code> / <code>STOMP</code></td>
+                <td>Cliente → Broker</td>
+                <td>Inicia a sessão STOMP.</td>
+              </tr>
+              <tr>
+                <td><code>CONNECTED</code></td>
+                <td>Broker → Cliente</td>
+                <td>Confirma a conexão e informa a versão negociada.</td>
+              </tr>
+              <tr>
+                <td><code>SEND</code></td>
+                <td>Cliente → Broker</td>
+                <td>Publica uma mensagem em um destino.</td>
+              </tr>
+              <tr>
+                <td><code>SUBSCRIBE</code></td>
+                <td>Cliente → Broker</td>
+                <td>Cria uma inscrição em um destino.</td>
+              </tr>
+              <tr>
+                <td><code>UNSUBSCRIBE</code></td>
+                <td>Cliente → Broker</td>
+                <td>Remove uma inscrição existente.</td>
+              </tr>
+              <tr>
+                <td><code>MESSAGE</code></td>
+                <td>Broker → Cliente</td>
+                <td>Entrega uma mensagem ao consumidor.</td>
+              </tr>
+              <tr>
+                <td><code>ACK</code> / <code>NACK</code></td>
+                <td>Cliente → Broker</td>
+                <td>Confirma ou rejeita o processamento de uma mensagem.</td>
+              </tr>
+              <tr>
+                <td><code>RECEIPT</code></td>
+                <td>Broker → Cliente</td>
+                <td>Confirma o processamento de um frame que solicitou recibo.</td>
+              </tr>
+              <tr>
+                <td><code>ERROR</code></td>
+                <td>Broker → Cliente</td>
+                <td>Informa um erro; normalmente a conexão é encerrada em seguida.</td>
+              </tr>
+              <tr>
+                <td><code>DISCONNECT</code></td>
+                <td>Cliente → Broker</td>
+                <td>Solicita encerramento organizado da sessão.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Comandos de transação</h3>
+        <p class="lead">A especificação também define <code>BEGIN</code>, <code>COMMIT</code> e <code>ABORT</code> para
+          iniciar, confirmar e cancelar transações. O suporte e os efeitos práticos dependem do broker.</p>
+      </section>
+      <section id="fluxo">
+        <div class="chapter">05 / NA PRÁTICA</div>
+        <h2 class="section-title">Ciclo de comunicação</h2>
+        <p class="lead">Veja a sequência típica: primeiro a conexão é estabelecida, depois o consumidor se inscreve e o
+          produtor publica.</p>
+        <div class="steps">
+          <div class="step">
+            <div>
+              <h3>Conectar</h3>
+              <p>O cliente envia <code>CONNECT</code> com a versão e o host desejados. O broker responde
+                <code>CONNECTED</code>.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div>
+              <h3>Inscrever</h3>
+              <p>O consumidor envia <code>SUBSCRIBE</code> com um ID e um destino para começar a receber mensagens.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div>
+              <h3>Publicar</h3>
+              <p>O produtor envia <code>SEND</code> indicando o destino e o conteúdo da mensagem.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div>
+              <h3>Entregar</h3>
+              <p>O broker encaminha a mensagem e envia um frame <code>MESSAGE</code> ao consumidor inscrito.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div>
+              <h3>Confirmar (quando necessário)</h3>
+              <p>Se a inscrição exigir confirmação manual, o cliente envia <code>ACK</code> após processar a mensagem.
+              </p>
+            </div>
+          </div>
+          <div class="step">
+            <div>
+              <h3>Desconectar</h3>
+              <p>O cliente envia <code>DISCONNECT</code>. Para um encerramento organizado, pode solicitar e aguardar um
+                <code>RECEIPT</code>.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="websocket">
+        <div class="chapter">06 / TRANSPORTE</div>
+        <h2 class="section-title">STOMP + WebSocket</h2>
+        <p class="lead">WebSocket mantém uma conexão bidirecional entre navegador e servidor. STOMP pode usar essa
+          conexão como transporte, adicionando uma linguagem padronizada de comandos e mensagens.</p>
+        <div class="two">
+          <div class="card">
+            <h3>WebSocket</h3>
+            <p>É o canal de comunicação persistente. Permite que cliente e servidor enviem dados um ao outro sem abrir
+              uma requisição HTTP para cada mensagem.</p>
+          </div>
+          <div class="card">
+            <h3>STOMP</h3>
+            <p>É o protocolo de mensageria que organiza o conteúdo enviado pelo canal: conexão, destinos, inscrições,
+              confirmações e mensagens.</p>
+          </div>
+        </div>
+        <div class="diagram" style="margin-top:18px">
+          <div class="node"><strong>Navegador</strong><small>aplicação JS</small></div>
+          <div class="arrow">⇄</div>
+          <div class="node"><strong>WebSocket</strong><small>transporte</small></div>
+          <div class="arrow">⇄</div>
+          <div class="node"><strong>STOMP Broker</strong><small>mensageria</small></div>
+        </div>
+        <div class="callout"><strong>Não confunda:</strong> WebSocket e STOMP não são concorrentes. WebSocket fornece o
+          canal; STOMP define como a comunicação de mensageria é organizada sobre esse canal. Também é possível usar
+          STOMP diretamente sobre TCP.</div>
+      </section>
+      <section id="codigo">
+        <div class="chapter">07 / MÃO NA MASSA</div>
+        <h2 class="section-title">Exemplo com JavaScript</h2>
+        <p class="lead">No navegador, uma biblioteca cliente STOMP pode cuidar da montagem e interpretação dos frames. O
+          exemplo abaixo usa a biblioteca <code>@stomp/stompjs</code> e pressupõe que exista um endpoint WebSocket STOMP
+          ativo no servidor.</p>
+        <div class="tabs"><button class="tab active" data-tab="setup">1. Instalação</button><button class="tab"
+            data-tab="connect">2. Conectar</button><button class="tab" data-tab="publish">3. Publicar</button><button
+            class="tab" data-tab="subscribe">4. Inscrever</button></div>
+        <div class="tab-panel active" id="setup">
+          <div class="code-head"><span>TERMINAL</span><button class="copy"
+              data-copy="npm install @stomp/stompjs">COPIAR</button></div>
+          <pre>npm install @stomp/stompjs</pre>
+          <p class="lead">Em projetos com bundler, instale o pacote pelo npm. Também é possível carregar uma versão
+            compatível por CDN, conforme a documentação da biblioteca.</p>
+        </div>
+        <div class="tab-panel" id="connect">
+          <div class="code-head"><span>client.js</span><button class="copy"
+              data-copy="import { Client } from '@stomp/stompjs';&#10;&#10;const client = new Client({&#10;  brokerURL: 'ws://localhost:8080/stomp',&#10;  reconnectDelay: 5000,&#10;  onConnect: () => console.log('Conectado!'),&#10;  onStompError: frame => console.error(frame.body)&#10;});&#10;&#10;client.activate();">COPIAR</button>
+          </div>
+          <pre><span class="kw">import</span> { Client } <span class="kw">from</span> <span class="str">'@stomp/stompjs'</span>;
+
+<span class="kw">const</span> client = <span class="kw">new</span> Client({
+  <span class="prop">brokerURL</span>: <span class="str">'ws://localhost:8080/stomp'</span>,
+  <span class="prop">reconnectDelay</span>: <span class="str">5000</span>,
+  <span class="prop">onConnect</span>: () =&gt; console.log(<span class="str">'Conectado!'</span>),
+  <span class="prop">onStompError</span>: frame =&gt; console.error(frame.body)
+});
+
+client.activate();</pre>
+          <p class="lead">Troque a URL pelo endpoint WebSocket STOMP real do seu broker. A rota e o tipo de conexão
+            dependem da configuração do servidor.</p>
+        </div>
+        <div class="tab-panel" id="publish">
+          <div class="code-head"><span>PUBLICAR MENSAGEM</span><button class="copy"
+              data-copy="client.publish({&#10;  destination: '/topic/avisos',&#10;  body: JSON.stringify({ texto: 'Olá, STOMP!' }),&#10;  headers: { 'content-type': 'application/json' }&#10;});">COPIAR</button>
+          </div>
+          <pre>client.publish({
+  <span class="prop">destination</span>: <span class="str">'/topic/avisos'</span>,
+  <span class="prop">body</span>: JSON.stringify({ texto: <span class="str">'Olá, STOMP!'</span> }),
+  <span class="prop">headers</span>: { <span class="str">'content-type'</span>: <span class="str">'application/json'</span> }
+});</pre>
+          <p class="lead">O destino <code>/topic/avisos</code> é ilustrativo. Use o padrão de destino que o seu broker
+            configurou.</p>
+        </div>
+        <div class="tab-panel" id="subscribe">
+          <div class="code-head"><span>RECEBER MENSAGENS</span><button class="copy"
+              data-copy="const subscription = client.subscribe('/topic/avisos', message => {&#10;  const dados = JSON.parse(message.body);&#10;  console.log('Recebido:', dados.texto);&#10;});&#10;&#10;// Quando não precisar mais receber:&#10;// subscription.unsubscribe();">COPIAR</button>
+          </div>
+          <pre><span class="kw">const</span> subscription = client.subscribe(
+  <span class="str">'/topic/avisos'</span>,
+  message =&gt; {
+    <span class="kw">const</span> dados = JSON.parse(message.body);
+    console.log(<span class="str">'Recebido:'</span>, dados.texto);
+  }
+);
+
+<span class="comment">// Quando não precisar mais receber:</span>
+<span class="comment">// subscription.unsubscribe();</span></pre>
+          <p class="lead">A função de callback é executada quando chega uma mensagem. Trate o corpo de acordo com o
+            formato combinado entre produtor e consumidor.</p>
+        </div>
+        <div class="callout"><strong>Atenção:</strong> este é um exemplo de cliente, não um sistema completo pronto para
+          produção. Você ainda precisa configurar um broker, habilitar o endpoint WebSocket/STOMP, definir autenticação,
+          permissões e destinos. Não exponha credenciais privadas no JavaScript do navegador.</div>
+      </section>
+      <section id="boas-praticas">
+        <div class="chapter">08 / QUALIDADE</div>
+        <h2 class="section-title">Boas práticas</h2>
+        <div class="grid">
+          <article class="card">
+            <h3>Autenticação</h3>
+            <p>Use TLS (WSS em produção) e autenticação configurada no broker. Nunca deixe credenciais sensíveis
+              expostas no front-end.</p>
+          </article>
+          <article class="card">
+            <h3>Reconexão</h3>
+            <p>Planeje reconexões e restauração de inscrições após quedas de rede.</p>
+          </article>
+          <article class="card">
+            <h3>Confirmação</h3>
+            <p>Escolha o modo de ACK conforme a criticidade e o comportamento de reentrega desejado.</p>
+          </article>
+          <article class="card">
+            <h3>Validação</h3>
+            <p>Valide o formato e o tamanho das mensagens antes de processá-las.</p>
+          </article>
+          <article class="card">
+            <h3>Destinos</h3>
+            <p>Documente os nomes dos destinos e confirme sua semântica na documentação do broker.</p>
+          </article>
+          <article class="card">
+            <h3>Observabilidade</h3>
+            <p>Registre erros, desconexões e falhas de processamento sem gravar segredos ou dados sensíveis.</p>
+          </article>
+        </div>
+      </section>
+      <section id="erros">
+        <div class="chapter">09 / DIAGNÓSTICO</div>
+        <h2 class="section-title">Problemas comuns</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Sintoma</th>
+                <th>Causa possível</th>
+                <th>O que verificar</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Conexão recusada</td>
+                <td>Endpoint incorreto ou broker indisponível.</td>
+                <td>URL, porta, serviço e suporte a WebSocket.</td>
+              </tr>
+              <tr>
+                <td>Erro ao negociar versão</td>
+                <td>Cliente e servidor sem versão STOMP em comum.</td>
+                <td>Cabeçalho <code>accept-version</code> e versão do broker.</td>
+              </tr>
+              <tr>
+                <td>Não recebe mensagens</td>
+                <td>Destino errado ou inscrição não criada.</td>
+                <td>Confirmação da conexão, destino e permissões.</td>
+              </tr>
+              <tr>
+                <td>Mensagem rejeitada</td>
+                <td>Frame inválido ou cabeçalho obrigatório ausente.</td>
+                <td>Comando, sintaxe, destino e corpo.</td>
+              </tr>
+              <tr>
+                <td>Desconexão inesperada</td>
+                <td>Rede instável, heartbeat ou timeout.</td>
+                <td>Configuração de heartbeat e logs do broker.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section id="revisao">
+        <div class="chapter">10 / FIXAÇÃO</div>
+        <h2 class="section-title">Revisão de combate</h2>
+        <p class="lead">Use o mapa mental para revisar os conceitos e responda ao quiz para conferir se entendeu o
+          essencial.</p>
+        <div class="mindmap">
+          <div><strong>STOMP</strong><span>Protocolo de mensageria</span></div>
+          <div><strong>Frame</strong><span>Comando + headers + corpo</span></div>
+          <div><strong>Broker</strong><span>Intermedia a distribuição</span></div>
+          <div><strong>Destino</strong><span>Endereço da mensagem</span></div>
+          <div><strong>SEND</strong><span>Publica mensagem</span></div>
+          <div><strong>SUBSCRIBE</strong><span>Cria inscrição</span></div>
+          <div><strong>MESSAGE</strong><span>Entrega mensagem</span></div>
+          <div><strong>ACK</strong><span>Confirma processamento</span></div>
+        </div>
+        <div class="quiz" style="margin-top:28px">
+          <h3>Quiz rápido // 01</h3>
+          <p>Qual comando é usado pelo cliente para se inscrever em um destino?</p>
+          <label><input type="radio" name="q1" value="a"> SEND</label><label><input type="radio" name="q1" value="b">
+            SUBSCRIBE</label><label><input type="radio" name="q1" value="c"> MESSAGE</label><button class="btn primary"
+            id="checkQuiz">VERIFICAR RESPOSTA</button>
+          <div class="feedback" id="quizFeedback" aria-live="polite"></div>
+        </div>
+      </section>
+      <section id="referencias">
+        <div class="chapter">11 / APROFUNDAMENTO</div>
+        <h2 class="section-title">Referências e próximos passos</h2>
+        <p class="lead">Para aprofundar, consulte a especificação do protocolo e a documentação da biblioteca cliente. A
+          semântica de filas, tópicos, autenticação e persistência pode variar de acordo com o broker utilizado.</p>
+        <div class="grid">
+          <article class="card">
+            <div class="icon">↗</div>
+            <h3>Especificação STOMP 1.2</h3>
+            <p>Documento oficial com estrutura de frames, comandos, cabeçalhos, ACKs, transações e heartbeat.</p>
+            <p style="margin-top:14px"><a href="https://stomp.github.io/stomp-specification-1.2.html" target="_blank"
+                rel="noopener">Ler especificação ↗</a></p>
+          </article>
+          <article class="card">
+            <div class="icon">↗</div>
+            <h3>STOMP.js</h3>
+            <p>Biblioteca cliente para conectar aplicações JavaScript a brokers por WebSocket usando STOMP.</p>
+            <p style="margin-top:14px"><a href="https://stomp-js.github.io/stomp-websocket/" target="_blank"
+                rel="noopener">Consultar documentação ↗</a></p>
+          </article>
+          <article class="card">
+            <div class="icon">↗</div>
+            <h3>Repositório da especificação</h3>
+            <p>Projeto que mantém as especificações publicadas e em desenvolvimento.</p>
+            <p style="margin-top:14px"><a href="https://github.com/stomp/stomp-spec" target="_blank"
+                rel="noopener">Abrir GitHub ↗</a></p>
+          </article>
+        </div>
+        <div class="callout"><strong>Fechamento:</strong> STOMP padroniza a conversa entre clientes e brokers.
+          Entendendo frames, destinos, inscrições e confirmações, você já tem a base para acompanhar implementações
+          reais em diferentes linguagens e plataformas.</div>
+      </section>
+      <footer>STOMP FIELD GUIDE · MANUAL DIDÁTICO · FEITO COM HTML, CSS E JAVASCRIPT · 2026</footer>
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+
+</html>

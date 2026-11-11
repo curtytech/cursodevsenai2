@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Manual prático de FTP, FTPS e SFTP com conceitos, comandos e exemplos.">
+  <title>Manual FTP / SFTP | Guia de Transferência</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="#inicio"><span class="brand-mark">⌘</span><span>NET<span class="brand-accent">TRANSFER</span><small>GUIA TÉCNICO</small></span></a>
+    <button class="menu-toggle" aria-label="Abrir menu" aria-expanded="false">☰</button>
+    <nav class="nav-links">
+      <a href="#conceitos">Conceitos</a><a href="#comparacao">Comparação</a><a href="#conexao">Conexão</a><a href="#comandos">Comandos</a><a href="#seguranca">Segurança</a>
+    </nav>
+    <a class="top-cta" href="#laboratorio">Ir para os exemplos <span>↗</span></a>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="pulse"></span> DOCUMENTAÇÃO • REDES E SERVIDORES</div>
+        <h1>Manual de<br><span>FTP / SFTP</span></h1>
+        <p class="hero-lead">Aprenda a transferir arquivos entre seu computador e um servidor. Do primeiro acesso aos comandos e boas práticas de segurança.</p>
+        <div class="hero-actions"><a class="button button-primary" href="#conceitos">Começar a aprender <span>↓</span></a><a class="button button-ghost" href="#comandos">Ver comandos <span>⌘</span></a></div>
+        <div class="hero-meta"><span>⌁ Guia passo a passo</span><span>◈ Exemplos práticos</span><span>◉ Nível iniciante</span></div>
+      </div>
+      <div class="hero-visual" aria-label="Ilustração de transferência de arquivos">
+        <div class="visual-grid"></div>
+        <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+        <div class="server-card">
+          <div class="server-head"><span></span><span></span><span></span><b>server_connection</b></div>
+          <div class="server-body"><div class="server-icon">▤</div><div><strong>Servidor remoto</strong><small>Conexão segura estabelecida</small></div><i class="status-dot"></i></div>
+          <div class="transfer-line"><span></span><span>↕</span><span></span></div>
+          <div class="file-row"><span class="file-icon">PDF</span><div><strong>documento.pdf</strong><small>Transferência concluída</small></div><b>100%</b></div>
+          <div class="progress"><span></span></div>
+          <div class="terminal-mini"><span class="terminal-prompt">$</span> sftp usuario@servidor.com <span class="terminal-cursor">▋</span></div>
+        </div>
+        <div class="float-tag tag-top"> <span>↗</span> UPLOAD</div><div class="float-tag tag-bottom"><span>🔒</span> ENCRYPTED</div>
+      </div>
+    </section>
+
+    <section class="stats">
+      <div><strong>03</strong><span>protocolos abordados</span></div><div><strong>15+</strong><span>comandos explicados</span></div><div><strong>100%</strong><span>foco na prática</span></div><div><strong>01</strong><span>guia para consultar</span></div>
+    </section>
+
+    <section class="section" id="conceitos">
+      <div class="section-heading"><div><div class="eyebrow">01 / FUNDAMENTOS</div><h2>O que são FTP e SFTP?</h2></div><p>Os dois protocolos permitem transferir arquivos, mas diferem principalmente na forma como protegem os dados durante a comunicação.</p></div>
+      <div class="concept-grid">
+        <article class="concept-card"><div class="card-icon purple">⇄</div><div class="card-kicker">FILE TRANSFER PROTOCOL</div><h3>FTP</h3><p>Protocolo tradicional para enviar e receber arquivos entre cliente e servidor. Por padrão, não criptografa credenciais nem conteúdo.</p><div class="tag-list"><span>Porta comum: 21</span><span>Sem criptografia</span></div></article>
+        <article class="concept-card featured"><div class="recommended">MAIS INDICADO</div><div class="card-icon blue">⌑</div><div class="card-kicker">SSH FILE TRANSFER PROTOCOL</div><h3>SFTP</h3><p>Protocolo de transferência que funciona sobre SSH. Criptografa a conexão e permite autenticação por senha ou chave SSH.</p><div class="tag-list"><span>Porta comum: 22</span><span>Criptografado</span></div></article>
+        <article class="concept-card"><div class="card-icon pink">⛨</div><div class="card-kicker">FTP OVER TLS</div><h3>FTPS</h3><p>É o FTP protegido por TLS. Mantém o funcionamento do FTP, adicionando criptografia e certificados digitais.</p><div class="tag-list"><span>Porta comum: 21 explícito</span><span>TLS</span></div></article>
+      </div>
+    </section>
+
+    <section class="section comparison" id="comparacao">
+      <div class="section-heading"><div><div class="eyebrow">02 / COMPARAÇÃO</div><h2>Qual protocolo escolher?</h2></div><p>Considere a segurança exigida, o suporte oferecido pelo servidor e a configuração de rede disponível.</p></div>
+      <div class="table-wrap"><table><thead><tr><th>Característica</th><th>FTP</th><th>FTPS</th><th>SFTP</th></tr></thead><tbody>
+        <tr><td>Criptografia</td><td><span class="bad">Não</span></td><td><span class="good">TLS</span></td><td><span class="good">SSH</span></td></tr>
+        <tr><td>Porta padrão comum</td><td>21</td><td>21 / 990</td><td>22</td></tr>
+        <tr><td>Canal de dados</td><td>Separado</td><td>Separado</td><td>Mesmo canal SSH</td></tr>
+        <tr><td>Autenticação por chave SSH</td><td>Não</td><td>Não é padrão</td><td><span class="good">Sim</span></td></tr>
+        <tr><td>Uso recomendado na internet</td><td><span class="bad">Evitar</span></td><td><span class="good">Quando suportado</span></td><td><span class="good">Sim</span></td></tr>
+      </tbody></table></div>
+      <p class="table-note">As portas indicadas são padrões comuns. O administrador do servidor pode configurar portas diferentes.</p>
+    </section>
+
+    <section class="section" id="conexao">
+      <div class="section-heading"><div><div class="eyebrow">03 / PRIMEIRO ACESSO</div><h2>Como se conectar</h2></div><p>Você precisa do endereço do servidor, usuário, método de autenticação e porta liberada. Solicite esses dados ao administrador.</p></div>
+      <div class="steps">
+        <article><div class="step-number">01</div><div><h3>Reúna os dados</h3><p>Endereço do host, porta, usuário, senha ou chave SSH e diretório remoto autorizado.</p></div></article>
+        <article><div class="step-number">02</div><div><h3>Escolha um cliente</h3><p>Use FileZilla para interface gráfica ou o terminal com o cliente OpenSSH para SFTP.</p></div></article>
+        <article><div class="step-number">03</div><div><h3>Valide a identidade</h3><p>Na primeira conexão SSH, confira a impressão digital (fingerprint) com o administrador antes de confiar no servidor.</p></div></article>
+        <article><div class="step-number">04</div><div><h3>Transfira e confira</h3><p>Envie ou baixe arquivos e confirme se o tamanho, nome e conteúdo chegaram corretamente.</p></div></article>
+      </div>
+    </section>
+
+    <section class="section lab-section" id="laboratorio">
+      <div class="section-heading"><div><div class="eyebrow">04 / LABORATÓRIO</div><h2>Comandos para usar na prática</h2></div><p>Copie os exemplos e substitua os dados fictícios pelos dados reais do seu ambiente.</p></div>
+      <div class="code-panel">
+        <div class="code-tabs" role="tablist" aria-label="Exemplos de comandos">
+          <button class="code-tab active" data-tab="sftp" role="tab" aria-selected="true">SFTP / SSH</button>
+          <button class="code-tab" data-tab="ftp" role="tab" aria-selected="false">FTP</button>
+          <button class="code-tab" data-tab="keys" role="tab" aria-selected="false">Chaves SSH</button>
+        </div>
+        <div class="code-content active" id="tab-sftp">
+          <div class="code-title"><span><i></i><i></i><i></i> terminal — sftp</span><button class="copy-button" data-copy="sftp-code">Copiar código ⧉</button></div>
+          <pre><code id="sftp-code"><span class="comment"># Conectar ao servidor SFTP (porta padrão 22)</span>
+sftp -P 22 usuario@servidor.exemplo.com
+
+<span class="comment"># Listar arquivos no servidor</span>
+ls
+
+<span class="comment"># Enviar arquivo local para o servidor</span>
+put relatorio.pdf
+
+<span class="comment"># Baixar arquivo do servidor</span>
+get backup.zip
+
+<span class="comment"># Criar diretório remoto e entrar nele</span>
+mkdir documentos
+cd documentos
+
+<span class="comment"># Encerrar a sessão</span>
+exit</code></pre>
+        </div>
+        <div class="code-content" id="tab-ftp">
+          <div class="code-title"><span><i></i><i></i><i></i> terminal — ftp</span><button class="copy-button" data-copy="ftp-code">Copiar código ⧉</button></div>
+          <pre><code id="ftp-code"><span class="comment"># Conectar ao servidor FTP</span>
+ftp ftp.exemplo.com
+
+<span class="comment"># Depois de autenticar, listar arquivos</span>
+ls
+
+<span class="comment"># Definir modo binário para arquivos não textuais</span>
+binary
+
+<span class="comment"># Enviar e baixar arquivos</span>
+put relatorio.pdf
+get retorno.csv
+
+<span class="comment"># Encerrar a sessão</span>
+bye</code></pre>
+        </div>
+        <div class="code-content" id="tab-keys">
+          <div class="code-title"><span><i></i><i></i><i></i> terminal — ssh-keygen</span><button class="copy-button" data-copy="keys-code">Copiar código ⧉</button></div>
+          <pre><code id="keys-code"><span class="comment"># Gerar um par de chaves Ed25519</span>
+ssh-keygen -t ed25519 -C "acesso-sftp"
+
+<span class="comment"># Exibir a chave pública para cadastramento no servidor</span>
+cat ~/.ssh/id_ed25519.pub
+
+<span class="comment"># Conectar usando a chave privada</span>
+sftp -i ~/.ssh/id_ed25519 -P 22 usuario@servidor.exemplo.com</code></pre>
+        </div>
+      </div>
+      <div class="notice"><span>ⓘ</span><p><strong>Atenção:</strong> os comandos FTP tradicionais podem enviar usuário, senha e dados sem criptografia. Não use FTP puro em redes públicas ou na internet para informações sensíveis. Prefira SFTP ou FTPS.</p></div>
+    </section>
+
+    <section class="section" id="automacao">
+      <div class="section-heading"><div><div class="eyebrow">05 / AUTOMAÇÃO</div><h2>Script de envio com Python</h2></div><p>Exemplo usando Paramiko para enviar um arquivo por SFTP. Instale a biblioteca antes de executar.</p></div>
+      <div class="code-panel">
+        <div class="code-title"><span><i></i><i></i><i></i> enviar_arquivo.py</span><button class="copy-button" data-copy="python-code">Copiar código ⧉</button></div>
+        <pre><code id="python-code"># Instalação: pip install paramiko
+import paramiko
+from pathlib import Path
+
+HOST = "servidor.exemplo.com"
+PORT = 22
+USERNAME = "seu_usuario"
+KEY_FILE = Path.home() / ".ssh" / "id_ed25519"
+
+ARQUIVO_LOCAL = "relatorio.pdf"
+ARQUIVO_REMOTO = "/uploads/relatorio.pdf"
+
+# Autenticação por chave SSH
+chave = paramiko.Ed25519Key.from_private_key_file(str(KEY_FILE))
+
+transport = paramiko.Transport((HOST, PORT))
+try:
+    transport.connect(username=USERNAME, pkey=chave)
+    sftp = paramiko.SFTPClient.from_transport(transport)
+
+    sftp.put(ARQUIVO_LOCAL, ARQUIVO_REMOTO)
+    print("Upload concluído!")
+
+    sftp.close()
+finally:
+    transport.close()</code></pre>
+      </div>
+      <p class="small-note">Guarde a chave privada com permissões restritas. Em produção, valide a chave de host do servidor; não desative a verificação de identidade.</p>
+    </section>
+
+    <section class="section security-section" id="seguranca">
+      <div class="section-heading"><div><div class="eyebrow">06 / BOAS PRÁTICAS</div><h2>Segurança em primeiro lugar</h2></div><p>Uma transferência bem-sucedida também precisa proteger os dados e as credenciais.</p></div>
+      <div class="security-grid">
+        <div><span class="security-icon">♢</span><h3>Prefira SFTP ou FTPS</h3><p>Use protocolos criptografados para proteger credenciais e conteúdo transferido.</p></div>
+        <div><span class="security-icon">⌑</span><h3>Proteja suas chaves</h3><p>Nunca envie a chave privada por e-mail ou mensageiro. Compartilhe apenas a chave pública.</p></div>
+        <div><span class="security-icon">◉</span><h3>Confira o servidor</h3><p>Valide o fingerprint SSH na primeira conexão para reduzir o risco de servidor falso.</p></div>
+        <div><span class="security-icon">▣</span><h3>Limite permissões</h3><p>Use contas individuais e acesso somente às pastas necessárias para cada atividade.</p></div>
+      </div>
+    </section>
+
+    <section class="section checklist-section">
+      <div class="section-heading"><div><div class="eyebrow">07 / REVISÃO</div><h2>Checklist antes de transferir</h2></div><p>Marque os itens conforme prepara sua conexão.</p></div>
+      <div class="checklist">
+        <label><input type="checkbox"> Tenho o endereço e a porta corretos do servidor.</label>
+        <label><input type="checkbox"> Tenho usuário e método de autenticação autorizados.</label>
+        <label><input type="checkbox"> Confirmei a identidade do servidor SSH.</label>
+        <label><input type="checkbox"> Estou usando SFTP ou FTPS quando há dados sensíveis.</label>
+        <label><input type="checkbox"> Tenho permissão para acessar a pasta de destino.</label>
+        <label><input type="checkbox"> Verifiquei o arquivo depois da transferência.</label>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer"><a class="brand" href="#inicio"><span class="brand-mark">⌘</span><span>NET<span class="brand-accent">TRANSFER</span><small>GUIA TÉCNICO</small></span></a><p>Manual de FTP / SFTP · Material educativo</p><a href="#inicio">Voltar ao topo ↑</a></footer>
+  <div class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
