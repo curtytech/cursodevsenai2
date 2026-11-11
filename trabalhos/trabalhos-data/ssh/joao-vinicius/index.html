@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Apresentação e manual didático sobre SSH, com exemplos e explicações.">
+  <title>SSH na prática | Apresentação e manual</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Início">
+      <span class="brand-mark">SSH<span>_</span></span>
+      <span> Manual <small>GUIA DE APRENDIZADO</small></span>
+    </a>
+    <nav class="mode-switch" aria-label="Modo de leitura">
+      <button class="mode-tab active" id="tabSlides" type="button">▣ Apresentação</button>
+      <button class="mode-tab" id="tabManual" type="button">☷ Manual completo</button>
+    </nav>
+    <div class="top-actions">
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema">◐ <span>Tema</span></button>
+      <a class="teacher-link" href="MANUAL_DO_PROFESSOR.md" target="_blank">Guia do professor ↗</a>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="intro">
+      <div class="eyebrow"><span class="live-dot"></span> REDES • SEGURANÇA • ACESSO REMOTO</div>
+      <h1>SSH: conectando<br><span>com segurança.</span></h1>
+      <p>Entenda como acessar outro computador pela rede, por que essa conexão é protegida e onde o SSH aparece no dia a dia de quem trabalha com tecnologia.</p>
+      <div class="intro-tags"><span>Conceitos essenciais</span><span>Comandos explicados</span><span>Boas práticas</span></div>
+    </section>
+
+    <section class="slides-view view active" id="slidesView" aria-label="Apresentação em slides">
+      <div class="presentation-head">
+        <div><span class="section-kicker">APRESENTAÇÃO</span><h2 id="slideTitle">Carregando...</h2></div>
+        <div class="counter"><strong id="slideNumber">01</strong><span>/</span><span id="slideTotal">12</span></div>
+      </div>
+      <div class="progress-track"><div id="progressBar"></div></div>
+      <article class="slide-card">
+        <div class="slide-accent"></div>
+        <div id="slideContent" class="slide-content"></div>
+      </article>
+      <div class="slide-controls">
+        <button class="control-btn secondary" id="prevBtn" type="button">← Anterior</button>
+        <div class="dots" id="slideDots" aria-label="Selecionar slide"></div>
+        <button class="control-btn primary" id="nextBtn" type="button">Próximo →</button>
+      </div>
+      <p class="keyboard-hint">Dica: use as setas ← → do teclado para avançar ou voltar.</p>
+    </section>
+
+    <section class="manual-view view" id="manualView" aria-label="Manual completo">
+      <div class="manual-heading">
+        <span class="section-kicker">MATERIAL DE CONSULTA</span>
+        <h2>Manual completo de SSH</h2>
+        <p>Leia na ordem ou use os tópicos como consulta. Os comandos são exemplos: substitua usuário, endereço e caminhos pelos dados do ambiente utilizado.</p>
+      </div>
+      <div class="manual-layout">
+        <aside class="contents">
+          <strong>NESTE MANUAL</strong>
+          <div id="contentsLinks"></div>
+          <button class="print-btn" type="button" onclick="window.print()">Imprimir / salvar em PDF ↗</button>
+        </aside>
+        <div id="manualContent" class="manual-content"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span class="footer-mark">SSH_</span>
+    <p>Material didático • Tecnologia explicada de forma direta</p>
+    <span>Apresentação + manual de consulta</span>
+  </footer>
+  <script src="js/script.js"></script>
+</body>
+</html>
