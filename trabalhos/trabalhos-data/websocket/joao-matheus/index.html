@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Manual técnico compacto sobre o protocolo WebSocket.">
+  <title>WebSocket — Manual Técnico</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+  <header class="topbar">
+    <a class="brand" href="#inicio" aria-label="WebSocket início">
+      <span class="brand-mark">↔</span><span>web<span class="accent">socket</span><small>TECHNICAL MANUAL</small></span>
+    </a>
+    <div class="top-actions">
+      <span class="edition">MANUAL · 2026</span>
+      <button class="icon-button" id="themeToggle" aria-label="Alternar tema" title="Alternar tema">☼</button>
+      <button class="menu-button" id="menuToggle" aria-label="Abrir navegação" aria-expanded="false">☰</button>
+    </div>
+  </header>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="side-label">CONTEÚDO</div>
+    <nav>
+      <a class="nav-link active" href="#inicio"><span>00</span> Visão geral</a>
+      <a class="nav-link" href="#introducao"><span>01</span> Introdução</a>
+      <a class="nav-link" href="#origem"><span>02</span> Origem e objetivo</a>
+      <a class="nav-link" href="#funcionamento"><span>03</span> Como funciona</a>
+      <a class="nav-link" href="#arquitetura"><span>04</span> Arquitetura</a>
+      <a class="nav-link" href="#comparacao"><span>05</span> WebSocket vs. HTTP</a>
+      <a class="nav-link" href="#avaliacao"><span>06</span> Prós e contras</a>
+      <a class="nav-link" href="#aplicacoes"><span>07</span> Aplicações</a>
+      <a class="nav-link" href="#codigo"><span>08</span> Implementação</a>
+      <a class="nav-link" href="#conclusao"><span>09</span> Conclusão</a>
+      <a class="nav-link" href="#referencias"><span>10</span> Referências</a>
+    </nav>
+    <div class="sidebar-note">
+      <span class="live-dot"></span>
+      <div><strong>Guia de estudo</strong><small>Conceitos · exemplos · demonstração</small></div>
+    </div>
+  </aside>
+
+  <main class="content" id="inicio">
+    <section class="hero">
+      <div class="eyebrow"><span class="eyebrow-line"></span> PROTOCOLOS DE COMUNICAÇÃO · 01</div>
+      <h1>Conexão contínua.<br><span>Comunicação em tempo real.</span></h1>
+      <p class="hero-copy">Um guia objetivo sobre WebSocket: como funciona, onde é utilizado e como implementar uma comunicação bidirecional entre cliente e servidor.</p>
+      <div class="hero-meta"><span>◈ NÍVEL INTERMEDIÁRIO</span><span>◈ PORTUGUÊS + ENGLISH TERMS</span><span>◈ MANUAL TÉCNICO</span></div>
+      <div class="hero-visual" aria-label="Diagrama de comunicação bidirecional entre cliente e servidor">
+        <div class="endpoint">
+          <div class="endpoint-icon">⌘</div><strong>CLIENT</strong><small>Browser / App</small>
+        </div>
+        <div class="connection">
+          <div class="connection-label">PERSISTENT CONNECTION</div>
+          <div class="arrow-line"><span>MESSAGE</span><b>⟶</b></div>
+          <div class="arrow-line reverse"><b>⟵</b><span>MESSAGE</span></div>
+          <div class="connection-status"><i></i> FULL-DUPLEX CHANNEL</div>
+        </div>
+        <div class="endpoint">
+          <div class="endpoint-icon server-icon">▤</div><strong>SERVER</strong><small>Backend / Service</small>
+        </div>
+        <div class="visual-grid"></div>
+      </div>
+      <div class="hero-foot"><span>RFC 6455</span><span>WS / WSS</span><span>FULL-DUPLEX</span></div>
+    </section>
+
+    <section class="section" id="introducao">
+      <div class="section-kicker">01 / FUNDAMENTOS</div>
+      <h2>O que é <span class="accent">WebSocket</span>?</h2>
+      <p>WebSocket é um protocolo de comunicação que permite a troca de dados <strong>bidirecional (full-duplex)</strong> entre um cliente (client) e um servidor (server), por meio de uma conexão persistente.</p>
+      <p>Depois que a conexão é estabelecida, qualquer uma das partes pode enviar mensagens sem precisar iniciar uma nova requisição para cada troca. Isso é especialmente útil em aplicações que precisam atualizar informações em tempo real (real-time communication).</p>
+      <div class="callout"><span class="callout-icon">↗</span><div><strong>Ideia central</strong><p>Em vez de perguntar repetidamente “há novidades?”, o cliente mantém um canal aberto pelo qual o servidor também pode enviar dados quando necessário.</p></div></div>
+    </section>
+
+    <section class="section" id="origem">
+      <div class="section-kicker">02 / CONTEXTO</div>
+      <h2>Origem e objetivo</h2>
+      <p>O WebSocket foi padronizado em 2011 pela <strong>RFC 6455</strong>. Ele surgiu para oferecer uma forma padronizada de comunicação contínua entre aplicações web, superando limitações do modelo tradicional de requisição e resposta do HTTP em cenários interativos.</p>
+      <div class="fact-row">
+        <div class="fact"><strong>2011</strong><span>Publicação da RFC 6455</span></div>
+        <div class="fact"><strong>2 vias</strong><span>Cliente ↔ servidor</span></div>
+        <div class="fact"><strong>1 canal</strong><span>Conexão persistente</span></div>
+      </div>
+      <p>Seu objetivo é permitir troca contínua de mensagens com menor overhead em cenários de comunicação frequente.</p>
+    </section>
+
+    <section class="section" id="funcionamento">
+      <div class="section-kicker">03 / CICLO DE CONEXÃO</div>
+      <h2>Como funciona?</h2>
+      <p>O ciclo básico pode ser entendido em três etapas:</p>
+      <div class="steps">
+        <article class="step"><div class="step-number">01</div><div><h3>Connection request</h3><p>O cliente inicia uma conexão usando uma requisição HTTP especial e solicita a mudança de protocolo (Upgrade).</p><code>Upgrade: websocket</code></div></article>
+        <article class="step"><div class="step-number">02</div><div><h3>Handshake</h3><p>Se a solicitação for aceita, o servidor responde com <code>101 Switching Protocols</code>. A conexão passa a usar WebSocket.</p><code>HTTP/1.1 101 Switching Protocols</code></div></article>
+        <article class="step"><div class="step-number">03</div><div><h3>Data exchange</h3><p>Cliente e servidor trocam mensagens pela conexão estabelecida. A comunicação continua até que um dos lados encerre o canal ou ocorra uma falha.</p><code>ws.send("Olá!")</code></div></article>
+      </div>
+      <div class="note"><strong>Nota técnica:</strong> o handshake descrito é o mecanismo clássico do WebSocket sobre HTTP/1.1. Há também formas de estabelecer WebSocket sobre HTTP/2, definidas em especificações próprias.</div>
+    </section>
+
+    <section class="section" id="arquitetura">
+      <div class="section-kicker">04 / ARQUITETURA</div>
+      <h2>Uma conexão, <span class="accent">duas direções</span></h2>
+      <p>Após o handshake, a comunicação ocorre por meio de frames (quadros de dados). O canal é full-duplex: cliente e servidor podem transmitir independentemente um do outro.</p>
+      <div class="architecture">
+        <div class="arch-node"><div class="arch-symbol">▣</div><strong>CLIENT</strong><small>Navegador ou app</small></div>
+        <div class="arch-channel"><span class="channel-tag">WEBSOCKET CONNECTION</span><div class="flow-line"><span>Enviar</span><b>⟶</b></div><div class="flow-line back"><b>⟵</b><span>Receber</span></div><small>Canal persistente · Full-duplex</small></div>
+        <div class="arch-node"><div class="arch-symbol">▤</div><strong>SERVER</strong><small>Aplicação backend</small></div>
+      </div>
+      <div class="definition-grid">
+        <div><strong>Client</strong><p>Inicia a conexão e pode enviar e receber mensagens.</p></div>
+        <div><strong>Server</strong><p>Aceita a conexão e também pode enviar e receber mensagens.</p></div>
+        <div><strong>Frames</strong><p>Unidades de dados usadas pelo protocolo para transportar mensagens e controles.</p></div>
+        <div><strong>Connection</strong><p>Canal mantido aberto até o encerramento ou uma falha.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="comparacao">
+      <div class="section-kicker">05 / COMPARAÇÃO</div>
+      <h2>WebSocket <span class="muted">vs.</span> HTTP</h2>
+      <p>Os protocolos atendem a necessidades diferentes. HTTP é a base de muitos sites e APIs; WebSocket é especialmente útil quando há troca frequente de dados nos dois sentidos.</p>
+      <div class="table-wrap"><table><thead><tr><th>CARACTERÍSTICA</th><th>HTTP</th><th>WEBSOCKET</th></tr></thead><tbody>
+        <tr><td>Modelo</td><td>Request / Response</td><td>Bidirecional</td></tr>
+        <tr><td>Conexão</td><td>Requisições HTTP</td><td>Persistente</td></tr>
+        <tr><td>Envio iniciado por</td><td>Normalmente cliente</td><td>Cliente ou servidor</td></tr>
+        <tr><td>Tempo real</td><td>Requer técnicas adicionais</td><td>Suportado diretamente</td></tr>
+        <tr><td>Uso comum</td><td>Sites e APIs REST</td><td>Chats e jogos online</td></tr>
+      </tbody></table></div>
+      <div class="callout"><span class="callout-icon">i</span><div><strong>Não é uma substituição</strong><p>WebSocket não substitui HTTP. As duas tecnologias podem coexistir na mesma aplicação, cada uma atendendo ao tipo de comunicação mais adequado.</p></div></div>
+    </section>
+
+    <section class="section" id="avaliacao">
+      <div class="section-kicker">06 / ANÁLISE</div>
+      <h2>Vantagens e desvantagens</h2>
+      <div class="pros-cons">
+        <div class="pros"><h3><span>＋</span> Vantagens</h3><ul><li>Comunicação bidirecional em tempo real.</li><li>Conexão persistente para trocas frequentes.</li><li>Menor overhead por mensagem em comparação com novas requisições HTTP repetidas.</li><li>Atualizações sem recarregar a página.</li><li>Suporte em navegadores modernos e várias linguagens.</li></ul></div>
+        <div class="cons"><h3><span>−</span> Desvantagens</h3><ul><li>Conexões abertas exigem gerenciamento.</li><li>Muitos clientes simultâneos podem consumir recursos.</li><li>Reconexão e recuperação de falhas precisam ser planejadas.</li><li>Autenticação, autorização e validação exigem atenção.</li></ul></div>
+      </div>
+    </section>
+
+    <section class="section" id="aplicacoes">
+      <div class="section-kicker">07 / NO MUNDO REAL</div>
+      <h2>Onde é utilizado?</h2>
+      <div class="use-cases">
+        <article><div class="use-icon">▤</div><div><h3>Chats e mensagens</h3><p>Entrega mensagens a participantes conectados sem precisar atualizar a página.</p><span>MESSAGING</span></div></article>
+        <article><div class="use-icon">◈</div><div><h3>Jogos multiplayer</h3><p>Compartilha eventos e estados de jogo entre jogadores com atualizações frequentes.</p><span>GAMING</span></div></article>
+        <article><div class="use-icon">⌁</div><div><h3>Painéis de monitoramento</h3><p>Atualiza indicadores, gráficos e status de sistemas continuamente.</p><span>LIVE DASHBOARDS</span></div></article>
+        <article><div class="use-icon">◎</div><div><h3>Notificações</h3><p>Permite que o servidor envie alertas aos clientes que mantêm conexão ativa.</p><span>NOTIFICATIONS</span></div></article>
+      </div>
+    </section>
+
+    <section class="section" id="codigo">
+      <div class="section-kicker">08 / IMPLEMENTAÇÃO</div>
+      <h2>Exemplo prático</h2>
+      <p>O exemplo utiliza JavaScript no navegador e a biblioteca <strong>ws</strong> no servidor Node.js. Os trechos abaixo formam uma demonstração simples de envio e resposta.</p>
+      <div class="code-card">
+        <div class="code-head"><span><i class="file-dot"></i> CLIENT.JS</span><button class="copy-button" data-copy="clientCode">Copiar código ↗</button></div>
+        <pre><code id="clientCode">const socket = new WebSocket("ws://localhost:8080");
+
+socket.onopen = () => {
+  console.log("Conexão estabelecida!");
+  socket.send("Olá, servidor!");
+};
+
+socket.onmessage = (event) => {
+  console.log("Mensagem:", event.data);
+};
+
+socket.onclose = () => {
+  console.log("Conexão encerrada.");
+};
+
+socket.onerror = (error) => {
+  console.log("Erro:", error);
+};</code></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-head"><span><i class="file-dot server-dot"></i> SERVER.JS · NODE.JS</span><button class="copy-button" data-copy="serverCode">Copiar código ↗</button></div>
+        <pre><code id="serverCode">const WebSocket = require("ws");
+
+const server = new WebSocket.Server({
+  port: 8080
+});
+
+server.on("connection", (socket) => {
+  console.log("Cliente conectado!");
+
+  socket.on("message", (message) => {
+    console.log("Recebido:", message.toString());
+    socket.send("Mensagem recebida!");
+  });
+
+  socket.on("close", () => {
+    console.log("Cliente desconectado.");
+  });
+});</code></pre>
+      </div>
+      <div class="explain-grid">
+        <div><code>new WebSocket()</code><p>Cria a conexão no cliente.</p></div>
+        <div><code>onopen</code><p>É executado quando a conexão abre.</p></div>
+        <div><code>send()</code><p>Envia uma mensagem pelo canal.</p></div>
+        <div><code>onmessage</code><p>Recebe mensagens do servidor.</p></div>
+        <div><code>onclose</code><p>Indica o encerramento da conexão.</p></div>
+        <div><code>onerror</code><p>Permite tratar eventos de erro.</p></div>
+      </div>
+      <div class="note"><strong>Como executar:</strong> instale Node.js, crie uma pasta de projeto, execute <code>npm install ws</code>, salve o segundo trecho como <code>server.js</code> e inicie com <code>node server.js</code>. Depois, abra uma página local que execute o código do cliente. Em páginas servidas por HTTPS, utilize <code>wss://</code>.</div>
+
+      <div class="demo">
+        <div class="demo-top"><div><span class="live-dot"></span><strong>LAB INTERATIVO</strong></div><span class="demo-label">SIMULAÇÃO LOCAL</span></div>
+        <h3>Teste a troca de mensagens</h3>
+        <p>Esta demonstração simula a conversa entre cliente e servidor dentro da página. Ela não abre uma conexão WebSocket real.</p>
+        <div class="chat-window" id="chatWindow" aria-live="polite"><div class="chat-message server-message"><small>SERVER · 00:00</small><p>Canal simulado pronto. Envie uma mensagem.</p></div></div>
+        <form class="chat-form" id="chatForm"><input id="chatInput" type="text" placeholder="Digite uma mensagem..." maxlength="180" autocomplete="off" aria-label="Mensagem para enviar"><button type="submit">Enviar <span>→</span></button></form>
+        <div class="demo-footer"><span><i></i> CLIENT CONNECTED</span><button id="clearChat" type="button">Limpar conversa</button></div>
+      </div>
+      <div class="security"><strong>Segurança em produção</strong><p>Prefira <code>wss://</code> (WebSocket Secure), use autenticação e autorização adequadas, valide as mensagens recebidas, limite tamanho e frequência de mensagens e verifique a origem da conexão quando aplicável.</p></div>
+    </section>
+
+    <section class="section" id="conclusao">
+      <div class="section-kicker">09 / ENCERRAMENTO</div>
+      <h2>Conclusão</h2>
+      <p>WebSocket é uma tecnologia relevante para aplicações que precisam de comunicação contínua entre clientes e servidores. Sua conexão bidirecional permite troca de mensagens sem iniciar uma nova requisição para cada atualização.</p>
+      <p>Embora exija cuidados com conexões, escalabilidade e segurança, é uma solução adequada para chats, jogos multiplayer, notificações e monitoramento em tempo real. A escolha deve considerar as necessidades específicas de cada aplicação.</p>
+      <div class="final-statement">QUANDO A APLICAÇÃO PRECISA DE TROCA CONTÍNUA DE DADOS, <span>WEBSOCKET É UMA OPÇÃO A CONSIDERAR.</span></div>
+    </section>
+
+    <section class="section references" id="referencias">
+      <div class="section-kicker">10 / FONTES</div>
+      <h2>Referências</h2>
+      <p>Documentação técnica utilizada como base para este manual:</p>
+      <a href="https://datatracker.ietf.org/doc/html/rfc6455" target="_blank" rel="noopener noreferrer"><span>RFC 6455</span><strong>The WebSocket Protocol ↗</strong><small>Especificação oficial do protocolo.</small></a>
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API" target="_blank" rel="noopener noreferrer"><span>MDN WEB DOCS</span><strong>WebSocket API ↗</strong><small>Documentação da API WebSocket para navegadores.</small></a>
+      <a href="https://github.com/websockets/ws" target="_blank" rel="noopener noreferrer"><span>GITHUB</span><strong>ws — WebSocket library for Node.js ↗</strong><small>Biblioteca utilizada no exemplo de servidor.</small></a>
+    </section>
+
+    <footer class="footer"><a class="brand footer-brand" href="#inicio"><span class="brand-mark">↔</span><span>web<span class="accent">socket</span><small>TECHNICAL MANUAL</small></span></a><span>MANUAL DE ESTUDO · WEBSOCKET</span><a href="#inicio">VOLTAR AO TOPO ↑</a></footer>
+  </main>
+  <script>
+const menuToggle = document.getElementById("menuToggle");
+const sidebar = document.getElementById("sidebar");
+menuToggle?.addEventListener("click", () => {
+  const open = sidebar.classList.toggle("open");
+  menuToggle.setAttribute("aria-expanded", String(open));
+});
+document.querySelectorAll(".nav-link").forEach(link => {
+  link.addEventListener("click", () => {
+    document.querySelectorAll(".nav-link").forEach(item => item.classList.remove("active"));
+    link.classList.add("active");
+    sidebar.classList.remove("open");
+    menuToggle?.setAttribute("aria-expanded", "false");
+  });
+});
+
+const themeToggle = document.getElementById("themeToggle");
+themeToggle?.addEventListener("click", () => {
+  document.body.classList.toggle("light");
+  themeToggle.textContent = document.body.classList.contains("light") ? "☾" : "☼";
+});
+
+const progress = document.getElementById("progress");
+function updateProgress() {
+  const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+  const percent = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+  progress.style.width = `${percent}%`;
+}
+window.addEventListener("scroll", updateProgress, { passive: true });
+updateProgress();
+
+document.querySelectorAll(".copy-button").forEach(button => {
+  button.addEventListener("click", async () => {
+    const code = document.getElementById(button.dataset.copy)?.innerText || "";
+    try {
+      await navigator.clipboard.writeText(code);
+      button.textContent = "Copiado ✓";
+    } catch {
+      button.textContent = "Selecione o código";
+    }
+    setTimeout(() => button.textContent = "Copiar código ↗", 1800);
+  });
+});
+
+// Local teaching simulation only: this does not create a network WebSocket.
+const chatForm = document.getElementById("chatForm");
+const chatInput = document.getElementById("chatInput");
+const chatWindow = document.getElementById("chatWindow");
+const clearChat = document.getElementById("clearChat");
+
+function addMessage(type, label, message) {
+  const article = document.createElement("div");
+  article.className = `chat-message ${type}-message`;
+  const time = new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  const small = document.createElement("small");
+  small.textContent = `${label} · ${time}`;
+  const p = document.createElement("p");
+  p.textContent = message;
+  article.append(small, p);
+  chatWindow.appendChild(article);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+chatForm?.addEventListener("submit", event => {
+  event.preventDefault();
+  const message = chatInput.value.trim();
+  if (!message) return;
+  addMessage("client", "CLIENT", message);
+  chatInput.value = "";
+  window.setTimeout(() => addMessage("server", "SERVER", `Mensagem recebida: ${message}`), 350);
+  chatInput.focus();
+});
+clearChat?.addEventListener("click", () => {
+  chatWindow.replaceChildren();
+  addMessage("server", "SERVER", "Conversa limpa. Envie uma nova mensagem.");
+});
+
+// Highlight the section currently visible in the reading area.
+const sections = [...document.querySelectorAll("main section[id]")];
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const active = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+    if (active) {
+      document.querySelectorAll(".nav-link").forEach(link => link.classList.remove("active"));
+      active.classList.add("active");
+    }
+  });
+}, { rootMargin: "-25% 0px -65% 0px" });
+sections.forEach(section => observer.observe(section));
+
+  </script>
+</body>
+</html>
