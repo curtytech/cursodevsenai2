@@ -12,6 +12,7 @@ async function index(req, res) {
 
 async function show(req, res) {
   try {
+    console.log('ID do usuário:', req.params.id);
     const user = await userService.getUserById(req.params.id);
     if (!user) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
