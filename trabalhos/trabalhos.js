@@ -7,7 +7,7 @@ const trabalhos = [
     { id: "ftp-sftp", tema: "FTP/SFTP", aluno: "Pedro", pasta: "trabalhos-data/ftp-sftp/pedro", caminhoSlide: "trabalhos-data/ftp-sftp/pedro/index.html" },
     { id: "p2p", tema: "P2P", aluno: "Alessandro", pasta: "trabalhos-data/p2p/alessandro" },
     { id: "ssh", tema: "SSH", aluno: "João Vinicius", pasta: "trabalhos-data/ssh/joao-vinicius", caminhoSlide: "trabalhos-data/ssh/joao-vinicius/index.html"},
-    { id: "tcp-socket", tema: "TCP Socket", aluno: "Daniel", pasta: "trabalhos-data/tcp-socket/daniel" },
+    { id: "tcp-socket", tema: "TCP Socket", aluno: "Daniel", pasta: "trabalhos-data/tcp-socket/daniel", caminhoSlide: "trabalhos-data/tcp-socket/daniel/index.html" },
     { id: "http-long-polling", tema: "HTTP Long Polling", aluno: "João Pedro", pasta: "trabalhos-data/http-long-polling/joao-pedro", caminhoSlide: "trabalhos-data/http-long-polling/joao-pedro/Trabalho_HTTP.html" },
     { id: "mqtt-pub-sub", tema: "MQTT Pub/Sub", aluno: "Matheus", pasta: "trabalhos-data/MQTT/matheus", caminhoSlide: "trabalhos-data/MQTT/matheus/slides_Matheus.html" },
     { id: "grpc", tema: "gRPC", aluno: "Francisco", pasta: "trabalhos-data/grpc/francisco" },
