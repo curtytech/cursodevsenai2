@@ -1,6 +1,6 @@
 const trabalhos = [
     { id: "http-https", tema: "HTTP/HTTPS", aluno: "Arthur Santos", pasta: "trabalhos-data/http-https/arthur-santos" },
-    { id: "sse-streaming", tema: "SSE Streaming", aluno: "Leticia", pasta: "trabalhos-data/sse-streaming/leticia" },
+    { id: "sse-streaming", tema: "SSE Streaming", aluno: "Leticia", pasta: "trabalhos-data/sse-streaming/leticia",  caminhoSlide: "trabalhos-data/sse-streaming/leticia/ManualSSE.html" },
     { id: "graphql-api-cliente", tema: "API cliente com GraphQL", aluno: "Raphael", pasta: "trabalhos-data/graphql-api-cliente/raphael", caminhoSlide: "trabalhos-data/graphql-api-cliente/raphael/index.html" },
     { id: "udp-datagramas", tema: "Datagramas UDP", aluno: "Marcos", pasta: "trabalhos-data/udp-datagramas/marcos", caminhoSlide: "trabalhos-data/udp-datagramas/marcos/apresentacao_do_marcos.html" },
     { id: "smtp", tema: "SMTP", aluno: "Arthur Baptista", pasta: "trabalhos-data/smtp/arthur-baptista" },

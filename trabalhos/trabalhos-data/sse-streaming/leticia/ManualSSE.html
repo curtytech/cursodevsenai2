@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual Técnico Interativo: Server-Sent Events (SSE)</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+          colors: {
+            neon: {
+              bg: '#0d0d12',
+              surface: '#161622',
+              elevated: '#1f1f2e',
+              pink: '#ff2a85',
+              purple: '#8b5cf6',
+              amber: '#f59e0b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #0d0d12;
+      color: #f8fafc;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Superfícies com Glassmorphism e Bordas Sutis */
+    .neon-card {
+      background: rgba(22, 22, 34, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(139, 92, 246, 0.18);
+    }
+
+    .neon-card-elevated {
+      background: rgba(31, 31, 46, 0.92);
+      border: 1px solid rgba(255, 42, 133, 0.22);
+    }
+
+    .neon-card-hover {
+      transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .neon-card-hover:hover {
+      border-color: rgba(255, 42, 133, 0.55);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px -10px rgba(255, 42, 133, 0.25);
+    }
+
+    /* Animação de Transição entre Slides */
+    .slide {
+      display: none;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Barra de Rolagem Customizada */
+    .manual-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .manual-scroll::-webkit-scrollbar-track {
+      background: rgba(13, 13, 18, 0.7);
+      border-radius: 4px;
+    }
+    .manual-scroll::-webkit-scrollbar-thumb {
+      background: #2e2e44;
+      border-radius: 4px;
+    }
+    .manual-scroll::-webkit-scrollbar-thumb:hover {
+      background: #ff2a85;
+    }
+
+    /* Syntax Highlighting na Nova Paleta (Rosa Neon, Roxo Elétrico, Âmbar) */
+    .token-keyword { color: #ff2a85; font-weight: 600; }
+    .token-string { color: #f59e0b; }
+    .token-function { color: #a78bfa; font-weight: 500; }
+    .token-comment { color: #6b7280; font-style: italic; }
+    .token-property { color: #f472b6; }
+    .token-number { color: #fbbf24; }
+
+    /* Brilhos Ambientais */
+    .glow-pink {
+      box-shadow: 0 0 28px rgba(255, 42, 133, 0.2);
+    }
+    .glow-purple {
+      box-shadow: 0 0 28px rgba(139, 92, 246, 0.2);
+    }
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col justify-between relative bg-[#0d0d12] text-slate-100 select-none sm:select-auto">
+
+  <!-- Luzes Decorativas de Fundo -->
+  <div class="absolute top-[-12%] left-[-8%] w-[38vw] h-[38vw] bg-[#ff2a85]/10 rounded-full blur-[130px] pointer-events-none"></div>
+  <div class="absolute bottom-[-12%] right-[-8%] w-[38vw] h-[38vw] bg-[#8b5cf6]/12 rounded-full blur-[130px] pointer-events-none"></div>
+  <div class="absolute top-[45%] left-[42%] w-[24vw] h-[24vw] bg-[#f59e0b]/5 rounded-full blur-[110px] pointer-events-none"></div>
+
+  <!-- CABEÇALHO / BARRA SUPERIOR -->
+  <header class="w-full px-4 sm:px-6 py-3 flex items-center justify-between z-20 border-b border-[#1f1f2e] bg-[#0d0d12]/90 backdrop-blur-md flex-shrink-0">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#ff2a85] to-[#8b5cf6] flex items-center justify-center text-white font-bold shadow-lg shadow-[#ff2a85]/25">
+        <i class="fa-solid fa-bolt-lightning text-sm"></i>
+      </div>
+      <div>
+        <span class="font-extrabold text-sm tracking-wider uppercase bg-clip-text text-transparent bg-gradient-to-r from-[#ff2a85] via-[#a855f7] to-[#f59e0b]">
+          MANUAL TÉCNICO SSE
+        </span>
+        <span class="text-xs text-slate-400 ml-2 border-l border-slate-700 pl-2 hidden sm:inline">
+          Arquitetura & Streaming Web
+        </span>
+      </div>
+    </div>
+
+    <!-- Abas de Navegação Rápida -->
+    <nav class="hidden md:flex items-center space-x-1 bg-[#161622] p-1 rounded-xl border border-[#1f1f2e]">
+      <button onclick="goToSlide(0, event)" class="nav-tab text-xs px-3 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white flex items-center space-x-1.5">
+        <span class="w-2 h-2 rounded-full bg-slate-600 dot"></span>
+        <span>1. Conceito & Polling</span>
+      </button>
+      <button onclick="goToSlide(1, event)" class="nav-tab text-xs px-3 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white flex items-center space-x-1.5">
+        <span class="w-2 h-2 rounded-full bg-slate-600 dot"></span>
+        <span>2. Protocolo & Headers</span>
+      </button>
+      <button onclick="goToSlide(2, event)" class="nav-tab text-xs px-3 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white flex items-center space-x-1.5">
+        <span class="w-2 h-2 rounded-full bg-slate-600 dot"></span>
+        <span>3. Usos & WebSockets</span>
+      </button>
+      <button onclick="goToSlide(3, event)" class="nav-tab text-xs px-3 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white flex items-center space-x-1.5">
+        <span class="w-2 h-2 rounded-full bg-slate-600 dot"></span>
+        <span>4. Código & Simulador</span>
+      </button>
+    </nav>
+
+    <!-- Controles Direita -->
+    <div class="flex items-center space-x-2">
+      <span class="text-[11px] text-slate-300 hidden lg:inline-block bg-[#161622] px-2.5 py-1 rounded-md border border-[#1f1f2e]">
+        <i class="fa-solid fa-computer-mouse text-[#ff2a85] mr-1"></i> Clique na tela para avançar
+      </span>
+      <button onclick="toggleFullscreen(event)" title="Alternar Tela Cheia" class="p-2 rounded-lg bg-[#161622] hover:bg-[#1f1f2e] text-slate-300 hover:text-[#ff2a85] border border-[#1f1f2e] transition">
+        <i id="fullscreenIcon" class="fa-solid fa-expand text-xs"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ÁREA PRINCIPAL DOS SLIDES -->
+  <main id="slideArea" class="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-3 overflow-y-auto manual-scroll flex flex-col justify-start lg:justify-center relative z-10 cursor-pointer">
+
+    <!-- ================= SLIDE 1: CAPA, CONCEITO CENTRAL & HTTP/POLLING ================= -->
+    <section class="slide active w-full flex-col justify-center items-center py-1">
+      <div class="text-center max-w-4xl mx-auto mb-4">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#ff2a85]/10 border border-[#ff2a85]/30 text-[#ff2a85] text-xs font-semibold mb-2 tracking-wide uppercase">
+          <i class="fa-solid fa-tower-broadcast"></i>
+          <span>Capítulo 01 • Conceito Central & Evolução do HTTP</span>
+        </div>
+
+        <h1 class="text-3xl sm:text-5xl font-black tracking-tight mb-2 text-white leading-tight">
+          Server-Sent Events <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#ff2a85] via-[#8b5cf6] to-[#f59e0b]">(SSE)</span>
+        </h1>
+        <p class="text-sm sm:text-base text-slate-300 font-medium">
+          Comunicação unidirecional em tempo real: o servidor empurra dados continuamente sobre uma única conexão HTTP.
+        </p>
+      </div>
+
+      <!-- Fórmula Visual Central -->
+      <div class="w-full neon-card rounded-2xl p-3.5 sm:p-4 mb-4 border border-[#ff2a85]/30 glow-pink">
+        <div class="text-[10px] uppercase tracking-widest text-[#f59e0b] font-bold mb-2.5 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-diagram-project"></i> Fluxo Arquitetural da Tecnologia
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 items-center text-center">
+          <div class="p-2.5 rounded-xl bg-[#1f1f2e] border border-[#ff2a85]/40 flex flex-col items-center">
+            <i class="fa-solid fa-bolt text-[#ff2a85] text-lg mb-1"></i>
+            <span class="font-bold text-sm text-white">SSE</span>
+            <span class="text-[10px] text-slate-400">Padrão HTML5 / HTTP</span>
+          </div>
+          <div class="text-slate-500 hidden sm:flex flex-col items-center">
+            <span class="text-[10px] text-[#ff2a85] font-mono mb-0.5">abre canal</span>
+            <i class="fa-solid fa-arrow-right text-[#ff2a85] animate-pulse"></i>
+          </div>
+          <div class="p-2.5 rounded-xl bg-[#1f1f2e] border border-[#8b5cf6]/40 flex flex-col items-center">
+            <i class="fa-solid fa-wave-square text-[#8b5cf6] text-lg mb-1"></i>
+            <span class="font-bold text-sm text-white">Streaming</span>
+            <span class="text-[10px] text-slate-400">Conexão Persistente</span>
+          </div>
+          <div class="text-slate-500 hidden sm:flex flex-col items-center">
+            <span class="text-[10px] text-[#8b5cf6] font-mono mb-0.5">unidirecional</span>
+            <i class="fa-solid fa-arrow-right text-[#8b5cf6] animate-pulse"></i>
+          </div>
+          <div class="col-span-2 sm:col-span-1 p-2.5 rounded-xl bg-[#1f1f2e] border border-[#f59e0b]/40 flex flex-col items-center">
+            <i class="fa-solid fa-server text-[#f59e0b] text-lg mb-1"></i>
+            <span class="font-bold text-sm text-white">Servidor → Cliente</span>
+            <span class="text-[10px] text-slate-400">Eventos, Notificações, Status</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparativo Visual: HTTP Tradicional & Polling vs. SSE (Analogia da Cafeteria) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+        <!-- Problema: HTTP Tradicional e Polling -->
+        <div class="neon-card p-4 sm:p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-bold text-sm sm:text-base text-[#f59e0b] flex items-center gap-2">
+                <i class="fa-solid fa-rotate"></i> O Problema: HTTP Comum & Polling
+              </h3>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#f59e0b]/15 text-[#f59e0b]">Jeito Antigo</span>
+            </div>
+            <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-2.5">
+              No <strong>HTTP tradicional</strong>, o cliente pede algo, o servidor responde e <strong>fecha a conexão na hora</strong>. Para simular tempo real, usava-se o <strong>Polling</strong> (perguntar a cada 3 segundos se há novidade).
+            </p>
+            <div class="bg-[#0d0d12]/90 p-3 rounded-xl border border-[#f59e0b]/25 text-xs text-slate-300">
+              <strong class="text-[#f59e0b] block mb-0.5"><i class="fa-solid fa-mug-saucer mr-1"></i> Na Cafeteria (Polling):</strong>
+              Você vai ao balcão a cada 2 minutos perguntar: <em>"Meu café ficou pronto?"</em>. Gera milhares de respostas vazias e sobrecarrega o servidor.
+            </div>
+          </div>
+        </div>
+
+        <!-- Solução Moderna: SSE Streaming -->
+        <div class="neon-card p-4 sm:p-5 rounded-2xl border border-[#ff2a85]/35 bg-gradient-to-br from-[#161622] to-[#ff2a85]/10 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-bold text-sm sm:text-base text-[#ff2a85] flex items-center gap-2">
+                <i class="fa-solid fa-bolt"></i> A Solução Moderna: SSE Streaming
+              </h3>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#ff2a85]/20 text-[#ff2a85]">Tempo Real</span>
+            </div>
+            <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-2.5">
+              Com <strong>SSE</strong>, o cliente abre uma única conexão HTTP de longa duração e permanece apenas em <strong>modo de escuta</strong>. O servidor empurra dados instantaneamente quando ocorrem.
+            </p>
+            <div class="bg-[#0d0d12]/90 p-3 rounded-xl border border-[#8b5cf6]/35 text-xs text-slate-300">
+              <strong class="text-[#8b5cf6] block mb-0.5"><i class="fa-solid fa-bell-concierge mr-1"></i> Na Cafeteria (SSE):</strong>
+              Você faz o pedido uma única vez, senta na mesa e o atendente <strong>vem até você</strong> avisar assim que o café fica pronto.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 2: COMO FUNCIONA POR TRÁS DOS PANOS ================= -->
+    <section class="slide w-full flex-col justify-center items-center py-1">
+      <div class="text-center mb-4">
+        <span class="text-xs uppercase tracking-widest text-[#8b5cf6] font-semibold bg-[#8b5cf6]/10 px-3 py-1 rounded-full border border-[#8b5cf6]/30">
+          Capítulo 02 • Engenharia do Protocolo & Anatomia dos Pacotes
+        </span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white mt-1.5">Como Funciona por Trás dos Panos?</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl mx-auto">O ciclo de vida completo da conexão persistente e a estrutura interna das mensagens.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+        <!-- Passo 1: Requisição via EventSource -->
+        <div class="neon-card neon-card-hover p-4 sm:p-5 rounded-2xl">
+          <div class="flex items-start space-x-3.5">
+            <div class="w-9 h-9 rounded-xl bg-[#ff2a85]/15 border border-[#ff2a85]/40 flex items-center justify-center text-[#ff2a85] font-bold text-sm flex-shrink-0">
+              01
+            </div>
+            <div>
+              <h3 class="font-bold text-base text-white mb-1">Requisição via API EventSource</h3>
+              <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                No frontend, o navegador instancia <code class="text-[#ff2a85] font-mono bg-[#0d0d12] px-1.5 py-0.5 rounded">new EventSource('/stream')</code>. Ele dispara uma requisição HTTP GET padrão contendo o cabeçalho <code class="text-[#f59e0b] font-mono">Accept: text/event-stream</code> para abrir o túnel de leitura.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Passo 2: Os 3 Cabeçalhos HTTP Vitais -->
+        <div class="neon-card neon-card-hover p-4 sm:p-5 rounded-2xl border-[#ff2a85]/40 bg-gradient-to-br from-[#161622] to-[#8b5cf6]/10">
+          <div class="flex items-start space-x-3.5">
+            <div class="w-9 h-9 rounded-xl bg-[#8b5cf6]/20 border border-[#8b5cf6] flex items-center justify-center text-[#a78bfa] font-bold text-sm flex-shrink-0">
+              02
+            </div>
+            <div class="w-full">
+              <div class="flex items-center justify-between mb-1">
+                <h3 class="font-bold text-base text-white">Os 3 Cabeçalhos HTTP Vitais</h3>
+                <span class="text-[10px] bg-[#ff2a85]/20 text-[#ff2a85] px-2 py-0.5 rounded font-mono font-semibold">Obrigatórios</span>
+              </div>
+              <p class="text-slate-300 text-xs leading-relaxed mb-2">
+                Configurados na resposta do servidor para manter o canal vivo sem cache:
+              </p>
+              <div class="font-mono text-[11px] bg-[#0d0d12] p-2.5 rounded-lg border border-[#1f1f2e] space-y-1">
+                <div><span class="text-[#f59e0b]">Content-Type:</span> <span class="text-[#ff2a85]">text/event-stream</span> <span class="text-slate-500">// Ativa streaming</span></div>
+                <div><span class="text-[#f59e0b]">Cache-Control:</span> <span class="text-[#a78bfa]">no-cache</span> <span class="text-slate-500">// Bloqueia cache</span></div>
+                <div><span class="text-[#f59e0b]">Connection:</span> <span class="text-emerald-400">keep-alive</span> <span class="text-slate-500">// Mantém porta aberta</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Passo 3: Anatomia do Pacote -->
+        <div class="neon-card neon-card-hover p-4 sm:p-5 rounded-2xl">
+          <div class="flex items-start space-x-3.5">
+            <div class="w-9 h-9 rounded-xl bg-[#f59e0b]/15 border border-[#f59e0b]/40 flex items-center justify-center text-[#f59e0b] font-bold text-sm flex-shrink-0">
+              03
+            </div>
+            <div class="w-full">
+              <h3 class="font-bold text-base text-white mb-1">Anatomia do Pacote & Tipos de Eventos</h3>
+              <p class="text-slate-300 text-xs leading-relaxed mb-2">
+                Mensagens em texto puro encerradas obrigatoriamente com <strong>dupla quebra de linha (<code class="text-[#ff2a85]">\n\n</code>)</strong>:
+              </p>
+              <div class="font-mono text-[11px] bg-[#0d0d12] p-2.5 rounded-lg border border-[#1f1f2e] space-y-1">
+                <div><span class="text-[#8b5cf6]">id:</span> <span class="text-slate-200">2048</span> <span class="text-slate-500">// Identificador único do evento</span></div>
+                <div><span class="text-[#ff2a85]">event:</span> <span class="text-slate-200">alerta-estoque</span> <span class="text-slate-500">// Nome customizado (padrão: message)</span></div>
+                <div><span class="text-[#f59e0b]">data:</span> <span class="text-slate-100">{"produto": "Jaqueta", "qtd": 3}</span><span class="text-[#ff2a85] font-bold">\n\n</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Passo 4: Reconexão Automática -->
+        <div class="neon-card neon-card-hover p-4 sm:p-5 rounded-2xl">
+          <div class="flex items-start space-x-3.5">
+            <div class="w-9 h-9 rounded-xl bg-[#8b5cf6]/15 border border-[#8b5cf6]/40 flex items-center justify-center text-[#8b5cf6] font-bold text-sm flex-shrink-0">
+              04
+            </div>
+            <div>
+              <h3 class="font-bold text-base text-white mb-1">Reconexão Nativa & Last-Event-ID</h3>
+              <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-2">
+                Se a rede cair ou o servidor reiniciar, o navegador aguarda ~3s e <strong>reconecta automaticamente</strong> sem nenhuma linha extra de código no cliente.
+              </p>
+              <div class="text-xs text-[#f59e0b] bg-[#f59e0b]/10 border border-[#f59e0b]/25 p-2 rounded-lg">
+                <i class="fa-solid fa-shield-halved mr-1"></i> Ao voltar, o browser envia o header <code class="font-mono">Last-Event-ID</code> para o servidor retomar exatamente do último pacote perdido.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 3: CASOS DE USO COMUNS & SSE VS WEBSOCKETS ================= -->
+    <section class="slide w-full flex-col justify-center items-center py-1">
+      <div class="text-center mb-4">
+        <span class="text-xs uppercase tracking-widest text-[#f59e0b] font-semibold bg-[#f59e0b]/10 px-3 py-1 rounded-full border border-[#f59e0b]/30">
+          Capítulo 03 • Aplicações no Mercado & Decisão Arquitetural
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1.5">Casos de Uso & SSE vs. WebSockets</h2>
+      </div>
+
+      <!-- Os 4 Principais Cenários -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full mb-4">
+        <div class="neon-card p-3.5 rounded-xl border-[#ff2a85]/25">
+          <div class="flex items-center space-x-2 mb-1.5">
+            <i class="fa-solid fa-chart-area text-[#ff2a85]"></i>
+            <h3 class="font-bold text-sm text-white">Dashboards & Métricas</h3>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed">
+            Monitoramento de servidores/CPU, gráficos financeiros, bolsa de valores e cotações de criptomoedas ao vivo.
+          </p>
+        </div>
+
+        <div class="neon-card p-3.5 rounded-xl border-[#8b5cf6]/25">
+          <div class="flex items-center space-x-2 mb-1.5">
+            <i class="fa-solid fa-bell text-[#8b5cf6]"></i>
+            <h3 class="font-bold text-sm text-white">Feeds & Notificações</h3>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed">
+            Alertas em tempo real (sininhos), atualização de timelines de notícias e placares esportivos instantâneos.
+          </p>
+        </div>
+
+        <div class="neon-card p-3.5 rounded-xl border-[#f59e0b]/25">
+          <div class="flex items-center space-x-2 mb-1.5">
+            <i class="fa-solid fa-wand-magic-sparkles text-[#f59e0b]"></i>
+            <h3 class="font-bold text-sm text-white">Streaming de IA (LLMs)</h3>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed">
+            Padrão usado por ChatGPT e Gemini para exibir respostas palavra por palavra (efeito <em>typing</em>) em tempo real.
+          </p>
+        </div>
+
+        <div class="neon-card p-3.5 rounded-xl border-pink-500/25">
+          <div class="flex items-center space-x-2 mb-1.5">
+            <i class="fa-solid fa-box-open text-pink-400"></i>
+            <h3 class="font-bold text-sm text-white">Status de Pedidos</h3>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed">
+            Rastreamento de etapas de entregas em apps de delivery, progresso de exportações e filas de processamento.
+          </p>
+        </div>
+      </div>
+
+      <!-- Tabela Comparativa Completa -->
+      <div class="w-full neon-card rounded-2xl p-4 border border-[#8b5cf6]/30">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2.5 gap-1">
+          <h3 class="font-bold text-sm sm:text-base text-[#ff2a85] flex items-center gap-2">
+            <i class="fa-solid fa-code-compare"></i> Comparativo Técnico: SSE vs. WebSockets
+          </h3>
+          <span class="text-[11px] text-slate-400">Regra de ouro: se o cliente <strong>apenas recebe</strong> dados em tempo real, prefira SSE.</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs sm:text-sm">
+            <thead>
+              <tr class="border-b border-[#1f1f2e] text-slate-300 bg-[#0d0d12]/70">
+                <th class="py-2 px-3 font-semibold">Característica</th>
+                <th class="py-2 px-3 font-bold text-[#ff2a85]">SSE (Server-Sent Events)</th>
+                <th class="py-2 px-3 font-bold text-[#8b5cf6]">WebSockets</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#1f1f2e] text-slate-300">
+              <tr>
+                <td class="py-2 px-3 font-medium text-white">Direção do Fluxo</td>
+                <td class="py-2 px-3"><span class="text-[#f59e0b] font-semibold">Unidirecional</span> (Servidor → Cliente)</td>
+                <td class="py-2 px-3"><span class="text-[#a78bfa] font-semibold">Bidirecional</span> (Servidor ↔ Cliente)</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-3 font-medium text-white">Protocolo</td>
+                <td class="py-2 px-3">HTTP / HTTPS Padrão (passa fácil por firewalls)</td>
+                <td class="py-2 px-3">Protocolo próprio (<code class="font-mono text-xs text-[#a78bfa]">ws://</code> ou <code class="font-mono text-xs text-[#a78bfa]">wss://</code>)</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-3 font-medium text-white">Reconexão Nativa</td>
+                <td class="py-2 px-3"><span class="text-emerald-400 font-semibold"><i class="fa-solid fa-check mr-1"></i>Sim</span> (Automática via <code class="font-mono text-xs">EventSource</code>)</td>
+                <td class="py-2 px-3"><span class="text-rose-400 font-semibold"><i class="fa-solid fa-xmark mr-1"></i>Não</span> (Exige implementação manual)</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-3 font-medium text-white">Complexidade</td>
+                <td class="py-2 px-3">Baixa (Leve e nativo nos navegadores)</td>
+                <td class="py-2 px-3">Média / Alta (Gerenciamento de estado e conexões)</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-3 font-medium text-white">Melhor Uso</td>
+                <td class="py-2 px-3">Feeds, notificações, dashboards, status, IA</td>
+                <td class="py-2 px-3">Chats em tempo real, jogos multiplayer, edição colaborativa</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SLIDE 4: CÓDIGO PRÁTICO & SIMULADOR AO VIVO ================= -->
+    <section class="slide w-full flex-col justify-center items-center py-1">
+      <div class="text-center mb-3.5">
+        <span class="text-xs uppercase tracking-widest text-[#ff2a85] font-semibold bg-[#ff2a85]/10 px-3 py-1 rounded-full border border-[#ff2a85]/30">
+          Capítulo 04 • Implementação Real & Teste Interativo
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">Código Prático & Simulador SSE Ao Vivo</h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full mb-3.5">
+        <!-- Código Backend Node.js / Express -->
+        <div class="neon-card rounded-2xl p-3.5 border border-[#1f1f2e] flex flex-col">
+          <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-[#1f1f2e]">
+            <div class="flex items-center space-x-2">
+              <i class="fa-brands fa-node-js text-[#f59e0b] text-base"></i>
+              <span class="font-bold text-xs text-slate-200">1. Servidor (Node.js + Express)</span>
+            </div>
+            <span class="text-[10px] text-[#f59e0b] bg-[#f59e0b]/15 px-2 py-0.5 rounded font-mono">Emissor SSE</span>
+          </div>
+
+          <pre class="bg-[#0d0d12] p-3 rounded-xl text-[11px] font-mono text-slate-300 overflow-x-auto border border-[#1f1f2e] leading-relaxed flex-1">
+app.<span class="token-function">get</span>(<span class="token-string">'/api/stream'</span>, (req, res) => {
+  <span class="token-comment">// 1. Cabeçalhos vitais para manter o streaming ativo</span>
+  res.<span class="token-function">setHeader</span>(<span class="token-string">'Content-Type'</span>, <span class="token-string">'text/event-stream'</span>);
+  res.<span class="token-function">setHeader</span>(<span class="token-string">'Cache-Control'</span>, <span class="token-string">'no-cache'</span>);
+  res.<span class="token-function">setHeader</span>(<span class="token-string">'Connection'</span>, <span class="token-string">'keep-alive'</span>);
+
+  <span class="token-comment">// 2. Envia eventos periódicos com dupla quebra (\n\n)</span>
+  <span class="token-keyword">const</span> timer = <span class="token-function">setInterval</span>(() => {
+    <span class="token-keyword">const</span> payload = { status: <span class="token-string">'Ativo'</span>, hora: <span class="token-keyword">new</span> <span class="token-function">Date</span>().<span class="token-function">toLocaleTimeString</span>() };
+    res.<span class="token-function">write</span>(<span class="token-string">`event: status-update\n`</span>);
+    res.<span class="token-function">write</span>(<span class="token-string">`data: ${JSON.stringify(payload)}\n\n`</span>);
+  }, <span class="token-number">2000</span>);
+
+  <span class="token-comment">// 3. Libera recursos quando o cliente desconectar</span>
+  req.<span class="token-function">on</span>(<span class="token-string">'close'</span>, () => <span class="token-function">clearInterval</span>(timer));
+});</pre>
+        </div>
+
+        <!-- Código Frontend EventSource -->
+        <div class="neon-card rounded-2xl p-3.5 border border-[#1f1f2e] flex flex-col">
+          <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-[#1f1f2e]">
+            <div class="flex items-center space-x-2">
+              <i class="fa-brands fa-js text-[#ff2a85] text-base"></i>
+              <span class="font-bold text-xs text-slate-200">2. Cliente (JavaScript Nativo EventSource)</span>
+            </div>
+            <span class="text-[10px] text-[#ff2a85] bg-[#ff2a85]/15 px-2 py-0.5 rounded font-mono">Ouvinte SSE</span>
+          </div>
+
+          <pre class="bg-[#0d0d12] p-3 rounded-xl text-[11px] font-mono text-slate-300 overflow-x-auto border border-[#1f1f2e] leading-relaxed flex-1">
+<span class="token-comment">// 1. Conecta ao endpoint SSE (sem bibliotecas externas)</span>
+<span class="token-keyword">const</span> evtSource = <span class="token-keyword">new</span> <span class="token-function">EventSource</span>(<span class="token-string">'/api/stream'</span>);
+
+<span class="token-comment">// 2. Escuta eventos personalizados enviados pelo servidor</span>
+evtSource.<span class="token-function">addEventListener</span>(<span class="token-string">'status-update'</span>, (event) => {
+  <span class="token-keyword">const</span> dados = JSON.<span class="token-function">parse</span>(event.data);
+  console.<span class="token-function">log</span>(<span class="token-string">'Evento recebido:'</span>, dados);
+});
+
+<span class="token-comment">// 3. Reconexão automática nativa em caso de queda</span>
+evtSource.<span class="token-function">onerror</span> = () => console.<span class="token-function">warn</span>(<span class="token-string">'Reconectando automaticamente...'</span>);</pre>
+        </div>
+      </div>
+
+      <!-- Simulador Interativo Ao Vivo (Blinda cliques para não avançar o slide) -->
+      <div onclick="event.stopPropagation()" class="w-full neon-card-elevated rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 cursor-default glow-purple">
+        <div class="flex items-center space-x-3 w-full sm:w-auto overflow-hidden">
+          <div id="simIndicator" class="w-3.5 h-3.5 rounded-full bg-slate-600 flex-shrink-0"></div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2">
+              <h4 class="text-xs font-extrabold uppercase tracking-wider text-[#f59e0b]">
+                Simulador SSE Ao Vivo
+              </h4>
+              <span id="simBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">IDLE</span>
+            </div>
+            <p id="simOutput" class="text-xs sm:text-sm font-mono text-slate-300 mt-1 truncate">
+              Clique em "Iniciar Stream" para simular pacotes chegando do servidor em tempo real.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2 flex-shrink-0 w-full sm:w-auto justify-end">
+          <button id="toggleSimBtn" onclick="toggleSimulation(event)" class="px-4 py-2 rounded-xl bg-gradient-to-r from-[#ff2a85] to-[#8b5cf6] hover:opacity-95 text-white font-bold text-xs transition flex items-center space-x-2 shadow-lg shadow-[#ff2a85]/25">
+            <i class="fa-solid fa-play"></i>
+            <span>Iniciar Stream</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- RODAPÉ / CONTROLES DE NAVEGAÇÃO -->
+  <footer class="w-full px-4 sm:px-6 py-2.5 border-t border-[#1f1f2e] bg-[#0d0d12]/95 backdrop-blur-md flex items-center justify-between z-20 flex-shrink-0">
+    <!-- Contador -->
+    <div class="flex items-center space-x-2">
+      <span class="text-xs text-slate-400 font-medium">Slide</span>
+      <span id="slideCounter" class="text-xs sm:text-sm font-bold text-[#ff2a85] bg-[#ff2a85]/10 px-2.5 py-0.5 rounded-md border border-[#ff2a85]/30">1 de 4</span>
+    </div>
+
+    <!-- Botões Anterior / Próximo -->
+    <div class="flex items-center space-x-3">
+      <button id="prevBtn" onclick="prevSlide(event)" class="px-3.5 py-2 rounded-xl bg-[#161622] hover:bg-[#1f1f2e] text-slate-200 border border-[#1f1f2e] text-xs font-semibold flex items-center space-x-2 transition disabled:opacity-30 disabled:cursor-not-allowed">
+        <i class="fa-solid fa-chevron-left"></i>
+        <span>Anterior</span>
+      </button>
+
+      <button id="nextBtn" onclick="nextSlide(event)" class="px-4 py-2 rounded-xl bg-gradient-to-r from-[#ff2a85] to-[#8b5cf6] hover:opacity-95 text-white text-xs font-bold flex items-center space-x-2 transition shadow-lg shadow-[#ff2a85]/25">
+        <span>Próximo</span>
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+
+    <!-- Atalhos -->
+    <div class="hidden md:flex items-center text-xs text-slate-400 space-x-1">
+      <i class="fa-solid fa-keyboard text-[#8b5cf6] mr-1"></i>
+      <span>Clique na tela ou use <kbd class="px-1.5 py-0.5 bg-[#161622] rounded text-slate-300 border border-[#1f1f2e]">←</kbd> <kbd class="px-1.5 py-0.5 bg-[#161622] rounded text-slate-300 border border-[#1f1f2e]">→</kbd></span>
+    </div>
+  </footer>
+
+  <!-- MOTOR DE NAVEGAÇÃO DOS SLIDES & SIMULADOR SSE -->
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const tabs = document.querySelectorAll('.nav-tab');
+    const counter = document.getElementById('slideCounter');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const slideArea = document.getElementById('slideArea');
+
+    function updateSlides() {
+      slides.forEach((slide, idx) => {
+        if (idx === currentSlide) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      tabs.forEach((tab, idx) => {
+        const dot = tab.querySelector('.dot');
+        if (idx === currentSlide) {
+          tab.classList.add('bg-[#ff2a85]/15', 'text-white', 'border', 'border-[#ff2a85]/40');
+          tab.classList.remove('text-slate-400');
+          if (dot) dot.className = 'w-2 h-2 rounded-full bg-[#ff2a85] dot';
+        } else {
+          tab.classList.remove('bg-[#ff2a85]/15', 'text-white', 'border', 'border-[#ff2a85]/40');
+          tab.classList.add('text-slate-400');
+          if (dot) dot.className = 'w-2 h-2 rounded-full bg-slate-600 dot';
+        }
+      });
+
+      counter.textContent = `${currentSlide + 1} de ${slides.length}`;
+      prevBtn.disabled = currentSlide === 0;
+
+      if (currentSlide === slides.length - 1) {
+        nextBtn.innerHTML = `<span>Reiniciar</span> <i class="fa-solid fa-rotate-left"></i>`;
+      } else {
+        nextBtn.innerHTML = `<span>Próximo</span> <i class="fa-solid fa-chevron-right"></i>`;
+      }
+
+      slideArea.scrollTop = 0;
+    }
+
+    function goToSlide(index, e) {
+      if (e) e.stopPropagation();
+      currentSlide = index;
+      updateSlides();
+    }
+
+    function nextSlide(e) {
+      if (e) e.stopPropagation();
+      currentSlide = (currentSlide + 1) % slides.length;
+      updateSlides();
+    }
+
+    function prevSlide(e) {
+      if (e) e.stopPropagation();
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlides();
+      }
+    }
+
+    // Avança o slide ao clicar em qualquer área livre da tela
+    slideArea.addEventListener('click', (e) => {
+      if (window.getSelection().toString().length > 0) return;
+      if (e.target.closest('button') || e.target.closest('pre')) return;
+      nextSlide();
+    });
+
+    // Navegação pelo teclado
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      }
+    });
+
+    // Suporte a deslize (Swipe) em dispositivos touch
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchEndX < touchStartX - 60) nextSlide();
+      if (touchEndX > touchStartX + 60) prevSlide();
+    });
+
+    // Alternar Tela Cheia
+    function toggleFullscreen(e) {
+      if (e) e.stopPropagation();
+      const icon = document.getElementById('fullscreenIcon');
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => console.error(err));
+        icon.className = 'fa-solid fa-compress text-xs';
+      } else if (document.exitFullscreen) {
+        document.exitFullscreen();
+        icon.className = 'fa-solid fa-expand text-xs';
+      }
+    }
+
+    // Simulador Interativo SSE Ao Vivo (Slide 4)
+    let simInterval = null;
+    let eventId = 101;
+    const eventTypes = ['status-update', 'nova-notificacao', 'metrica-cpu'];
+
+    function toggleSimulation(e) {
+      if (e) e.stopPropagation();
+      const btn = document.getElementById('toggleSimBtn');
+      const output = document.getElementById('simOutput');
+      const indicator = document.getElementById('simIndicator');
+      const badge = document.getElementById('simBadge');
+
+      if (simInterval) {
+        clearInterval(simInterval);
+        simInterval = null;
+        btn.innerHTML = `<i class="fa-solid fa-play"></i><span>Iniciar Stream</span>`;
+        btn.className = "px-4 py-2 rounded-xl bg-gradient-to-r from-[#ff2a85] to-[#8b5cf6] hover:opacity-95 text-white font-bold text-xs transition flex items-center space-x-2 shadow-lg shadow-[#ff2a85]/25";
+        indicator.className = "w-3.5 h-3.5 rounded-full bg-slate-600 flex-shrink-0";
+        badge.textContent = "CLOSED";
+        badge.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-400";
+        output.innerHTML = `Conexão encerrada pelo cliente (<span class="text-[#ff2a85]">evtSource.close()</span>).`;
+      } else {
+        btn.innerHTML = `<i class="fa-solid fa-stop"></i><span>Parar Stream</span>`;
+        btn.className = "px-4 py-2 rounded-xl bg-[#f59e0b] hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center space-x-2 shadow-lg shadow-[#f59e0b]/25";
+        indicator.className = "w-3.5 h-3.5 rounded-full bg-[#ff2a85] animate-ping flex-shrink-0";
+        badge.textContent = "200 OK • STREAMING";
+        badge.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400";
+        output.innerHTML = `<span class="text-[#a78bfa]">Content-Type: text/event-stream</span> — Conectado, aguardando pacotes...`;
+
+        const sendMockPacket = () => {
+          const now = new Date().toLocaleTimeString('pt-BR');
+          const evType = eventTypes[eventId % eventTypes.length];
+          const load = Math.floor(Math.random() * 40) + 20;
+          output.innerHTML = `<span class="text-[#8b5cf6]">id:${eventId++}</span> | <span class="text-[#ff2a85]">event:${evType}</span> | <span class="text-[#f59e0b]">data:</span> {"hora":"${now}","carga":"${load}%"}`;
+        };
+
+        setTimeout(sendMockPacket, 500);
+        simInterval = setInterval(sendMockPacket, 2000);
+      }
+    }
+
+    // Inicializa o estado visual
+    updateSlides();
+  </script>
+</body>
+</html>
