@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="pbg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A1128"/>
+      <stop offset="100%" stop-color="#101F3C"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" rx="12" fill="url(#pbg)" stroke="#1E293B" stroke-width="2"/>
+  
+  <!-- Browser top bar simulation -->
+  <rect x="0" y="0" width="800" height="40" rx="12" fill="#0D182E"/>
+  <circle cx="25" cy="20" r="5" fill="#EF4444"/>
+  <circle cx="42" cy="20" r="5" fill="#F59E0B"/>
+  <circle cx="59" cy="20" r="5" fill="#10B981"/>
+  <rect x="90" y="8" width="450" height="24" rx="6" fill="#152238" stroke="#1E293B" stroke-width="1"/>
+  <text x="110" y="24" fill="#94A3B8" font-family="monospace" font-size="11">http://localhost:15672/#/ (RabbitMQ Management - Overview)</text>
+  
+  <!-- Dashed drop zone -->
+  <rect x="40" y="70" width="720" height="340" rx="10" fill="#070E1E" fill-opacity="0.6" stroke="#00FF88" stroke-width="2" stroke-dasharray="8,6"/>
+  
+  <!-- Camera / Image Icon -->
+  <g transform="translate(400, 190)">
+    <circle cx="0" cy="0" r="35" fill="#00E676" fill-opacity="0.12" stroke="#00FF88" stroke-width="1.5"/>
+    <path d="M -16 6 L -16 -10 L -9 -10 L -6 -14 L 6 -14 L 9 -10 L 16 -10 L 16 6 Z" stroke="#00FF88" stroke-width="2" fill="none"/>
+    <circle cx="0" cy="-2" r="6" stroke="#00FF88" stroke-width="2" fill="none"/>
+  </g>
+  
+  <text x="400" y="260" fill="#FFFFFF" font-family="'Segoe UI', Inter, sans-serif" font-size="18" font-weight="700" text-anchor="middle">ESPAÇO RESERVADO PARA SCREENSHOT REAL</text>
+  <text x="400" y="285" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Painel Geral RabbitMQ 4 (Overview Dashboard)</text>
+  <text x="400" y="315" fill="#94A3B8" font-family="'Segoe UI', Inter, sans-serif" font-size="12" text-anchor="middle">Insira aqui a captura de tela do painel web após login com guest/guest.</text>
+  <text x="400" y="335" fill="#64748B" font-family="'Segoe UI', Inter, sans-serif" font-size="11" text-anchor="middle">Destaque esperado: Versão do RabbitMQ (4.x), Erlang runtime, nós ativos e gráficos de taxas.</text>
+  
+  <rect x="290" y="355" width="220" height="26" rx="4" fill="#0D1E3A" stroke="#00FF88" stroke-width="0.8"/>
+  <text x="400" y="372" fill="#00FF88" font-family="monospace" font-size="11" font-weight="600" text-anchor="middle">[screenshot-01-dashboard.png]</text>
+</svg>

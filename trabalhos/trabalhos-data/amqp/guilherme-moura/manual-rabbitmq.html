@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Técnico: AMQP e RabbitMQ</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
+        header { background: #ff6600; color: white; padding: 2rem; border-radius: 8px; margin-bottom: 2rem; }
+        h1, h2, h3 { color: #222; }
+        header h1 { color: white; margin: 0; }
+        section { background: white; padding: 2rem; border-radius: 8px; margin-bottom: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        code { background: #f1f1f1; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+        pre { background: #2d2d2d; color: #f8f8f2; padding: 1rem; border-radius: 6px; overflow-x: auto; }
+        pre code { background: none; color: inherit; padding: 0; }
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f4f4f4; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Manual Técnico: AMQP & RabbitMQ</h1>
+        <p>Arquitetura, Conceitos Fundamentais e Implementação Prática em Sistemas Distribuídos</p>
+    </header>
+
+    <section>
+        <h2>1. Introdução ao AMQP (Advanced Message Queuing Protocol)</h2>
+        <p>O <strong>AMQP</strong> é um protocolo de camada de aplicação aberto e padronizado para orientação a mensagens. Ele permite que aplicações heterogêneas comuniquem-se de forma assíncrona, confiável e interoperável, garantindo que o remetente e o destinatário não precisem estar ativos ao mesmo tempo.</p>
+        
+        <h3>Conceitos Core do Modelo AMQP:</h3>
+        <ul>
+            <li><strong>Publisher (Produtor):</strong> Aplicação que cria e envia a mensagem.</li>
+            <li><strong>Exchange (Roteador):</strong> Recebe as mensagens do Publisher e decide para quais filas (Queues) elas devem ser enviadas com base em regras chamadas <em>Bindings</em>.</li>
+            <li><strong>Queue (Fila):</strong> Buffer que armazena as mensagens até que sejam consumidas.</li>
+            <li><strong>Consumer (Consumidor):</strong> Aplicação que se conecta à fila e processa as mensagens.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>2. Tipos de Exchanges no RabbitMQ</h2>
+        <table>
+            <tr>
+                <th>Tipo</th>
+                <th>Comportamento</th>
+                <th>Caso de Uso Ideal</th>
+            </tr>
+            <tr>
+                <td><strong>Direct</strong></td>
+                <td>Roteia mensagens para filas cuja chave de roteamento (Routing Key) exata coincide com a chave da mensagem.</td>
+                <td>Processamento de tarefas direcionadas (ex: filas de logs específicos).</td>
+            </tr>
+            <tr>
+                <td><strong>Fanout</strong></td>
+                <td>Ignora a Routing Key e envia cópias da mensagem para *todas* as filas vinculadas a ela.</td>
+                <td>Sistemas de Broadcast / Publicação de Eventos (Pub/Sub).</td>
+            </tr>
+            <tr>
+                <td><strong>Topic</strong></td>
+                <td>Roteia mensagens usando padrões coringa (wildcards) na Routing Key (ex: <code>stock.us.*</code>).</td>
+                <td>Sistemas complexos de roteamento baseados em múltiplos atributos.</td>
+            </tr>
+            <tr>
+                <td><strong>Headers</strong></td>
+                <td>Usa atributos do cabeçalho da mensagem em vez de routing keys para o roteamento.</td>
+                <td>Roteamento flexível baseado em metadados ricos.</td>
+            </tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>3. Exemplo Prático com Node.js (TypeScript)</h2>
+        <p>Abaixo está um exemplo básico de conexão, envio e consumo utilizando a biblioteca <code>amqplib</code>:</p>
+        <pre><code>import amqp from 'amqplib';
+
+async function run() {
+    // 1. Conexão com o RabbitMQ
+    const connection = await amqp.connect('amqp://localhost');
+    const channel = await connection.createChannel();
+
+    const queue = 'task_queue';
+    const msg = 'Olá, Arquitetura Orientada a Mensagens!';
+
+    // 2. Garantir que a fila existe
+    await channel.assertQueue(queue, { durable: true });
+
+    // 3. Enviar mensagem
+    channel.sendToQueue(queue, Buffer.from(msg), { persistent: true });
+    console.log(" [x] Enviado: '%s'", msg);
+
+    // 4. Fechar conexão após envio de exemplo
+    setTimeout(() => {
+        connection.close();
+        process.exit(0);
+    }, 500);
+}
+
+run().catch(console.error);</code></pre>
+    </section>
+
+    <section>
+        <h2>4. Garantias e Confiabilidade</h2>
+        <p>Para garantir que nenhuma mensagem seja perdida em ambientes de produção, o RabbitMQ implementa:</p>
+        <ul>
+            <li><strong>Durable Queues:</strong> As filas sobrevivem a reinicializações do servidor RabbitMQ.</li>
+            <li><strong>Message Persistence:</strong> As mensagens são salvas em disco.</li>
+            <li><strong>Publisher Confirms:</strong> O broker confirma ao produtor que a mensagem foi persistida com sucesso.</li>
+            <li><strong>Manual Acknowledgements (Acks):</strong> O consumidor só remove a mensagem da fila após processá-la com sucesso.</li>
+        </ul>
+    </section>
+
+</body>
+</html>

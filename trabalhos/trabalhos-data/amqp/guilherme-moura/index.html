@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual Técnico: AMQP via Broker RabbitMQ | Projeto Acadêmico</title>
+  <style>
+    :root {
+      --bg-primary: #070d1e;
+      --bg-secondary: #0d1b36;
+      --bg-card: #132347;
+      --bg-card-hover: #192d59;
+      --bg-input: #0a1429;
+      --accent-green: #00ff88;
+      --accent-green-hover: #00e57a;
+      --accent-green-dim: rgba(0, 255, 136, 0.12);
+      --accent-cyan: #38bdf8;
+      --accent-yellow: #f59e0b;
+      --accent-purple: #a855f7;
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --border-color: #1e335f;
+      --border-focus: #00ff88;
+      --code-bg: #060b17;
+      --sidebar-width: 290px;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.68;
+      font-size: 16px;
+      overflow-x: hidden;
+    }
+
+    /* Progress bar */
+    #reading-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green));
+      width: 0%;
+      z-index: 1000;
+      transition: width 0.1s;
+    }
+
+    /* Layout */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      overflow-y: auto;
+      padding: 1.75rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      z-index: 100;
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      background: var(--accent-green-dim);
+      border: 1.5px solid var(--accent-green);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-green);
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .brand-text h1 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--accent-green);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .nav-menu a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      transition: all 0.2s ease;
+      line-height: 1.3;
+    }
+
+    .nav-menu a:hover, .nav-menu a.active {
+      color: var(--text-main);
+      background-color: var(--bg-card);
+      border-left: 3px solid var(--accent-green);
+    }
+
+    .nav-menu a .badge {
+      font-size: 0.7rem;
+      background-color: var(--accent-green-dim);
+      color: var(--accent-green);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+    }
+
+    .sidebar-actions {
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-green);
+      color: #050b17;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-green-hover);
+      box-shadow: 0 0 16px rgba(0, 255, 136, 0.4);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--bg-card-hover);
+      border-color: var(--accent-green);
+    }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      padding: 2.5rem 3.5rem;
+      max-width: 1200px;
+    }
+
+    /* Top Bar Mobile */
+    .mobile-header {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 99;
+    }
+
+    /* Header Academic Card */
+    .academic-header {
+      background: linear-gradient(135deg, #0e1e3e 0%, #070e1f 100%);
+      border: 1px solid var(--border-color);
+      border-top: 4px solid var(--accent-green);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .academic-header::after {
+      content: "";
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(0, 255, 136, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .badge-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--accent-green-dim);
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1rem;
+    }
+
+    .academic-header h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+      color: #ffffff;
+    }
+
+    .academic-header p.subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      margin-bottom: 2rem;
+    }
+
+    .metadata-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .meta-item label {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+
+    .meta-item .meta-val {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      display: inline-block;
+    }
+
+    /* Chapters & Sections */
+    .chapter {
+      margin-bottom: 3.5rem;
+      scroll-margin-top: 2rem;
+    }
+
+    .chapter-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .chapter-num {
+      width: 44px;
+      height: 44px;
+      background: var(--accent-green-dim);
+      border: 2px solid var(--accent-green);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-green);
+      font-size: 1.2rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      flex-shrink: 0;
+    }
+
+    .chapter-header h2 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      margin: 1.75rem 0 0.85rem;
+    }
+
+    h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    p {
+      color: #cbd5e1;
+      margin-bottom: 1.2rem;
+      font-size: 1rem;
+      line-height: 1.75;
+    }
+
+    strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    ul, ol {
+      margin: 1rem 0 1.5rem 1.75rem;
+      color: #cbd5e1;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+      line-height: 1.65;
+    }
+
+    /* Cards & Grids */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .tech-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .tech-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent-green);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .tech-card.highlight {
+      border-left: 4px solid var(--accent-green);
+    }
+
+    .tech-card.highlight-cyan {
+      border-left: 4px solid var(--accent-cyan);
+    }
+
+    .tech-card.highlight-yellow {
+      border-left: 4px solid var(--accent-yellow);
+    }
+
+    .tech-card.highlight-purple {
+      border-left: 4px solid var(--accent-purple);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-title .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      display: inline-block;
+    }
+
+    .card-body {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-bottom: 0;
+    }
+
+    /* Alerts and Callouts */
+    .callout {
+      background: rgba(13, 27, 54, 0.9);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--accent-green);
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .callout-icon {
+      font-size: 1.35rem;
+      line-height: 1;
+      margin-top: 0.15rem;
+    }
+
+    .callout.callout-info {
+      border-left-color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.08);
+    }
+
+    .callout.callout-warning {
+      border-left-color: var(--accent-yellow);
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    .callout-content h4 {
+      margin: 0 0 0.35rem 0;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .callout-content p {
+      margin: 0;
+      font-size: 0.92rem;
+      color: #cbd5e1;
+    }
+
+    /* Diagram Containers */
+    .diagram-container {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin: 2rem 0;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .diagram-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .diagram-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--accent-green);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .diagram-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: var(--radius-sm);
+    }
+
+    .diagram-caption {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      text-align: center;
+      margin-top: 0.85rem;
+      margin-bottom: 0;
+    }
+
+    /* Code Blocks */
+    .code-wrapper {
+      background: var(--code-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      margin: 1.5rem 0;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    .code-header {
+      background: #091326;
+      padding: 0.55rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .code-lang {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .btn-copy {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-dim);
+      padding: 3px 8px;
+      font-size: 0.72rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: var(--font-sans);
+    }
+
+    .btn-copy:hover {
+      color: var(--accent-green);
+      border-color: var(--accent-green);
+    }
+
+    pre {
+      padding: 1.25rem 1.5rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+    }
+
+    code {
+      font-family: var(--font-mono);
+    }
+
+    p code, li code, td code {
+      background: rgba(0, 255, 136, 0.08);
+      color: var(--accent-green);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      border: 1px solid rgba(0, 255, 136, 0.2);
+    }
+
+    /* Syntax Highlighting Fake Tokens */
+    .token-kw { color: #f43f5e; font-weight: 600; }
+    .token-fn { color: #38bdf8; }
+    .token-str { color: #00ff88; }
+    .token-num { color: #f59e0b; }
+    .token-com { color: #64748b; font-style: italic; }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      margin: 1.75rem 0;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-secondary);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.92rem;
+    }
+
+    th {
+      background: #09142b;
+      color: var(--accent-green);
+      font-weight: 700;
+      padding: 0.9rem 1.2rem;
+      border-bottom: 2px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+    }
+
+    td {
+      padding: 0.85rem 1.2rem;
+      border-bottom: 1px solid var(--border-color);
+      color: #cbd5e1;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Steps list */
+    .steps-list {
+      list-style: none;
+      margin: 1.5rem 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 1.25rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .step-item:hover {
+      border-color: var(--accent-green);
+    }
+
+    .step-badge {
+      width: 32px;
+      height: 32px;
+      background: var(--accent-green);
+      color: #070d1e;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .step-details h4 {
+      margin: 0 0 0.35rem 0;
+      font-size: 1.05rem;
+      color: #ffffff;
+    }
+
+    .step-details p {
+      margin-bottom: 0.5rem;
+      font-size: 0.92rem;
+      color: var(--text-muted);
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 5rem;
+      padding: 2.5rem 0;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-dim);
+      font-size: 0.88rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+      text-align: center;
+    }
+
+    footer p {
+      margin-bottom: 0;
+      color: var(--text-dim);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .footer-links a {
+      color: var(--accent-green);
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-size: 11pt;
+      }
+
+      .sidebar, .mobile-header, #reading-progress, .btn-copy, .btn, .footer-links {
+        display: none !important;
+      }
+
+      .main-content {
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+
+      .academic-header {
+        background: #f8fafc !important;
+        color: #0f172a !important;
+        border: 2px solid #000000 !important;
+        border-top: 6px solid #16a34a !important;
+        page-break-after: avoid;
+        box-shadow: none !important;
+      }
+
+      .academic-header h1 {
+        color: #0f172a !important;
+      }
+
+      .meta-item .meta-val {
+        border: 1px solid #cbd5e1 !important;
+        color: #000000 !important;
+        background: transparent !important;
+      }
+
+      .tech-card, .callout, .step-item, .diagram-container, .table-container, .code-wrapper {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #000000 !important;
+        page-break-inside: avoid;
+        box-shadow: none !important;
+      }
+
+      p, li, td, th {
+        color: #1e293b !important;
+      }
+
+      h2, h3, h4 {
+        color: #0f172a !important;
+        page-break-after: avoid;
+      }
+
+      pre, code {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+        border: 1px solid #e2e8f0 !important;
+      }
+
+      .chapter {
+        page-break-before: always;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        display: none;
+      }
+      .mobile-header {
+        display: flex;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 1.5rem;
+      }
+      .academic-header {
+        padding: 1.5rem;
+      }
+      .academic-header h1 {
+        font-size: 1.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="reading-progress"></div>
+
+  <!-- Mobile Top Header -->
+  <header class="mobile-header">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <div class="brand-logo">R</div>
+      <div>
+        <div style="font-weight: 700; font-size: 0.95rem;">AMQP & RabbitMQ</div>
+        <div style="font-size: 0.7rem; color: var(--accent-green);">Manual Técnico</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="window.print()" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+      Salvar PDF
+    </button>
+  </header>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand-box">
+        <div class="brand-logo">R</div>
+        <div class="brand-text">
+          <h1>RabbitMQ Lab</h1>
+          <p>AMQP 0-9-1 Protocol</p>
+        </div>
+      </div>
+
+      <div class="nav-label">Navegação Técnica</div>
+      <ul class="nav-menu">
+        <li><a href="#cap-intro"><span class="badge">01</span> Introdução ao AMQP</a></li>
+        <li><a href="#cap-broker"><span class="badge">02</span> O Broker RabbitMQ</a></li>
+        <li><a href="#cap-arquitetura"><span class="badge">03</span> Arquitetura Core</a></li>
+        <li><a href="#cap-filas"><span class="badge">04</span> Filas & Mensagens</a></li>
+        <li><a href="#cap-docker"><span class="badge">05</span> Docker & Portas</a></li>
+        <li><a href="#cap-painel"><span class="badge">06</span> Criação de Fila</a></li>
+        <li><a href="#cap-publicacao"><span class="badge">07</span> Default Exchange</a></li>
+        <li><a href="#cap-consumo"><span class="badge">08</span> Consumo & Ack</a></li>
+        <li><a href="#cap-codigo"><span class="badge">09</span> Código Prático</a></li>
+        <li><a href="#cap-aplicacoes"><span class="badge">10</span> Aplicações & Escala</a></li>
+        <li><a href="#cap-conclusao"><span class="badge">11</span> Conclusão & Ref.</a></li>
+      </ul>
+
+      <div class="sidebar-actions">
+        <button class="btn btn-primary" onclick="window.print()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+          Salvar em PDF / Imprimir
+        </button>
+        <a href="demonstracao-rabbitmq.md" class="btn btn-secondary">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Tutorial Passo a Passo
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Documentation Area -->
+    <main class="main-content">
+
+      <!-- Academic Header Box -->
+      <section class="academic-header">
+        <div class="badge-tag">Manual Técnico & Acadêmico</div>
+        <h1>AMQP via Broker RabbitMQ: Arquitetura, Filas e Implementação Prática</h1>
+        <p class="subtitle">Guia completo para compreensão teórica, orquestração com Docker, roteamento via Default Exchange e consumo confiável em sistemas distribuídos orientados a mensagens.</p>
+        
+        <div class="metadata-grid">
+          <div class="meta-item">
+            <label>Instituição:SENAI / Curso Tecnico em desenvolvimento de sistemas</label>
+            <div class="meta-val"><div Nome="Guilherme Moura"></div></div>
+          </div>
+          <div class="meta-item">
+            <label>Disciplina</label>
+            <div class="meta-val">[Sistemas Distribuídos / Redes / Arquitetura]</div>
+          </div>
+          <div class="meta-item">
+            <label>Aluno(s) / Integrantes</label>
+            <div class="meta-val">[Nome do Aluno:Guilherme Moura / Matrículas]</div>
+          </div>
+          <div class="meta-item">
+            <label>Professor / Orientador</label>
+            <div class="meta-val">[Nome do Professor:Phelipe Curty]</div>
+          </div>
+          <div class="meta-item">
+            <label>Versão do Broker</label>
+            <div class="meta-val" style="color: var(--accent-green); border-color: var(--accent-green);">RabbitMQ 4 (rabbitmq:4-management)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CAPÍTULO 1 -->
+      <article id="cap-intro" class="chapter">
+        <div class="chapter-header">
+          <div class="chapter-num">01</div>
+          <h2>Introdução ao Protocolo AMQP</h2>
+        </div>
+        
+        <p>O <strong>AMQP (Advanced Message Queuing Protocol)</strong> é um protocolo de camada de aplicação aberto e padronizado internacionalmente (pela OASIS e ISO/IEC 19464) concebido especificamente para comunicação assíncrona orientada a mensagens entre sistemas de computação heterogêneos.</p>
+
+        <p>Antes do surgimento do AMQP, a mensageria corporativa (conhecida genericamente como MOM — <em>Message-Oriented Middleware</em>) era dominada por soluções proprietárias fechadas (como IBM MQ e TIBCO). Tais tecnologias impunham forte acoplamento entre fornecedores e inviabilizavam a comunicação nativa direta entre aplicações escritas em ecossistemas distintos sem a criação de adaptadores complexos.</p>
+
+        <div class="card-grid">
+          <div class="tech-card highlight">
+            <div class="card-title"><span class="dot"></span> Protocolo Binário de Rede</div>
+            <p class="card-body">Diferente de protocolos baseados em texto (como HTTP/1.1 ou STOMP), o AMQP opera com frames binários compactos, garantindo baixíssimo overhead de serialização, alta velocidade de tráfego e suporte a multiplexação de canais em conexões TCP persistentes.</p>
+          </div>
+          <div class="tech-card highlight-cyan">
+            <div class="card-title"><span class="dot" style="background: var(--accent-cyan);"></span> Interoperabilidade Total</div>
+            <p class="card-body">Como se trata de um padrão aberto de nível de protocolo (e não apenas uma API de linguagem como JMS no Java), clientes em C#, Go, Python, Node.js, Rust e Java conversam entre si com fidelidade absoluta de payload e metadados.</p>
+          </div>
+          <div class="tech-card highlight-purple">
+            <div class="card-title"><span class="dot" style="background: var(--accent-purple);"></span> Desacoplamento Temporal e Espacial</div>
+            <p class="card-body">O produtor não precisa saber o endereço IP nem a existência do consumidor no instante do disparo da mensagem. O broker armazena e protege os dados até que os consumidores estejam online e aptos a processá-los.</p>
+          </div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">💡</div>
+          <div class="callout-content">
+            <h4>Diferença Paradigmática: AMQP vs HTTP REST</h4>
+            <p>No modelo síncrono HTTP/REST tradicional (Request-Response), o cliente bloqueia ou depende da resposta imediata do servidor receptor (acoplamento temporal e de disponibilidade). Se o servidor receptor estiver fora do ar ou sobrecarregado, o cliente falha. No AMQP, a comunicação é declarada por eventos e tarefas assíncronas: o broker atua como intermediário infalível, absorvendo oscilações bruscas de carga (<em>load smoothing</em>).</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- CAPÍTULO 2 -->
+      <article id="cap-broker" class="chapter">
+        <div class="chapter-header">
+          <div class="chapter-num">02</div>
+          <h2>O que é um Message Broker e o Papel do RabbitMQ</h2>
+        </div>
+
+        <p>Um <strong>Message Broker</strong> (ou corretor de mensagens) é um componente arquitetural intermediário encarregado de receber mensagens de sistemas emissores, validar suas regras de endereçamento, enfileirá-las com segurança em buffers e despachá-las aos destinos corretos.</p>
+
+        <p>O <strong>RabbitMQ</strong> é o broker de mensageria de código aberto mais amplamente adotado no mundo da engenharia de software moderno. Desenvolvido sobre a plataforma <strong>Erlang/OTP</strong>, ele foi concebido com os princípios que tornaram o setor de telecomunicações referência global em confiabilidade:</p>
+
+        <ul>
+          <li><strong>Alta Concorrência Massiva:</strong> Erlang opera com processos leves gerenciados em espaço de usuário (BEAM VM), permitindo que centenas de milhares de conexões, canais e filas coexistam com consumo mínimo de memória.</li>
+          <li><strong>Tolerância a Falhas e Recuperação (Crash-Only Design):</strong> A árvore de supervisão (supervision trees) do OTP reinicia componentes que apresentam falhas sem derrubar o broker ou perder mensagens persistidas.</li>
+          <li><strong>Suporte Nativo ao AMQP 0-9-1:</strong> O RabbitMQ é a implementação de referência mundial para o perfil AMQP 0-9-1, além de suportar AMQP 1.0, MQTT, STOMP e RabbitMQ Streams via plugins.</li>
+        </ul>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Característica</th>
+                <th>Comunicação Síncrona Direta (HTTP/REST)</th>
+                <th>Mensageria Assíncrona com RabbitMQ Broker</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Acoplamento Temporal</strong></td>
+                <td>Alto: Ambas as partes precisam estar ativas e disponíveis simultaneamente.</td>
+                <td>Nenhum: O produtor envia e segue sua execução; o consumidor processa no seu tempo.</td>
+              </tr>
+              <tr>
+                <td><strong>Resiliência a Falhas</strong></td>
+                <td>Baixa: Se o serviço destino falhar, a requisição é perdida a menos que haja retentativas ativas.</td>
+                <td>Alta: O broker retém a mensagem na fila até que o consumidor se recupere e confirme o ACK.</td>
+              </tr>
+              <tr>
+                <td><strong>Controle de Vazão (Backpressure)</strong></td>
+                <td>Difícil: O receptor pode sofrer saturação de conexões e colapsar sob surtos de requisições.</td>
+                <td>Nativo: Consumidores controlam sua velocidade de ingestão via <code>prefetch count</code> (QoS).</td>
+              </tr>
+              <tr>
+                <td><strong>Topologia de Entrega</strong></td>
+                <td>Ponto-a-ponto (1:1 direto).</td>
+                <td>1:1 (Fila de Tarefas), 1:N (Pub/Sub Fanout), Roteamento por Tópicos (Topic) e Cabeçalhos.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- CAPÍTULO 3 -->
+      <article id="cap-arquitetura" class="chapter">
+        <div class="chapter-header">
+          <div class="chapter-num">03</div>
+          <h2>Arquitetura AMQP 0-9-1 Detalhada</h2>
+        </div>
+
+        <p>A especificação <strong>AMQP 0-9-1</strong> estabelece um modelo conceitual rigoroso e modular. Uma das confusões mais comuns de desenvolvedores iniciantes é acreditar que o produtor envia mensagens diretamente para a fila. <strong>No AMQP 0-9-1 isso nunca acontece: produtores só publicam mensagens em Exchanges!</strong></p>
+
+        <!-- Diagram 1 -->
+        <div class="diagram-container">
+          <div class="diagram-header">
+            <span class="diagram-title">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+              Diagrama Arquitetural AMQP 0-9-1
+            </span>
+            <span style="font-size: 0.75rem; color: var(--accent-green); font-family: var(--font-mono);">assets/amqp-architecture.svg</span>
+          </div>
+          <img src="assets/amqp-architecture.svg" alt="Arquitetura AMQP 0-9-1" class="diagram-img">
+          <p class="diagram-caption">Figura 1: Arquitetura completa de roteamento no RabbitMQ — Produtores publicam em Exchanges, que avaliam Bindings para entregar a Queues consumidas por Consumers.</p>
+        </div>
+
+        <h3>Os Cinco Pilares do Modelo</h3>
+
+        <div class="card-grid">
+          <div class="tech-card highlight">
+            <div class="card-title">1. Producer (Publicador)</div>
+            <p class="card-body">A aplicação cliente que gera dados ou eventos de negócio e os despacha ao broker. O produtor endereça sua mensagem especificando o <strong>Exchange</strong> de destino, uma <strong>Routing Key</strong> (chave de roteamento) e propriedades adicionais (como persistência, expiração e cabeçalhos).</p>
+          </div>
+
+          <div class="tech-card highlight-cyan">
+            <div class="card-title">2. Exchange (Roteador Central)</div>
+            <p class="card-body">O componente lógico responsável por inspecionar os metadados da mensagem (Routing Key, Headers) e decidir para quais filas aquela mensagem deve ser clonada e despachada. Existem quatro tipos padronizados: <em>Direct</em>, <em>Fanout</em>, <em>Topic</em> e <em>Headers</em>, além do especial <em>Default Exchange</em>.</p>
+          </div>
+
+          <div class="tech-card highlight-yellow">
+            <div class="card-title">3. Binding (A Regra de Ligação)</div>
+            <p class="card-body">A relação ou "ponte" configurada entre uma fila e um Exchange. O Binding define a regra ou chave de associação (<em>binding key</em>) sob a qual a fila aceita receber mensagens encaminhadas por aquele Exchange específico.</p>
+          </div>
+
+          <div class="tech-card highlight-purple">
+            <div class="card-title">4. Queue (Fila de Buffer)</div>
+            <p class="card-body">Estrutura FIFO (First-In, First-Out) em memória ou disco que armazena mensagens em sequência ordenada até que consumidores as processem. Uma fila possui nome único por Virtual Host e atributos como durabilidade e expiração.</p>
+          </div>
+
+          <div class="tech-card highlight">
+            <div class="card-title">5. Consumer (Consumidor)</div>
+            <p class="card-body">Aplicação trabalhadora (<em>worker</em>) que se inscreve em uma fila específica para receber, processar a carga útil (payload) e emitir o sinal de confirmação (ACK) para liberação da memória no broker.</p>
+          </div>
+        </div>
+
+        <h3>Canais (Channels) vs Conexões TCP</h3>
+        <p>Estabelecer conexões TCP/IP completas exige múltiplos handshakes de rede, autenticações de credenciais e negociação de parâmetros TLS. Em ambientes com dezenas de threads, abrir uma conexão TCP por thread esgotaria portas e recursos do sistema operacional.</p>
+        <p>O AMQP resolve essa restrição implementando <strong>Channels</strong>: conexões lógicas leves e bidirecionais multiplexadas dentro de uma única conexão TCP física real. Uma única conexão pode hospedar centenas de canais simultâneos isolados com custo computacional desprezível.</p>
+      </article>
+
+      <!-- CAPÍTULO 4 -->
+      <article id="cap-filas" class="chapter">
+        <div class="chapter-header">
+          <div class="chapter-num">04</div>
+          <h2>Funcionamento das Filas, Mensagens e Confirmações (ACK)</h2>
+        </div>
+
+        <p>A confiabilidade corporativa do RabbitMQ apoia-se em mecanismos determinísticos de proteção de dados contra falhas de hardware, reinicializações de contêineres e quedas inesperadas de serviços clientes.</p>
+
+        <!-- Diagram 2 -->
+        <div class="diagram-container">
+          <div class="diagram-header">
+            <span class="diagram-title">Ciclo de Vida da Mensagem e Máquina de Estados</span>
+            <span style="font-size: 0.75rem; color: var(--accent-green); font-family: var(--font-mono);">assets/queue-lifecycle.svg</span>
+          </div>
+          <img src="assets/queue-lifecycle.svg" alt="Ciclo de Vida da Mensagem no RabbitMQ" class="diagram-img">
+          <p class="diagram-caption">Figura 2: Estados Ready, Unacknowledged e o impacto do ACK manual vs NACK/Requeue.</p>
+        </div>
+
+        <h3>Propriedades Críticas de Durabilidade</h3>
+        <ul>
+          <li><strong>Queue Durability (Fila Durável):</strong> Declarar uma fila com <code>durable: true</code> garante que os metadados da fila sobrevivam a uma reinicialização do broker RabbitMQ. Se a fila for declarada como <code>transient</code> (não-durável), ela será eliminada caso o servidor pare.</li>
+          <li><strong>Message Persistence (Mensagem Persistente):</strong> Para que a mensagem sobreviva à reinicialização, o produtor precisa marcá-la com o modo de entrega <code>delivery_mode: 2</code> (persistente). Mensagens persistentes dentro de filas duráveis são gravadas em journal de disco pelo broker.</li>
+          <li><strong>Confirmações de Publicador (Publisher Confirms):</strong> Extensão AMQP em que o broker envia um recibo de confirmação assíncrono ao produtor indicando que a mensagem foi escrita com segurança em disco ou roteada às filas duráveis.</li>
+        </ul>
+
+        <h3>O Mecanismo de Acknowledgment (ACK)</h3>
+        <p>Quando um consumidor solicita mensagens de uma fila, o RabbitMQ monitora o ciclo de atendimento através do protocolo de reconhecimento:</p>
+        <div class="card-grid">
+          <div class="tech-card highlight">
+            <div class="card-title">Basic.Ack (Positivo)</div>
+            <p class="card-body">O consumidor processou o trabalho com êxito e notifica o broker. O RabbitMQ remove definitivamente a mensagem da fila, liberando espaço em memória e disco.</p>
+          </div>
+          <div class="tech-card highlight-yellow">
+            <div class="card-title">Basic.Nack / Basic.Reject</div>
+            <p class="card-body">O consumidor encontrou uma falha de negócio ou infraestrutura e rejeita a mensagem. Se o parâmetro <code>requeue=true</code> for passado, ela retorna ao topo da fila para ser reentregue; se <code>requeue=false</code>, a mensagem é descartada ou despachada para uma <strong>Dead Letter Exchange (DLX)</strong>.</p>
+          </div>
+          <div class="tech-card highlight-cyan">
+            <div class="card-title">Auto-Ack vs Manual Ack</div>
+            <p class="card-body">No modo <code>autoAck: true</code>, o broker considera a mensagem entregue no milissegundo em que ela sai pela placa de rede. Se a aplicação quebrar antes de processá-la, a mensagem é perdida para sempre. Em ambientes acadêmicos e profissionais sérios, <strong>utiliza-se sempre Manual Ack (<code>autoAck: false</code>)</strong>.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- CAPÍTULO 5 -->
+      <article id="cap-docker" class="chapter">
+        <div class="chapter-header">
+          <div class="chapter-num">05</div>
+          <h2>Instalação do RabbitMQ 4 com Docker</h2>
+        </div>
+
+        <p>Para este laboratório prático acadêmico, utilizamos a versão mais moderna do broker: <strong>RabbitMQ 4</strong>, empacotada na imagem oficial do Docker Hub que inclui o plugin de gerenciamento gráfico web (Management Plugin).</p>
+
+        <!-- Diagram 3 -->
+        <div class="diagram-container">
+          <div class="diagram-header">
+            <span class="diagram-title">Mapeamento de Portas e Topologia Docker</span>
+            <span style="font-size: 0.75rem; color: var(--accent-green); font-family: var(--font-mono);">assets/docker-ports.svg</span>
+          </div>
+          <img src="assets/docker-ports.svg" alt="Portas do RabbitMQ no Docker" class="diagram-img">
+          <p class="diagram-caption">Figura 3: Separação de canais: porta 5672 para clientes AMQP e porta 15672 para gerenciamento HTTP web.</p>
+        </div>
+
+        <h3>O Comando de Inicialização</h3>
+        <p>Execute o comando abaixo no terminal da sua máquina host (PowerShell, Bash ou CMD):</p>
+
+        <div class="code-wrapper">
+          <div class="code-header">
+            <span class="code-lang">docker terminal</span>
+            <button class="btn-copy" onclick="copyCode(this)">Copiar Comando</button>
+          </div>
+          <pre><code>docker run -d --name rabbitmq-lab -p 5672:5672 -p 15672:15672 rabbitmq:4-management</code></pre>
+        </div>
+
+        <h3>Detalhamento dos Parâmetros do Comando</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Parâmetro</th>
+                <th>Finalidade Técnica</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>-d</code> (detach)</td>
+                <td>Executa o contêiner em segundo plano no daemon do Docker, liberando o terminal.</td>
+              </tr>
+              <tr>
+                <td><code>--name rabbitmq-lab</code></td>
+                <td>Atribui um identificador amigável ao contêiner para facilitar comandos como <code>docker logs</code> ou <code>docker stop</code>.</td>
+              </tr>
+              <tr>
+                <td><code>-p 5672:5672</code></td>
+                <td>Mapeia a porta nativa do protocolo binário AMQP 0-9-1 da máquina host para a porta interna do contêiner. É por esta porta que produtores e consumidores de código conectam-se.</td>
+              </tr>
+              <tr>
+                <td><code>-p 15672:15672</code></td>
+                <td>Mapeia a porta HTTP do servidor web embutido do RabbitMQ Management Plugin. Permite abrir a interface administrativa visual no navegador.</td>
+              </tr>
+              <tr>
+                <td><code>rabbitmq:4-management</code></td>
+                <td>Tag da imagem oficial contendo o RabbitMQ 4 com Erlang 26/27 e o plugin Web Management pré-habilitado.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-content">
+            <h4>Segurança e Escopo das Credenciais guest / guest</h4>
+            <p>O RabbitMQ possui, por padrão de fábrica, o usuário administrativo <code>guest</code> com senha <code>guest</code>. Por rigor de segurança da especificação, este usuário <strong>só tem permissão de autenticação a partir de conexões de loopback local (<code>localhost</code> / <code>127.0.0.1</code>)</strong>. Em ambientes corporativos de produção, deve-se criar usuários dedicados com permissões explícitas em Virtual Hosts isolados e desativar a conta guest.</p>
+          </div>
+        </div>
+
+        <h3>Acesso ao Painel Administrativo</h3>
+        <p>Com o contêiner rodando, abra o navegador e acesse:</p>
+        <p><a href="http://localhost:15672" target="_blank" style="color: var(--accent-green); font-family: var(--font-mono); font-weight: 700; text-decoration: underline;">http://localhost:15672</a></p>
+
+        <!-- Placeholder 1: Dashboard -->
+        <div class="diagram-container">
+          <div class="diagram-header">
+            <span class="diagram-title">Espaço para Captura Real: Overview Dashboard</span>
+            <span style="font-size: 0.75rem; color: var(--accent-green); font-family: var(--font-mono);">assets/placeholder-dashboard.svg</span>
+          </div>
+          <img src="assets/placeholder-dashboard.svg" alt="Placeholder Dashboard RabbitMQ" class="diagram-img">
+          <p class="diagram-caption">Figura 4: Espaço reservado para inclusão da captura de tela do painel web após autenticação com guest/guest.</p>
+        </div>
+      </article>
+
+      <!-- CAPÍTULO 6 -->
+      <article id="cap-painel" class="chapter">
+        <div class="chapter-header">
+          <div class="chapter-num">06</div>
+          <h2>Criação Prática da Fila fila_teste</h2>
+        </div>
+
+        <p>Para o nosso experimento acadêmico, criamos uma fila padronizada denominada <code>fila_teste</code> através da interface web do RabbitMQ Management.</p>
+
+        <ol class="steps-list">
+          <li class="step-item">
+            <div class="step-badge">1</div>
+            <div class="step-details">
+              <h4>Navegue até a Aba Queues</h4>
+              <p>No menu superior do painel administrativo, clique na guia <strong>Queues</strong> (Filas). Essa página lista todas as filas ativas no Virtual Host selecionado (por padrão, <code>/</code>).</p>
+            </div>
+          </li>
+
+          <li class="step-item">
+            <div class="step-badge">2</div>
+            <div class="step-details">
+              <h4>Expanda a Seção "Add a new queue"</h4>
+              <p>Clique no bloco retrátil <em>Add a new queue</em> para exibir o formulário de declaração de fila.</p>
+            </div>
+          </li>
+
+          <li class="step-item">
+            <div class="step-badge">3</div>
+            <div class="step-details">
+              <h4>Configure os Parâmetros da Fila</h4>
+              <p>Preencha os campos com os valores técnicos:</p>
+              <ul>
+                <li><strong>Type:</strong> <code>Classic</code> (ou Quorum se desejar consenso distribuído Raft). Manter Classic para fins acadêmicos gerais.</li>
+                <li><strong>Name:</strong> <code>fila_teste</code> (atenção para caracteres minúsculos sem espaços).</li>
+                <li><strong>Durability:</strong> <code>Durable</code> (garante que a fila sobreviva a reinicializações).</li>
+                <li><strong>Auto delete:</strong> <code>No</code>.</li>
+                <li><strong>Arguments:</strong> Deixar em branco (sem TTL ou limites adicionais por enquanto).</li>
+              </ul>
+            </div>
+          </li>
+
+          <li class="step-item">
+            <div class="step-badge">4</div>
+            <div class="step-details">
+              <h4>Finalize a Declaração</h4>
+              <p>Clique no botão <strong>Add queue</strong>. A fila aparecerá imediatamente na tabela com contadores de mensagens zerados (<em>Ready: 0, Unacked: 0, Total: 0</em>).</p>
+            </div>
+          </li>
+        </ol>
+
+        <!-- Placeholder 2: Criação de Fila -->
+        <div class="diagram-container">
+          <div class="diagram-header">
+            <span class="diagram-title">Espaço para Captura Real: Criação da Fila</span>
+            <span style="font-size: 0.75rem; color: var(--accent-green); font-family: var(--font-mono);">assets/placeholder-queue-create.svg</span>
+          </div>
+          <img src="assets/placeholder-queue-create.svg" alt="Placeholder Criação de Fila" class="diagram-img">
+          <p class="diagram-caption">Figura 5: Espaço reservado para screenshot do formulário de criação da fila_teste preenchido e confirmado.</p>
+        </div>
+      </article>
+
+      <!-- CAPÍTULO 7 -->
+      <article id="cap-publicacao" class="chapter">
+        <div class="chapter-header">
+          <div class="chapter-num">07</div>
+          <h2>Publicação de Mensagens e o Mecanismo do Default Exchange</h2>
+        </div>
+
+        <p>Um dos conceitos mais refinados do AMQP 0-9-1 é o funcionamento do <strong>Default Exchange</strong> (Exchange Padrão, também denominado tecnicamente na especificação como <em>Nameless Exchange</em> ou Exchange de nome vazio <code>""</code>).</p>
+
+        <!-- Diagram 4 -->
+        <div class="diagram-container">
+          <div class="diagram-header">
+            <span class="diagram-title">Mecanismo do Default Exchange</span>
+            <span style="font-size: 0.75rem; color: var(--accent-green); font-family: var(--font-mono);">assets/default-exchange-flow.svg</span>
+          </div>
+          <img src="assets/default-exchange-flow.svg" alt="Fluxo do Default Exchange no RabbitMQ" class="diagram-img">
+          <p class="diagram-caption">Figura 6: Roteamento implícito do Default Exchange: toda fila criada é automaticamente vinculada a ele com uma chave igual ao próprio nome da fila.</p>
+        </div>
+
+        <h3>Por Que o Default Exchange é Tão Importante?</h3>
+        <p>No AMQP, todo broker cria automaticamente ao inicializar um Exchange do tipo <code>direct</code> sem nome (string vazia <code>""</code>). A especificação impõe uma regra obrigatória:</p>
+        
+        <div class="callout callout-info">
+          <div class="callout-icon">📌</div>
+          <div class="callout-content">
+            <h4>Regra Fundamental da Especificação AMQP 0-9-1:</h4>
+            <p><em>"Toda fila criada no broker é automaticamente vinculada (bound) ao Default Exchange com uma chave de roteamento (binding key) rigorosamente idêntica ao nome da própria fila."</em></p>
+          </div>
+        </div>
+
+        <p>Assim, quando publicamos uma mensagem apontando para o Exchange <code>""</code> (vazio) e definimos a <strong>Routing Key</strong> como <code>fila_teste</code>, o Default Exchange encaminha a mensagem com precisão cirúrgica diretamente para a fila <code>fila_teste</code>!</p>
+
+        <h3>Passo a Passo da Publicação no Painel Web:</h3>
+        <ol class="steps-list">
+          <li class="step-item">
+            <div class="step-badge">1</div>
+            <div class="step-details">
+              <h4>Acesse a Fila fila_teste</h4>
+              <p>Na lista de filas, clique no nome <strong>fila_teste</strong> para abrir sua página detalhada de monitoramento.</p>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-badge">2</div>
+            <div class="step-details">
+              <h4>Expanda a Seção "Publish message"</h4>
+              <p>Role a tela para baixo até encontrar o acordeão <strong>Publish message</strong>.</p>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-badge">3</div>
+            <div class="step-details">
+              <h4>Defina as Propriedades e o Payload</h4>
+              <p>Observe que o campo de exchange já está implicitamente associado à fila, ou pode ser preenchido como vazio com a routing key correspondente:</p>
+              <ul>
+                <li><strong>Routing key:</strong> <code>fila_teste</code></li>
+                <li><strong>Delivery mode:</strong> <code>2 - Persistent</code> (assegura escrita em disco)</li>
+                <li><strong>Headers:</strong> Deixar vazio ou adicionar <code>contentType: application/json</code></li>
+                <li><strong>Payload:</strong> Digite a mensagem, por exemplo: <code>{"id": 101, "evento": "MATRICULA_CONFIRMADA", "aluno": "Academico 01", "timestamp": "2026-11-11T16:00:00Z"}</code></li>
+              </ul>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-badge">4</div>
+            <div class="step-details">
+              <h4>Clique em "Publish message"</h4>
+              <p>O broker exibirá um aviso flutuante verde <code>Message published</code>. Na parte superior da página, a métrica <strong>Messages: Ready</strong> mudará instantaneamente de <strong>0 para 1</strong>!</p>
+            </div>
+          </li>
+        </ol>
+
+        <!-- Placeholder 3: Publicação -->
+        <div class="diagram-container">
+          <div class="diagram-header">
+            <span class="diagram-title">Espaço para Captura Real: Publicação de Mensagem</span>
+            <span style="font-size: 0.75rem; color: var(--accent-green); font-family: var(--font-mono);">assets/placeholder-publish.svg</span>
+          </div>
+          <img src="assets/placeholder-publish.svg" alt="Placeholder Publicação de Mensagem" class="diagram-img">
+          <p class="diagram-caption">Figura 7: Espaço reservado para captura de tela do painel demonstrando o payload publicado e o alerta "Message published".</p>
+        </div>
+      </article>
+
+      <!-- CAPÍTULO 8 -->
+      <article id="cap-consumo" class="chapter">
+        <div class="chapter-header">
+          <div class="chapter-num">08</div>
+          <h2>Recebimento, Inspeção e Confirmação de Mensagens</h2>
+        </div>
+
+        <p>Uma vez que a mensagem reside com segurança no buffer da <code>fila_teste</code> (com status <em>Ready: 1</em>), qualquer consumidor autorizado pode requisitá-la ou escutá-la.</p>
+
+        <p>No próprio painel de administração web do RabbitMQ, existe uma ferramenta de diagnóstico e teste manual chamada <strong>Get messages</strong>, que permite inspecionar ou drenar mensagens sem necessidade imediata de compilar código externo.</p>
+
+        <h3>Como Utilizar a Seção "Get messages":</h3>
+        <ol class="steps-list">
+          <li class="step-item">
+            <div class="step-badge">1</div>
+            <div class="step-details">
+              <h4>Localize a Seção Get messages</h4>
+              <p>Abaixo da área de publicação, abra o painel retrátil <strong>Get messages</strong>.</p>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-badge">2</div>
+            <div class="step-details">
+              <h4>Selecione a Política de Requeue / Ack</h4>
+              <p>O campo <strong>Ack Mode</strong> oferece opções fundamentais:</p>
+              <ul>
+                <li><strong>Nack message requeue true:</strong> O painel lê o conteúdo da mensagem e solicita ao RabbitMQ que a mantenha na fila (requeue). Ideal para inspeção sem consumir.</li>
+                <li><strong>Automatic ack:</strong> O painel lê a mensagem e envia o ACK positivo imediatamente. A mensagem é consumida e expurgada da fila (o contador Ready volta a 0).</li>
+                <li><strong>Reject requeue false:</strong> Rejeita e descarta a mensagem.</li>
+              </ul>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-badge">3</div>
+            <div class="step-details">
+              <h4>Clique em "Get Message(s)"</h4>
+              <p>O painel exibe um bloco com todos os metadados técnicos recebidos: <em>Exchange</em>, <em>Routing Key</em>, <em>Redelivered</em> (booleano indicando se já foi reentregue), <em>Properties</em> e o corpo do <em>Payload</em> decodificado em UTF-8.</p>
+            </div>
+          </li>
+        </ol>
+
+        <!-- Placeholder 4: Consumo -->
+        <div class="diagram-container">
+          <div class="diagram-header">
+            <span class="diagram-title">Espaço para Captura Real: Inspeção e Consumo</span>
+            <span style="font-size: 0.75rem; color: var(--accent-green); font-family: var(--font-mono);">assets/placeholder-consume.svg</span>
+          </div>
+          <img src="assets/placeholder-consume.svg" alt="Placeholder Consumo de Mensagem" class="diagram-img">
+          <p class="diagram-caption">Figura 8: Espaço reservado para captura de tela dos dados inspecionados via Get messages (Payload, Headers e contadores atualizados).</p>
+        </div>
+      </article>
+
+      <!-- CAPÍTULO 9 -->
+      <article id="cap-codigo" class="chapter">
+        <div class="chapter-header">
+          <div class="chapter-num">09</div>
+          <h2>Implementação Prática com Código de Aplicação</h2>
+        </div>
+
+        <p>A interface web do RabbitMQ é perfeita para aprendizado e administração, mas na engenharia de software real a comunicação é realizada por microsserviços via bibliotecas clientes AMQP. Apresentamos implementações completas e resilientes em duas linguagens amplamente utilizadas no meio acadêmico e no mercado:</p>
+
+        <h3>Exemplo 1: Node.js / TypeScript com <code>amqplib</code></h3>
+
+        <div class="code-wrapper">
+          <div class="code-header">
+            <span class="code-lang">producer.ts (Node.js)</span>
+            <button class="btn-copy" onclick="copyCode(this)">Copiar Código</button>
+          </div>
+          <pre><code><span class="token-kw">import</span> amqp <span class="token-kw">from</span> <span class="token-str">'amqplib'</span>;
+
+<span class="token-kw">async function</span> <span class="token-fn">publicarMensagem</span>() {
+  <span class="token-com">// 1. Conexão TCP multiplexada com o RabbitMQ Broker</span>
+  <span class="token-kw">const</span> connection = <span class="token-kw">await</span> amqp.<span class="token-fn">connect</span>(<span class="token-str">'amqp://guest:guest@localhost:5672'</span>);
+  <span class="token-kw">const</span> channel = <span class="token-kw">await</span> connection.<span class="token-fn">createChannel</span>();
+
+  <span class="token-kw">const</span> queueName = <span class="token-str">'fila_teste'</span>;
+  <span class="token-kw">const</span> payload = {
+    evento: <span class="token-str">'PAGAMENTO_APROVADO'</span>,
+    valor: <span class="token-num">250.75</span>,
+    dataHora: <span class="token-kw">new</span> <span class="token-fn">Date</span>().<span class="token-fn">toISOString</span>()
+  };
+
+  <span class="token-com">// 2. Declaração idempotente da fila durável</span>
+  <span class="token-kw">await</span> channel.<span class="token-fn">assertQueue</span>(queueName, { durable: <span class="token-kw">true</span> });
+
+  <span class="token-com">// 3. Publicação via Default Exchange ("") usando o nome da fila como routing key</span>
+  <span class="token-kw">const</span> enviado = channel.<span class="token-fn">sendToQueue</span>(
+    queueName,
+    Buffer.<span class="token-fn">from</span>(JSON.<span class="token-fn">stringify</span>(payload)),
+    { persistent: <span class="token-kw">true</span>, contentType: <span class="token-str">'application/json'</span> }
+  );
+
+  console.<span class="token-fn">log</span>(<span class="token-str">`[✓] Mensagem publicada na fila "${queueName}":`</span>, payload);
+
+  <span class="token-kw">await</span> channel.<span class="token-fn">close</span>();
+  <span class="token-kw">await</span> connection.<span class="token-fn">close</span>();
+}
+
+<span class="token-fn">publicarMensagem</span>().<span class="token-fn">catch</span>(console.error);</code></pre>
+        </div>
+
+        <div class="code-wrapper">
+          <div class="code-header">
+            <span class="code-lang">consumer.ts (Node.js)</span>
+            <button class="btn-copy" onclick="copyCode(this)">Copiar Código</button>
+          </div>
+          <pre><code><span class="token-kw">import</span> amqp <span class="token-kw">from</span> <span class="token-str">'amqplib'</span>;
+
+<span class="token-kw">async function</span> <span class="token-fn">iniciarConsumidor</span>() {
+  <span class="token-kw">const</span> connection = <span class="token-kw">await</span> amqp.<span class="token-fn">connect</span>(<span class="token-str">'amqp://guest:guest@localhost:5672'</span>);
+  <span class="token-kw">const</span> channel = <span class="token-kw">await</span> connection.<span class="token-fn">createChannel</span>();
+
+  <span class="token-kw">const</span> queueName = <span class="token-str">'fila_teste'</span>;
+  <span class="token-kw">await</span> channel.<span class="token-fn">assertQueue</span>(queueName, { durable: <span class="token-kw">true</span> });
+
+  <span class="token-com">// Controle de vazão (QoS): entrega no máximo 1 mensagem por vez antes do ACK</span>
+  channel.<span class="token-fn">prefetch</span>(<span class="token-num">1</span>);
+
+  console.<span class="token-fn">log</span>(<span class="token-str">`[*] Aguardando mensagens em "${queueName}". Pressione CTRL+C para sair.`</span>);
+
+  channel.<span class="token-fn">consume</span>(queueName, (msg) => {
+    <span class="token-kw">if</span> (msg !== <span class="token-kw">null</span>) {
+      <span class="token-kw">try</span> {
+        <span class="token-kw">const</span> dados = JSON.<span class="token-fn">parse</span>(msg.content.<span class="token-fn">toString</span>());
+        console.<span class="token-fn">log</span>(<span class="token-str">'[→] Processando payload:'</span>, dados);
+
+        <span class="token-com">// Confirmação manual positiva após processamento bem-sucedido</span>
+        channel.<span class="token-fn">ack</span>(msg);
+        console.<span class="token-fn">log</span>(<span class="token-str">'[✓] ACK confirmado ao broker.'</span>);
+      } <span class="token-kw">catch</span> (err) {
+        console.<span class="token-fn">error</span>(<span class="token-str">'[✗] Erro no processamento. Rejeitando com requeue:'</span>, err);
+        channel.<span class="token-fn">nack</span>(msg, <span class="token-kw">false</span>, <span class="token-kw">true</span>);
+      }
+    }
+  }, { noAck: <span class="token-kw">false</span> });
+}
+
+<span class="token-fn">iniciarConsumidor</span>().<span class="token-fn">catch</span>(console.error);</code></pre>
+        </div>
+
+        <h3>Exemplo 2: Python com biblioteca <code>pika</code></h3>
+
+        <div class="code-wrapper">
+          <div class="code-header">
+            <span class="code-lang">consumer.py (Python 3)</span>
+            <button class="btn-copy" onclick="copyCode(this)">Copiar Código</button>
+          </div>
+          <pre><code><span class="token-kw">import</span> pika
+<span class="token-kw">import</span> json
+
+<span class="token-kw">def</span> <span class="token-fn">callback</span>(ch, method, properties, body):
+    payload = json.loads(body.decode(<span class="token-str">'utf-8'</span>))
+    print(f<span class="token-str">" [→] Mensagem recebida: {payload}"</span>)
+    
+    <span class="token-com"># Confirmação manual do processamento com sucesso</span>
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+    print(<span class="token-str">" [✓] ACK enviado com sucesso."</span>)
+
+credentials = pika.PlainCredentials(<span class="token-str">'guest'</span>, <span class="token-str">'guest'</span>)
+parameters = pika.ConnectionParameters(<span class="token-str">'localhost'</span>, <span class="token-num">5672</span>, <span class="token-str">'/'</span>, credentials)
+
+connection = pika.BlockingConnection(parameters)
+channel = connection.channel()
+
+channel.queue_declare(queue=<span class="token-str">'fila_teste'</span>, durable=<span class="token-kw">True</span>)
+channel.basic_qos(prefetch_count=<span class="token-num">1</span>)
+
+channel.basic_consume(queue=<span class="token-str">'fila_teste'</span>, on_message_callback=callback, auto_ack=<span class="token-kw">False</span>)
+
+print(<span class="token-str">' [*] Aguardando mensagens. Pressione CTRL+C para sair.'</span>)
+channel.start_consuming()</code></pre>
+        </div>
+      </article>
+
+      <!-- CAPÍTULO 10 -->
+      <article id="cap-aplicacoes" class="chapter">
+        <div class="chapter-header">
+          <div class="chapter-num">04</div>
+          <h2>Vantagens, Aplicações e Padrões Arquiteturais</h2>
+        </div>
+
+        <p>A arquitetura de mensageria baseada em AMQP e RabbitMQ é aplicada nos principais pilares de sistemas corporativos modernos:</p>
+
+        <div class="card-grid">
+          <div class="tech-card highlight">
+            <div class="card-title">Processamento em Segundo Plano</div>
+            <p class="card-body">Tarefas computacionalmente pesadas (como renderização de vídeos, geração de relatórios PDF, processamento de inteligência artificial ou envio em lote de e-mails) são delegadas a filas assíncronas sem bloquear o usuário na tela da aplicação web.</p>
+          </div>
+
+          <div class="tech-card highlight-cyan">
+            <div class="card-title">Amortecimento de Carga (Load Leveling)</div>
+            <p class="card-body">Em eventos com picos imprevisíveis (Black Friday, inscrições universitárias, votações), a fila atua como um reservatório elástico. O banco de dados e os serviços internos continuam operando em sua capacidade ideal e constante sem sobrecarga.</p>
+          </div>
+
+          <div class="tech-card highlight-yellow">
+            <div class="card-title">Orquestração em Microsserviços</div>
+            <p class="card-body">Permite coordenar transações distribuídas (padrão Saga Coreografada) e publicar eventos de domínio (<em>Domain Events</em>) onde múltiplos subsistemas reagem a uma única ação sem conhecer os detalhes internos uns dos outros.</p>
+          </div>
+
+          <div class="tech-card highlight-purple">
+            <div class="card-title">Distribuição de Carga Competitiva</div>
+            <p class="card-body">Múltiplas instâncias de consumidores podem subscrever a mesma fila (<em>Competing Consumers Pattern</em>). O RabbitMQ distribui as mensagens de modo Round-Robin justo respeitando o prefetch de cada trabalhador, escalando horizontalmente em segundos.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- CAPÍTULO 11 -->
+      <article id="cap-conclusao" class="chapter">
+        <div class="chapter-header">
+          <div class="chapter-num">11</div>
+          <h2>Conclusão e Referências Oficiais</h2>
+        </div>
+
+        <p>O estudo do protocolo <strong>AMQP 0-9-1</strong> em conjunto com o broker <strong>RabbitMQ 4</strong> demonstra de maneira prática e inequívoca os benefícios do desacoplamento de software. Ao compreender que os publicadores interagem exclusivamente com Exchanges e que as filas atuam como buffers gerenciados com garantias transacionais de persistência e confirmação manual (ACK), o estudante de engenharia e tecnologia adquire a base para projetar sistemas distribuídos resilientes a qualquer escala.</p>
+
+        <p>A separação cirúrgica entre a porta de dados do protocolo (<code>5672</code>) e a porta HTTP do painel de administração (<code>15672</code>), bem como o roteamento inteligente via <em>Default Exchange</em> com chaves de roteamento explícitas, sintetizam os princípios de design de redes industriais de alta fidelidade.</p>
+
+        <h3>Referências Oficiais e Bibliografia Técnica</h3>
+        <ul>
+          <li><strong>OASIS:</strong> <em>Advanced Message Queuing Protocol (AMQP) Version 0-9-1 Specification</em>. OASIS Open Standard. Disponível em: <a href="https://www.amqp.org" target="_blank" style="color: var(--accent-green);">amqp.org</a>.</li>
+          <li><strong>VMware Tanzu / Broadcom:</strong> <em>RabbitMQ Official Documentation: Documentation, Guides, and Tutorials</em>. Disponível em: <a href="https://www.rabbitmq.com/docs" target="_blank" style="color: var(--accent-green);">rabbitmq.com/docs</a>.</li>
+          <li><strong>RabbitMQ 4 Release Notes:</strong> <em>RabbitMQ 4.0 Features: Khepri metadata store, native stream improvements and MQTT 5.0 enhancements</em>. Disponível em: <a href="https://www.rabbitmq.com" target="_blank" style="color: var(--accent-green);">rabbitmq.com</a>.</li>
+          <li><strong>Hohpe, Gregor; Woolf, Bobby:</strong> <em>Enterprise Integration Patterns: Designing, Building, and Deploying Messaging Solutions</em>. Addison-Wesley Professional, 2003.</li>
+          <li><strong>Fowler, Martin:</strong> <em>Patterns of Enterprise Application Architecture</em>. Addison-Wesley, 2002.</li>
+          <li><strong>Docker Inc.:</strong> <em>Official Docker Hub Repository for RabbitMQ: rabbitmq:4-management</em>. Disponível em: <a href="https://hub.docker.com/_/rabbitmq" target="_blank" style="color: var(--accent-green);">hub.docker.com/_/rabbitmq</a>.</li>
+        </ul>
+      </article>
+
+      <!-- Footer -->
+      <footer>
+        <p><strong>Projeto Acadêmico: AMQP via Broker RabbitMQ</strong></p>
+        <p>Desenvolvido para fins didáticos, laboratoriais e de apresentação acadêmica formal.</p>
+        <div class="footer-links">
+          <a href="#reading-progress">Voltar ao Topo</a>
+          <a href="demonstracao-rabbitmq.md">Roteiro de Demonstração</a>
+          <a href="roteiro-de-fala.md">Roteiro de Apresentação</a>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+
+  <script>
+    // Reading progress indicator
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    // Copy to clipboard helper
+    function copyCode(btn) {
+      const pre = btn.closest('.code-wrapper').querySelector('pre');
+      const text = pre.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btn.innerText;
+        btn.innerText = 'Copiado!';
+        btn.style.borderColor = 'var(--accent-green)';
+        btn.style.color = 'var(--accent-green)';
+        setTimeout(() => {
+          btn.innerText = original;
+          btn.style.borderColor = '';
+          btn.style.color = '';
+        }, 2000);
+      });
+    }
+
+    // Active sidebar link on scroll
+    const sections = document.querySelectorAll('.chapter');
+    const navLinks = document.querySelectorAll('.nav-menu a');
+
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (pageYOffset >= sectionTop - 120) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

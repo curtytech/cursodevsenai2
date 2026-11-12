@@ -12,6 +12,6 @@ const trabalhos = [
     { id: "mqtt-pub-sub", tema: "MQTT Pub/Sub", aluno: "Matheus", pasta: "trabalhos-data/MQTT/matheus", caminhoSlide: "trabalhos-data/MQTT/matheus/slides_Matheus.html" },
     { id: "grpc", tema: "gRPC", aluno: "Francisco", pasta: "trabalhos-data/grpc/francisco" },
     { id: "websocket", tema: "WebSocket", aluno: "João Matheus", pasta: "trabalhos-data/websocket/joao-matheus", caminhoSlide: "trabalhos-data/websocket/joao-matheus/index.html" },
-    { id: "amqp", tema: "AMQP", aluno: "Guilherme Moura", pasta: "trabalhos-data/amqp/guilherme-moura" },
+    { id: "amqp", tema: "AMQP", aluno: "Guilherme Moura", pasta: "trabalhos-data/amqp/guilherme-moura", caminhoSlide: "trabalhos-data/amqp/guilherme-moura/index.html" },
     { id: "stomp", tema: "STOMP", aluno: "Lucas Bayão", pasta: "trabalhos-data/stomp/lucas-bayao", caminhoSlide: "trabalhos-data/stomp/lucas-bayao/index.html" },
 ];

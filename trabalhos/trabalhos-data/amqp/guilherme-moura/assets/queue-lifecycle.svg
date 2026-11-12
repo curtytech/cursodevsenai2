@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 460" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070D1E"/>
+      <stop offset="100%" stop-color="#0F1F3D"/>
+    </linearGradient>
+
+    <linearGradient id="cardGrad4" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#152544"/>
+      <stop offset="100%" stop-color="#0F1C35"/>
+    </linearGradient>
+
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#00FF88" />
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F43F5E" />
+    </marker>
+  </defs>
+
+  <rect width="950" height="460" rx="16" fill="url(#bgGrad4)" stroke="#1E293B" stroke-width="2"/>
+
+  <!-- Badge -->
+  <rect x="40" y="28" width="220" height="28" rx="5" fill="#00FF88" fill-opacity="0.12" stroke="#00FF88" stroke-width="1.2"/>
+  <text x="150" y="47" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="12" font-weight="700" text-anchor="middle" letter-spacing="1">CICLO DE VIDA DA MENSAGEM</text>
+
+  <text x="40" y="86" fill="#FFFFFF" font-family="'Segoe UI', Inter, sans-serif" font-size="20" font-weight="700">Estados de Mensagens e Confirmações (ACK / NACK)</text>
+  <text x="40" y="108" fill="#94A3B8" font-family="'Segoe UI', Inter, sans-serif" font-size="13">Garantias de integridade: a mensagem permanece na fila até a confirmação de processamento</text>
+
+  <!-- State 1: Ingress / Ready -->
+  <g transform="translate(40, 150)">
+    <rect width="240" height="180" rx="12" fill="url(#cardGrad4)" stroke="#38BDF8" stroke-width="1.6"/>
+    <circle cx="35" cy="35" r="16" fill="#0284C7" fill-opacity="0.3"/>
+    <text x="35" y="40" fill="#38BDF8" font-family="'Segoe UI', Inter, sans-serif" font-size="12" font-weight="700" text-anchor="middle">1</text>
+    <text x="65" y="40" fill="#FFFFFF" font-family="'Segoe UI', Inter, sans-serif" font-size="15" font-weight="700">Estado: READY</text>
+    <text x="20" y="75" fill="#CBD5E1" font-family="'Segoe UI', Inter, sans-serif" font-size="12">• Mensagem enfileirada no buffer.</text>
+    <text x="20" y="95" fill="#CBD5E1" font-family="'Segoe UI', Inter, sans-serif" font-size="12">• Aguarda um consumidor ativo.</text>
+    <text x="20" y="115" fill="#CBD5E1" font-family="'Segoe UI', Inter, sans-serif" font-size="12">• Se durable + persistent, salva</text>
+    <text x="28" y="132" fill="#38BDF8" font-family="'Segoe UI', Inter, sans-serif" font-size="12">em disco com segurança.</text>
+    <rect x="20" y="145" width="200" height="22" rx="4" fill="#081426"/>
+    <text x="120" y="160" fill="#38BDF8" font-family="monospace" font-size="11" text-anchor="middle">messages_ready: 1</text>
+  </g>
+
+  <!-- Arrow 1 to 2 -->
+  <path d="M 280 240 L 350 240" stroke="#00FF88" stroke-width="2" marker-end="url(#arrGreen)" fill="none"/>
+  <text x="315" y="230" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="10" font-weight="600" text-anchor="middle">Entrega</text>
+
+  <!-- State 2: Unacknowledged -->
+  <g transform="translate(355, 150)">
+    <rect width="250" height="180" rx="12" fill="url(#cardGrad4)" stroke="#F59E0B" stroke-width="1.8"/>
+    <circle cx="35" cy="35" r="16" fill="#D97706" fill-opacity="0.3"/>
+    <text x="35" y="40" fill="#F59E0B" font-family="'Segoe UI', Inter, sans-serif" font-size="12" font-weight="700" text-anchor="middle">2</text>
+    <text x="65" y="40" fill="#FFFFFF" font-family="'Segoe UI', Inter, sans-serif" font-size="15" font-weight="700">UNACKNOWLEDGED</text>
+    <text x="20" y="75" fill="#CBD5E1" font-family="'Segoe UI', Inter, sans-serif" font-size="12">• Entregue ao consumidor.</text>
+    <text x="20" y="95" fill="#CBD5E1" font-family="'Segoe UI', Inter, sans-serif" font-size="12">• Bloqueada para outros clientes.</text>
+    <text x="20" y="115" fill="#CBD5E1" font-family="'Segoe UI', Inter, sans-serif" font-size="12">• Broker aguarda retorno de sucesso</text>
+    <text x="28" y="132" fill="#F59E0B" font-family="'Segoe UI', Inter, sans-serif" font-size="12">ou queda de conexão do cliente.</text>
+    <rect x="20" y="145" width="210" height="22" rx="4" fill="#081426"/>
+    <text x="125" y="160" fill="#F59E0B" font-family="monospace" font-size="11" text-anchor="middle">messages_unacknowledged: 1</text>
+  </g>
+
+  <!-- Transition branches: Ack (Green) and Nack (Red) -->
+  <path d="M 605 210 Q 645 190, 680 190" stroke="#00FF88" stroke-width="2" marker-end="url(#arrGreen)" fill="none"/>
+  <rect x="618" y="175" width="50" height="18" rx="3" fill="#070D1E" stroke="#00FF88" stroke-width="0.8"/>
+  <text x="643" y="188" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="9" font-weight="700" text-anchor="middle">ACK</text>
+
+  <path d="M 605 270 Q 645 290, 680 290" stroke="#F43F5E" stroke-width="2" marker-end="url(#arrRed)" fill="none"/>
+  <rect x="615" y="285" width="55" height="18" rx="3" fill="#070D1E" stroke="#F43F5E" stroke-width="0.8"/>
+  <text x="642" y="298" fill="#F43F5E" font-family="'Segoe UI', Inter, sans-serif" font-size="9" font-weight="700" text-anchor="middle">NACK / Crash</text>
+
+  <!-- Destination A: Processed & Removed -->
+  <g transform="translate(685, 140)">
+    <rect width="225" height="90" rx="10" fill="url(#cardGrad4)" stroke="#00FF88" stroke-width="1.6"/>
+    <text x="20" y="30" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="13" font-weight="700">ACK: Remoção Definitiva</text>
+    <text x="20" y="52" fill="#CBD5E1" font-family="'Segoe UI', Inter, sans-serif" font-size="11">Mensagem processada com êxito.</text>
+    <text x="20" y="70" fill="#94A3B8" font-family="'Segoe UI', Inter, sans-serif" font-size="10">Buffer liberado no RabbitMQ.</text>
+  </g>
+
+  <!-- Destination B: Requeue / DLX -->
+  <g transform="translate(685, 245)">
+    <rect width="225" height="90" rx="10" fill="url(#cardGrad4)" stroke="#F43F5E" stroke-width="1.6"/>
+    <text x="20" y="30" fill="#F43F5E" font-family="'Segoe UI', Inter, sans-serif" font-size="13" font-weight="700">NACK / Requeue / DLX</text>
+    <text x="20" y="52" fill="#CBD5E1" font-family="'Segoe UI', Inter, sans-serif" font-size="11">Falha ou timeout do consumidor.</text>
+    <text x="20" y="70" fill="#94A3B8" font-family="'Segoe UI', Inter, sans-serif" font-size="10">Retorna à fila ou vai para Dead Letter.</text>
+  </g>
+
+  <!-- Bottom Explanatory Bar -->
+  <rect x="40" y="355" width="870" height="80" rx="8" fill="#0A162C" stroke="#1E293B" stroke-width="1.2"/>
+  <text x="60" y="380" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="12" font-weight="700">Garantia At-Least-Once (Pelo menos uma vez):</text>
+  <text x="60" y="400" fill="#CBD5E1" font-family="'Segoe UI', Inter, sans-serif" font-size="11">
+    Se o worker falhar ou sua conexão TCP cair antes do envio do ACK, o RabbitMQ automaticamente detecta o encerramento do canal e reintroduz a mensagem no estado READY para que outro consumidor possa executá-la, eliminando perda de dados.
+  </text>
+  <text x="60" y="420" fill="#94A3B8" font-family="'Segoe UI', Inter, sans-serif" font-size="10">
+    Modo automático (no_ack=True / ack_mode=ack_requeue_false) exclui a mensagem imediatamente no envio, não sendo recomendado para transações críticas.
+  </text>
+</svg>

@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 480" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070D1E"/>
+      <stop offset="100%" stop-color="#0F1F3D"/>
+    </linearGradient>
+
+    <linearGradient id="cardGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#152544"/>
+      <stop offset="100%" stop-color="#0F1C35"/>
+    </linearGradient>
+
+    <marker id="arrow3" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#00FF88" />
+    </marker>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38BDF8" />
+    </marker>
+  </defs>
+
+  <rect width="950" height="480" rx="16" fill="url(#bgGrad3)" stroke="#1E293B" stroke-width="2"/>
+
+  <!-- Badge -->
+  <rect x="40" y="28" width="220" height="28" rx="5" fill="#00FF88" fill-opacity="0.12" stroke="#00FF88" stroke-width="1.2"/>
+  <text x="150" y="47" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="12" font-weight="700" text-anchor="middle" letter-spacing="1">DOCKER &amp; NETWORKING</text>
+
+  <text x="40" y="86" fill="#FFFFFF" font-family="'Segoe UI', Inter, sans-serif" font-size="20" font-weight="700">Mapeamento de Portas e Serviços: RabbitMQ 4 Management</text>
+  <text x="40" y="108" fill="#94A3B8" font-family="'Segoe UI', Inter, sans-serif" font-size="13">Isolamento em contêiner com exposição das portas de protocolo e painel web administrativo</text>
+
+  <!-- HOST MACHINE -->
+  <rect x="40" y="140" width="300" height="250" rx="12" fill="#0B152A" stroke="#334155" stroke-width="1.5"/>
+  <rect x="55" y="155" width="130" height="24" rx="4" fill="#334155" fill-opacity="0.5"/>
+  <text x="120" y="171" fill="#E2E8F0" font-family="'Segoe UI', Inter, sans-serif" font-size="11" font-weight="700" text-anchor="middle">HOST (MÁQUINA LOCAL)</text>
+
+  <!-- Client 1: Browser -->
+  <rect x="55" y="195" width="270" height="75" rx="8" fill="url(#cardGrad3)" stroke="#38BDF8" stroke-width="1.2"/>
+  <text x="70" y="220" fill="#FFFFFF" font-family="'Segoe UI', Inter, sans-serif" font-size="13" font-weight="700">Navegador Web / Administrador</text>
+  <text x="70" y="240" fill="#38BDF8" font-family="monospace" font-size="12">http://localhost:15672</text>
+  <text x="70" y="258" fill="#94A3B8" font-family="'Segoe UI', Inter, sans-serif" font-size="10">Login: guest | Senha: guest (local-only)</text>
+
+  <!-- Client 2: Application / Producer / Consumer -->
+  <rect x="55" y="290" width="270" height="85" rx="8" fill="url(#cardGrad3)" stroke="#00FF88" stroke-width="1.2"/>
+  <text x="70" y="315" fill="#FFFFFF" font-family="'Segoe UI', Inter, sans-serif" font-size="13" font-weight="700">Aplicações (Producers / Consumers)</text>
+  <text x="70" y="335" fill="#00FF88" font-family="monospace" font-size="12">amqp://guest:guest@localhost:5672</text>
+  <text x="70" y="355" fill="#94A3B8" font-family="'Segoe UI', Inter, sans-serif" font-size="10">Protocolo binário AMQP 0-9-1 multiplexado</text>
+
+  <!-- PORT BRIDGES -->
+  <!-- Port 15672 -->
+  <path d="M 325 232 L 485 232" stroke="#38BDF8" stroke-width="2.5" marker-end="url(#arrowBlue)" fill="none"/>
+  <rect x="365" y="212" width="90" height="20" rx="4" fill="#070D1E" stroke="#38BDF8" stroke-width="1"/>
+  <text x="410" y="226" fill="#38BDF8" font-family="monospace" font-size="10" font-weight="700" text-anchor="middle">15672:15672</text>
+
+  <!-- Port 5672 -->
+  <path d="M 325 332 L 485 332" stroke="#00FF88" stroke-width="2.5" marker-end="url(#arrow3)" fill="none"/>
+  <rect x="375" y="312" width="70" height="20" rx="4" fill="#070D1E" stroke="#00FF88" stroke-width="1"/>
+  <text x="410" y="326" fill="#00FF88" font-family="monospace" font-size="10" font-weight="700" text-anchor="middle">5672:5672</text>
+
+  <!-- DOCKER CONTAINER -->
+  <g transform="translate(495, 140)">
+    <rect width="415" height="250" rx="12" fill="#0A162D" stroke="#00FF88" stroke-width="1.8"/>
+    
+    <!-- Header -->
+    <rect x="15" y="15" width="220" height="26" rx="4" fill="#00E676" fill-opacity="0.15" stroke="#00FF88" stroke-width="1"/>
+    <text x="125" y="32" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="11" font-weight="700" text-anchor="middle">CONTÊINER DOCKER: rabbitmq-lab</text>
+
+    <!-- Image tag -->
+    <text x="250" y="32" fill="#94A3B8" font-family="monospace" font-size="11">rabbitmq:4-management</text>
+
+    <!-- Internal Module 1: Management UI -->
+    <rect x="15" y="55" width="385" height="75" rx="8" fill="url(#cardGrad3)" stroke="#38BDF8" stroke-width="1"/>
+    <text x="30" y="80" fill="#38BDF8" font-family="'Segoe UI', Inter, sans-serif" font-size="13" font-weight="700">RabbitMQ Management Plugin (HTTP)</text>
+    <text x="30" y="100" fill="#CBD5E1" font-family="'Segoe UI', Inter, sans-serif" font-size="11">Painel visual interativo, métricas em tempo real, criação de filas e exchanges</text>
+    <text x="30" y="118" fill="#94A3B8" font-family="monospace" font-size="10">Escuta interna: Porta 15672</text>
+
+    <!-- Internal Module 2: AMQP Engine -->
+    <rect x="15" y="145" width="385" height="90" rx="8" fill="url(#cardGrad3)" stroke="#00FF88" stroke-width="1.2"/>
+    <text x="30" y="170" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="13" font-weight="700">AMQP 0-9-1 Messaging Engine</text>
+    <text x="30" y="190" fill="#CBD5E1" font-family="'Segoe UI', Inter, sans-serif" font-size="11">Mecanismo central de roteamento, persistência (Mnesia/Khepri) e enfileiramento</text>
+    <text x="30" y="210" fill="#94A3B8" font-family="monospace" font-size="10">Escuta interna: Porta 5672 (Padrão AMQP)</text>
+  </g>
+
+  <!-- CLI Command banner -->
+  <rect x="40" y="410" width="870" height="48" rx="8" fill="#060C18" stroke="#1E293B" stroke-width="1"/>
+  <text x="60" y="430" fill="#94A3B8" font-family="'Segoe UI', Inter, sans-serif" font-size="10" font-weight="700">COMANDO DE EXECUÇÃO EXATO:</text>
+  <text x="60" y="446" fill="#00FF88" font-family="monospace" font-size="11">docker run -d --name rabbitmq-lab -p 5672:5672 -p 15672:15672 rabbitmq:4-management</text>
+</svg>

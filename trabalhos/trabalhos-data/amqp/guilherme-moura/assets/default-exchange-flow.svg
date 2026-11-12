@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 950 480" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070D1E"/>
+      <stop offset="100%" stop-color="#0F1F3D"/>
+    </linearGradient>
+
+    <linearGradient id="cardGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#152544"/>
+      <stop offset="100%" stop-color="#0F1C35"/>
+    </linearGradient>
+
+    <marker id="arrow2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#00FF88" />
+    </marker>
+  </defs>
+
+  <rect width="950" height="480" rx="16" fill="url(#bgGrad2)" stroke="#1E293B" stroke-width="2"/>
+
+  <!-- Badge -->
+  <rect x="40" y="28" width="260" height="28" rx="5" fill="#00FF88" fill-opacity="0.12" stroke="#00FF88" stroke-width="1.2"/>
+  <text x="170" y="47" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="12" font-weight="700" text-anchor="middle" letter-spacing="1">MECANISMO DO DEFAULT EXCHANGE</text>
+
+  <text x="40" y="86" fill="#FFFFFF" font-family="'Segoe UI', Inter, sans-serif" font-size="20" font-weight="700">Roteamento Implícito via Exchange Padrão (Nameless Exchange "")</text>
+  <text x="40" y="108" fill="#94A3B8" font-family="'Segoe UI', Inter, sans-serif" font-size="13">No AMQP, mesmo quando parece que enviamos direto para a fila, a mensagem passa pelo Exchange sem nome ("")</text>
+
+  <!-- Step 1: Publisher -->
+  <g transform="translate(40, 140)">
+    <rect width="210" height="230" rx="12" fill="url(#cardGrad2)" stroke="#38BDF8" stroke-width="1.8"/>
+    <rect x="15" y="15" width="40" height="24" rx="4" fill="#0284C7" fill-opacity="0.3"/>
+    <text x="35" y="31" fill="#38BDF8" font-family="'Segoe UI', Inter, sans-serif" font-size="11" font-weight="700" text-anchor="middle">PASSO 1</text>
+
+    <text x="105" y="70" fill="#FFFFFF" font-family="'Segoe UI', Inter, sans-serif" font-size="15" font-weight="700" text-anchor="middle">Publisher / Painel</text>
+    
+    <rect x="15" y="90" width="180" height="120" rx="8" fill="#0A1426" stroke="#1E293B" stroke-width="1"/>
+    <text x="25" y="112" fill="#94A3B8" font-family="'Segoe UI', Inter, sans-serif" font-size="10" font-weight="600">PARÂMETROS DE ENVIO:</text>
+    <text x="25" y="134" fill="#E2E8F0" font-family="monospace" font-size="11">Exchange: <tspan fill="#F59E0B">""</tspan> (vazio)</text>
+    <text x="25" y="156" fill="#E2E8F0" font-family="monospace" font-size="11">Routing Key: <tspan fill="#00FF88">"fila_teste"</tspan></text>
+    <text x="25" y="178" fill="#E2E8F0" font-family="monospace" font-size="11">Payload: <tspan fill="#38BDF8">"Hello AMQP"</tspan></text>
+    <text x="25" y="198" fill="#E2E8F0" font-family="monospace" font-size="11">Delivery: <tspan fill="#A855F7">2 (Persistent)</tspan></text>
+  </g>
+
+  <!-- Arrow 1 to 2 -->
+  <path d="M 250 255 L 340 255" stroke="#00FF88" stroke-width="2.5" marker-end="url(#arrow2)" fill="none"/>
+  <rect x="260" y="235" width="70" height="18" rx="3" fill="#070D1E" stroke="#00FF88" stroke-width="0.8"/>
+  <text x="295" y="247" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="9" font-weight="600" text-anchor="middle">Publicação</text>
+
+  <!-- Step 2: Default Exchange -->
+  <g transform="translate(350, 140)">
+    <rect width="240" height="230" rx="12" fill="url(#cardGrad2)" stroke="#00FF88" stroke-width="2"/>
+    <rect x="15" y="15" width="40" height="24" rx="4" fill="#00E676" fill-opacity="0.3"/>
+    <text x="35" y="31" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="11" font-weight="700" text-anchor="middle">PASSO 2</text>
+
+    <text x="120" y="70" fill="#FFFFFF" font-family="'Segoe UI', Inter, sans-serif" font-size="15" font-weight="700" text-anchor="middle">Default Exchange ("")</text>
+    <text x="120" y="88" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="11" font-weight="600" text-anchor="middle">Tipo Especial: Direct Oculto</text>
+
+    <rect x="15" y="102" width="210" height="108" rx="8" fill="#071224" stroke="#1E293B" stroke-width="1"/>
+    <text x="25" y="122" fill="#F59E0B" font-family="'Segoe UI', Inter, sans-serif" font-size="10" font-weight="700">REGRA INTERNA DO BROKER:</text>
+    <text x="25" y="142" fill="#E2E8F0" font-family="'Segoe UI', Inter, sans-serif" font-size="11">Toda fila criada é</text>
+    <text x="25" y="158" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="11" font-weight="600">automaticamente ligada</text>
+    <text x="25" y="174" fill="#E2E8F0" font-family="'Segoe UI', Inter, sans-serif" font-size="11">ao Default Exchange com</text>
+    <text x="25" y="192" fill="#38BDF8" font-family="monospace" font-size="11">binding_key == nome_da_fila</text>
+  </g>
+
+  <!-- Arrow 2 to 3 -->
+  <path d="M 590 255 L 680 255" stroke="#00FF88" stroke-width="2.5" marker-end="url(#arrow2)" fill="none"/>
+  <rect x="600" y="235" width="70" height="18" rx="3" fill="#070D1E" stroke="#00FF88" stroke-width="0.8"/>
+  <text x="635" y="247" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="9" font-weight="600" text-anchor="middle">Roteamento</text>
+
+  <!-- Step 3: Destination Queue -->
+  <g transform="translate(690, 140)">
+    <rect width="220" height="230" rx="12" fill="url(#cardGrad2)" stroke="#00FF88" stroke-width="1.8"/>
+    <rect x="15" y="15" width="40" height="24" rx="4" fill="#00E676" fill-opacity="0.3"/>
+    <text x="35" y="31" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="11" font-weight="700" text-anchor="middle">PASSO 3</text>
+
+    <text x="110" y="70" fill="#FFFFFF" font-family="'Segoe UI', Inter, sans-serif" font-size="15" font-weight="700" text-anchor="middle">Fila: fila_teste</text>
+    <text x="110" y="88" fill="#38BDF8" font-family="'Segoe UI', Inter, sans-serif" font-size="11" font-weight="600" text-anchor="middle">Destino Exato da Mensagem</text>
+
+    <rect x="15" y="102" width="190" height="108" rx="8" fill="#071224" stroke="#1E293B" stroke-width="1"/>
+    <text x="25" y="122" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="10" font-weight="700">STATUS DA FILA:</text>
+    <text x="25" y="142" fill="#E2E8F0" font-family="'Segoe UI', Inter, sans-serif" font-size="11">• Ready: <tspan fill="#00FF88" font-weight="700">1 msg</tspan></text>
+    <text x="25" y="160" fill="#E2E8F0" font-family="'Segoe UI', Inter, sans-serif" font-size="11">• Unacked: 0</text>
+    <text x="25" y="178" fill="#E2E8F0" font-family="'Segoe UI', Inter, sans-serif" font-size="11">• Total: 1 msg</text>
+    <text x="25" y="196" fill="#38BDF8" font-family="'Segoe UI', Inter, sans-serif" font-size="10">Pronta p/ Get Messages</text>
+  </g>
+
+  <!-- Explanation Bottom Box -->
+  <rect x="40" y="395" width="870" height="60" rx="8" fill="#0B162C" stroke="#1E293B" stroke-width="1.2"/>
+  <text x="60" y="420" fill="#00FF88" font-family="'Segoe UI', Inter, sans-serif" font-size="12" font-weight="700">Destaque Conceitual para Avaliação Acadêmica:</text>
+  <text x="60" y="440" fill="#CBD5E1" font-family="'Segoe UI', Inter, sans-serif" font-size="11">
+    No padrão AMQP 0-9-1 não existe entrega sem Exchange. Quando omitimos o nome do Exchange (string vazia ""), o RabbitMQ direciona a mensagem para o Default Direct Exchange pré-declarado, que avalia a Routing Key e localiza a fila de mesmo nome.
+  </text>
+</svg>
