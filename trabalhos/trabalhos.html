@@ -3,67 +3,610 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apresentações &amp; Trabalhos — Dev SENAI</title>
+    <title>Portfólios & Trabalhos da Turma — Dev SENAI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
-<body class="min-h-screen bg-slate-950 px-4 py-8 font-['Inter',sans-serif] text-white antialiased">
-    <header class="mx-auto w-full max-w-6xl">
-        <nav class="flex items-center justify-between rounded-full border border-slate-700 bg-slate-900/65 px-6 py-4 backdrop-blur-xl">
-            <a href="../index.html" class="text-sm font-semibold text-slate-300 transition hover:text-white">
-                &larr; Voltar para a Home
-            </a>
-            <span class="rounded-full border border-purple-400/30 bg-purple-400/10 px-3 py-1 text-xs font-semibold uppercase text-purple-300">Central de Trabalhos</span>
-        </nav>
+<body class="min-h-screen bg-slate-950 font-['Inter',sans-serif] text-slate-100 antialiased selection:bg-cyan-500 selection:text-slate-950">
+
+    <!-- Topbar / Header -->
+    <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
+        <div class="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center gap-4">
+                <a href="../index.html" class="group flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/60 px-4 py-2 text-xs font-semibold text-slate-300 transition hover:border-cyan-400/50 hover:bg-slate-800 hover:text-white">
+                    <span class="transition-transform group-hover:-translate-x-1">&larr;</span> Voltar à Home
+                </a>
+                <span class="hidden h-4 w-px bg-slate-800 sm:block"></span>
+                <div class="flex items-center gap-2">
+                    <span class="flex h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.8)]"></span>
+                    <span class="text-xs font-medium text-slate-400">Turma Dev SENAI</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button id="openRegisterStudentModalBtn" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/90 px-4 py-2.5 text-xs font-bold text-slate-200 shadow-sm transition hover:border-cyan-400 hover:bg-slate-800 hover:text-cyan-300">
+                    <span class="text-sm font-bold leading-none text-cyan-400">+</span> Cadastrar Aluno
+                </button>
+                <button id="openUploadModalBtn" type="button" class="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-cyan-950/40 transition hover:-translate-y-0.5 hover:bg-cyan-300 active:translate-y-0">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                    Publicar Trabalho
+                </button>
+            </div>
+        </div>
     </header>
 
-    <main class="mx-auto w-full max-w-6xl py-12">
-        <header class="mb-10 text-center">
-            <h1 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Trabalhos da Turma</h1>
-            <p class="mt-3 text-slate-400">Selecione um tema para ver os detalhes e a apresentação do aluno.</p>
-        </header>
+    <!-- Feedback Toast -->
+    <div id="toastNotification" class="fixed right-6 top-24 z-50 hidden max-w-md rounded-2xl border border-cyan-500/40 bg-slate-900/95 p-4 shadow-2xl backdrop-blur-xl transition-all">
+        <div class="flex items-start gap-3">
+            <span id="toastIcon" class="text-xl">✨</span>
+            <div class="flex-1 text-xs">
+                <p id="toastTitle" class="font-bold text-white"></p>
+                <p id="toastMessage" class="mt-0.5 text-slate-300"></p>
+            </div>
+            <button onclick="hideToast()" class="text-slate-400 hover:text-white">&times;</button>
+        </div>
+    </div>
 
-        <div id="projectsGrid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"></div>
+    <!-- Conteúdo Principal -->
+    <main class="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        
+        <!-- Hero Section -->
+        <div class="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 via-slate-900/50 to-slate-950 p-8 sm:p-12">
+            <div class="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl"></div>
+            <div class="absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl"></div>
+
+            <div class="relative max-w-3xl space-y-4">
+                <span class="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-300">
+                    Portfólios da Turma
+                </span>
+                <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-5xl">
+                    Trabalhos & Apresentações
+                </h1>
+                <p class="text-sm text-slate-400 sm:text-base leading-relaxed">
+                    Explore os trabalhos práticos e apresentações interativas de cada aluno da turma. Escolha um aluno abaixo para visualizar seu portfólio completo ou publique seu próprio trabalho.
+                </p>
+            </div>
+
+            <!-- Barra de Busca e Filtros -->
+            <div class="relative mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div class="relative flex-1">
+                    <svg class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input id="searchInput" type="search" autocomplete="off" placeholder="Buscar aluno por nome ou por tema de trabalho..." 
+                           class="w-full rounded-2xl border border-slate-800 bg-slate-950/80 py-3.5 pl-12 pr-4 text-sm text-white placeholder-slate-500 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20">
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2 rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-xs text-slate-400">
+                        <span>Alunos na Sala:</span>
+                        <strong id="totalStudentsCount" class="font-bold text-cyan-400">0</strong>
+                    </div>
+                    <div class="flex items-center gap-2 rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-xs text-slate-400">
+                        <span>Apresentações:</span>
+                        <strong id="totalWorksCount" class="font-bold text-emerald-400">0</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid de Portfólios / Alunos -->
+        <section class="mt-12 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-4">
+                <h2 class="text-lg font-bold text-white">Alunos da Turma</h2>
+                <span class="text-xs text-slate-400">Clique para abrir o portfólio individual</span>
+            </div>
+
+            <div id="studentsGrid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <!-- Inserido dinamicamente via JS -->
+            </div>
+        </section>
     </main>
 
-    <script src="trabalhos.js"></script>
+    <!-- MODAL 1: Cadastrar Novo Aluno -->
+    <div id="registerStudentModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-md flex items-center justify-center" role="dialog" aria-modal="true">
+        <div class="w-full max-w-lg rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div>
+                    <h3 class="text-xl font-bold text-white">Cadastrar Novo Aluno</h3>
+                    <p class="text-xs text-slate-400 mt-1">Insira seu nome e crie seu PIN de 4 a 6 números.</p>
+                </div>
+                <button type="button" onclick="closeModal('registerStudentModal')" class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white">&times;</button>
+            </div>
+
+            <form id="registerStudentForm" autocomplete="off" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Nome Completo do Aluno *</label>
+                    <input id="studentNameInput" required type="text" placeholder="Ex.: Lucas Mendes" 
+                           class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-1.5">Criar PIN Secreto (4 a 6 dígitos numéricos) *</label>
+                    <input id="studentPinInput" required type="password" maxlength="6" pattern="[0-9]{4,6}" inputmode="numeric" placeholder="Ex.: 1234" 
+                           class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
+                    <p class="mt-1 text-[11px] text-slate-500">Memorize este PIN. Ele será solicitado sempre que você quiser publicar ou excluir trabalhos.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">URL do Avatar / Foto (Opcional)</label>
+                    <input id="studentAvatarInput" type="url" placeholder="https://exemplo.com/foto.jpg" 
+                           class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
+                </div>
+
+                <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-5">
+                    <button type="button" onclick="closeModal('registerStudentModal')" class="rounded-xl border border-slate-700 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="submitRegisterBtn" class="rounded-xl bg-cyan-500 px-5 py-2.5 text-xs font-bold text-slate-950 shadow-md transition hover:bg-cyan-300">
+                        Cadastrar Aluno
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Publicar Trabalho (Upload R2) -->
+    <div id="uploadWorkModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-md flex items-center justify-center" role="dialog" aria-modal="true">
+        <div class="w-full max-w-xl rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div>
+                    <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-2.5 py-0.5 text-[10px] font-bold uppercase text-cyan-300">Upload Cloudflare R2</span>
+                    <h3 class="text-xl font-bold text-white mt-1">Publicar Apresentação / Trabalho</h3>
+                </div>
+                <button type="button" onclick="closeModal('uploadWorkModal')" class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white">&times;</button>
+            </div>
+
+            <form id="uploadWorkForm" autocomplete="off" class="space-y-4">
+                
+                <!-- Seleção do Aluno -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Quem é você? (Selecione seu nome) *</label>
+                    <select id="uploadAlunoSelect" required class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400">
+                        <option value="">-- Selecione seu nome na lista da sala --</option>
+                        <!-- Populado via JS -->
+                    </select>
+                </div>
+
+                <!-- Campo dinâmico para cadastrar novo aluno caso não esteja na lista -->
+                <div id="novoAlunoContainer" class="hidden rounded-2xl border border-cyan-500/30 bg-cyan-950/20 p-4 space-y-2">
+                    <label class="block text-xs font-bold text-cyan-300 uppercase tracking-wider">Digite seu Nome Completo *</label>
+                    <input id="uploadNovoNomeInput" type="text" placeholder="Ex.: Gabriel Souza" 
+                           class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-xs text-white outline-none focus:border-cyan-400">
+                    <p class="text-[11px] text-cyan-200">Você será cadastrado automaticamente na lista da turma!</p>
+                </div>
+
+                <!-- PIN do Aluno -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-semibold text-cyan-400 uppercase tracking-wider">Seu PIN Secreto (4 a 6 números) *</label>
+                        <span id="pinHelpBadge" class="text-[10px] text-slate-400">Primeira vez? O PIN que digitar será gravado</span>
+                    </div>
+                    <input id="uploadPinInput" required type="password" maxlength="6" inputmode="numeric" placeholder="Digite seu PIN numérico" 
+                           class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Título do Trabalho *</label>
+                        <input id="uploadTitleInput" required type="text" placeholder="Ex.: Apresentação Protocolo MQTT" 
+                               class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Módulo / Tema *</label>
+                        <input id="uploadModuleInput" required type="text" placeholder="Ex.: MQTT Pub/Sub" 
+                               class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Descrição Resumida</label>
+                    <textarea id="uploadDescriptionInput" rows="2" placeholder="Resumo do conteúdo..." 
+                              class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400"></textarea>
+                </div>
+
+                <!-- Seletor de Arquivos Múltiplos com Travas -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-semibold text-cyan-400 uppercase tracking-wider">
+                            Arquivos do Trabalho *
+                        </label>
+                        <span class="text-[10px] text-slate-400">Máx. 5 arquivos • Até 2 MB/arq (5 MB total)</span>
+                    </div>
+                    <div class="relative rounded-2xl border-2 border-dashed border-slate-700 bg-slate-950/60 p-6 text-center transition hover:border-cyan-400/70 hover:bg-slate-950">
+                        <input id="uploadFilesInput" required type="file" multiple class="absolute inset-0 h-full w-full cursor-pointer opacity-0" accept=".html,.htm,.css,.js,.png,.jpg,.jpeg,.svg,.webp,.gif">
+                        <div class="flex flex-col items-center justify-center space-y-2 pointer-events-none">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-950/80 border border-cyan-800/60 text-cyan-400">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                            </div>
+                            <p class="text-xs font-bold text-slate-200">Clique para selecionar arquivos ou arraste até aqui</p>
+                            <p class="text-[11px] text-slate-400">Envie o <code class="text-cyan-300 font-bold">.html</code> principal e arquivos <code class="text-slate-300">.css, .js, imagens</code></p>
+                            <span id="selectedFilesSummary" class="text-xs font-semibold text-cyan-400 pt-1">Nenhum arquivo selecionado</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-5">
+                    <button type="button" onclick="closeModal('uploadWorkModal')" class="rounded-xl border border-slate-700 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="submitUploadBtn" class="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-2.5 text-xs font-bold text-slate-950 shadow-md transition hover:bg-cyan-300">
+                        <span>Fazer Upload e Publicar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script de Integração com Cloudflare Worker e R2 -->
     <script>
-        const grid = document.getElementById("projectsGrid");
+        const API_BASE_URL = "https://api-cursos.matheusbarroso124.workers.dev/api";
+        let allStudents = [];
 
-        trabalhos.forEach((trabalho) => {
-            const card = document.createElement("article");
-            card.className = "flex min-h-56 flex-col rounded-2xl border border-slate-700 bg-slate-900/70 p-6 transition duration-200 hover:border-cyan-400/50 hover:bg-slate-900";
+        const ALLOWED_EXTS = [".html", ".htm", ".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".svg", ".gif"];
+        const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+        const MAX_TOTAL_SIZE = 5 * 1024 * 1024; // 5 MB
 
-            const student = document.createElement("h2");
-            student.className = "text-2xl font-bold leading-tight tracking-tight text-white";
-            student.textContent = trabalho.aluno;
+        // Utilitários de UI
+        function showToast(title, message, isError = false) {
+            const toast = document.getElementById("toastNotification");
+            document.getElementById("toastTitle").textContent = title;
+            document.getElementById("toastMessage").textContent = message;
+            document.getElementById("toastIcon").textContent = isError ? "⚠️" : "✅";
+            toast.className = `fixed right-6 top-24 z-50 max-w-md rounded-2xl border p-4 shadow-2xl backdrop-blur-xl transition-all ${
+                isError ? "border-rose-500/50 bg-rose-950/90 text-rose-200" : "border-cyan-500/50 bg-slate-900/95 text-slate-100"
+            }`;
+            toast.classList.remove("hidden");
+            setTimeout(hideToast, 5000);
+        }
 
-            const topicBlock = document.createElement("div");
-            topicBlock.className = "mt-5 border-t border-slate-800 pt-4";
+        function hideToast() {
+            document.getElementById("toastNotification").classList.add("hidden");
+        }
 
-            const topicLabel = document.createElement("p");
-            topicLabel.className = "text-xs font-medium text-slate-500";
-            topicLabel.textContent = "Tema";
+        function openModal(id) {
+            document.getElementById(id).classList.remove("hidden");
+            document.body.classList.add("overflow-hidden");
+        }
 
-            const topic = document.createElement("p");
-            topic.className = "mt-1 text-base font-medium text-slate-300";
-            topic.textContent = trabalho.tema;
-            topicBlock.append(topicLabel, topic);
+        function closeModal(id) {
+            document.getElementById(id).classList.add("hidden");
+            document.body.classList.remove("overflow-hidden");
+        }
 
-            const link = document.createElement("a");
-            link.className = "mt-auto inline-flex w-fit items-center gap-2 pt-6 text-sm font-semibold text-cyan-300 transition hover:text-cyan-200";
-            link.href = `trabalho-detalhes.html?modulo=${encodeURIComponent(trabalho.id)}`;
-            link.append(document.createTextNode("Ver trabalho"));
-            const arrow = document.createElement("span");
-            arrow.setAttribute("aria-hidden", "true");
-            arrow.textContent = "→";
-            link.append(arrow);
+        function getInitials(name) {
+            if (!name) return "AL";
+            const parts = name.trim().split(" ");
+            if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        }
 
-            card.append(student, topicBlock, link);
-            grid.append(card);
+        // Validação Estrita de Arquivos
+        function validateFiles(files) {
+            if (files.length === 0) return { valid: false, error: "Nenhum arquivo selecionado." };
+            if (files.length > 5) return { valid: false, error: `Máximo de 5 arquivos permitidos. Você selecionou ${files.length}.` };
+
+            let totalSize = 0;
+            let hasHtml = false;
+
+            for (const file of files) {
+                const ext = "." + (file.name.split(".").pop() || "").toLowerCase();
+                if (!ALLOWED_EXTS.includes(ext)) {
+                    return { valid: false, error: `Extensão '${ext}' não permitida no arquivo '${file.name}'. Apenas .html, .css, .js e imagens são aceitos.` };
+                }
+                if (file.size > MAX_FILE_SIZE) {
+                    return { valid: false, error: `O arquivo '${file.name}' possui ${(file.size / (1024 * 1024)).toFixed(2)} MB e excede o limite de 2 MB.` };
+                }
+                if (ext === ".html" || ext === ".htm") hasHtml = true;
+                totalSize += file.size;
+            }
+
+            if (totalSize > MAX_TOTAL_SIZE) {
+                return { valid: false, error: `O total dos arquivos (${(totalSize / (1024 * 1024)).toFixed(2)} MB) excede o limite máximo de 5 MB.` };
+            }
+
+            if (!hasHtml) {
+                return { valid: false, error: "O envio precisa conter ao menos um arquivo .html (ex: index.html)." };
+            }
+
+            return { valid: true, count: files.length, totalSize };
+        }
+
+        // 1. Carregar Alunos do Backend D1
+        async function loadStudents() {
+            const grid = document.getElementById("studentsGrid");
+            grid.innerHTML = `
+                <div class="col-span-full py-16 text-center text-slate-400">
+                    <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-cyan-400 border-r-transparent"></div>
+                    <p class="mt-4 text-xs font-semibold">Carregando alunos da sala...</p>
+                </div>
+            `;
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/trabalhos/alunos`);
+                if (!res.ok) throw new Error(`Falha ao carregar alunos (status ${res.status})`);
+                allStudents = await res.json();
+                renderStudents(allStudents);
+                populateUploadSelect(allStudents);
+            } catch (err) {
+                console.error("Erro ao carregar alunos:", err);
+                grid.innerHTML = `
+                    <div class="col-span-full rounded-3xl border border-dashed border-rose-500/40 bg-rose-950/20 p-12 text-center text-rose-300">
+                        <p class="font-bold">Não foi possível carregar a lista de alunos.</p>
+                        <p class="mt-1 text-xs text-rose-400">${err.message}</p>
+                        <button onclick="loadStudents()" class="mt-4 rounded-xl bg-rose-500 px-4 py-2 text-xs font-bold text-white hover:bg-rose-400">Tentar Novamente</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Popula o select do modal de upload
+        function populateUploadSelect(students) {
+            const select = document.getElementById("uploadAlunoSelect");
+            select.innerHTML = '<option value="">-- Selecione seu nome na lista da sala --</option>';
+
+            students.forEach((s) => {
+                const opt = document.createElement("option");
+                opt.value = s.id;
+                opt.textContent = `${s.nome} ${s.total_trabalhos > 0 ? `(${s.total_trabalhos} trabalho${s.total_trabalhos > 1 ? 's' : ''})` : ''}`;
+                select.appendChild(opt);
+            });
+
+            // Opção para quem ainda não está na lista
+            const optNew = document.createElement("option");
+            optNew.value = "__novo__";
+            optNew.textContent = "✨ + Não estou na lista (Criar meu nome agora)...";
+            optNew.className = "font-bold text-cyan-300 bg-slate-900";
+            select.appendChild(optNew);
+        }
+
+        // 2. Renderizar Alunos com Suporte a Filtro de Busca
+        function renderStudents(students) {
+            const grid = document.getElementById("studentsGrid");
+            grid.innerHTML = "";
+
+            let totalWorks = 0;
+            students.forEach((s) => (totalWorks += Number(s.total_trabalhos || 0)));
+            document.getElementById("totalStudentsCount").textContent = students.length;
+            document.getElementById("totalWorksCount").textContent = totalWorks;
+
+            if (students.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full rounded-3xl border border-dashed border-slate-800 p-12 text-center">
+                        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 mb-3">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-200">Nenhum aluno encontrado</h3>
+                        <p class="mt-1 text-xs text-slate-400">Clique abaixo para cadastrar o primeiro aluno da turma!</p>
+                        <button onclick="openModal('registerStudentModal')" class="mt-5 inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-xs font-bold text-slate-950 hover:bg-cyan-300">
+                            + Cadastrar Aluno Agora
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            students.forEach((aluno) => {
+                const card = document.createElement("article");
+                card.className = "group relative flex flex-col justify-between rounded-3xl border border-slate-800/90 bg-slate-900/60 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-1.5 hover:border-cyan-400/60 hover:bg-slate-900 hover:shadow-2xl hover:shadow-cyan-950/40";
+
+                const modulesBadges = (aluno.modulos || [])
+                    .slice(0, 3)
+                    .map((m) => `<span class="rounded-lg border border-slate-800 bg-slate-950/80 px-2.5 py-1 text-[10px] font-semibold text-slate-300">${m}</span>`)
+                    .join("");
+
+                card.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3.5">
+                                ${
+                                    aluno.avatar_url
+                                        ? `<img src="${aluno.avatar_url}" alt="${aluno.nome}" class="h-12 w-12 rounded-2xl object-cover border border-slate-700">`
+                                        : `<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-500/30 bg-cyan-950/40 text-sm font-extrabold text-cyan-300 shadow-sm">${getInitials(aluno.nome)}</div>`
+                                }
+                                <div class="min-w-0">
+                                    <h3 class="truncate text-base font-bold text-white group-hover:text-cyan-300 transition-colors">${aluno.nome}</h3>
+                                    <p class="text-xs font-medium text-slate-400">${aluno.total_trabalhos > 0 ? "Apresentação disponível" : "Aguardando envio"}</p>
+                                </div>
+                            </div>
+
+                            <span class="inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[11px] font-bold ${
+                                aluno.total_trabalhos > 0
+                                    ? "border-emerald-500/40 bg-emerald-950/30 text-emerald-300"
+                                    : "border-slate-800 bg-slate-950/50 text-slate-500"
+                            }">
+                                ${aluno.total_trabalhos} ${aluno.total_trabalhos === 1 ? "Trabalho" : "Trabalhos"}
+                            </span>
+                        </div>
+
+                        <div class="border-t border-slate-800/80 pt-3">
+                            <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Módulos</p>
+                            <div class="flex flex-wrap gap-1.5">
+                                ${modulesBadges || '<span class="text-xs text-slate-500 italic">Nenhum módulo enviado ainda</span>'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-800/60 flex items-center justify-between">
+                        <span class="text-[11px] text-slate-400">Portfólio</span>
+                        <a href="trabalho-detalhes.html?aluno_id=${encodeURIComponent(aluno.id)}" 
+                           class="inline-flex items-center gap-1.5 rounded-xl bg-cyan-500/10 border border-cyan-400/30 px-3.5 py-2 text-xs font-bold text-cyan-300 transition hover:bg-cyan-500 hover:text-slate-950">
+                            Ver Portfólio &rarr;
+                        </a>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // 3. Busca em Tempo Real
+        document.getElementById("searchInput").addEventListener("input", (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            if (!query) {
+                renderStudents(allStudents);
+                return;
+            }
+            const filtered = allStudents.filter((student) => {
+                const nameMatch = student.nome.toLowerCase().includes(query);
+                const moduleMatch = (student.modulos || []).some((m) => m.toLowerCase().includes(query));
+                return nameMatch || moduleMatch;
+            });
+            renderStudents(filtered);
         });
+
+        // 4. Modal de Criação de Aluno
+        document.getElementById("openRegisterStudentModalBtn").addEventListener("click", () => openModal("registerStudentModal"));
+        document.getElementById("openUploadModalBtn").addEventListener("click", () => openModal("uploadWorkModal"));
+
+        // Alterna campo de novo nome no select de aluno
+        document.getElementById("uploadAlunoSelect").addEventListener("change", (e) => {
+            const isNew = e.target.value === "__novo__";
+            const container = document.getElementById("novoAlunoContainer");
+            const input = document.getElementById("uploadNovoNomeInput");
+            if (isNew) {
+                container.classList.remove("hidden");
+                input.required = true;
+                input.focus();
+            } else {
+                container.classList.add("hidden");
+                input.required = false;
+            }
+        });
+
+        document.getElementById("registerStudentForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById("submitRegisterBtn");
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Cadastrando...";
+
+            try {
+                const nome = document.getElementById("studentNameInput").value.trim();
+                const pin = document.getElementById("studentPinInput").value.trim();
+                const avatar_url = document.getElementById("studentAvatarInput").value.trim();
+
+                const res = await fetch(`${API_BASE_URL}/trabalhos/alunos`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ nome, pin, avatar_url })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Falha ao registrar aluno.");
+
+                showToast("Aluno Cadastrado!", `${nome} foi adicionado à turma com sucesso!`);
+                closeModal("registerStudentModal");
+                document.getElementById("registerStudentForm").reset();
+                await loadStudents();
+            } catch (err) {
+                console.error("Erro no cadastro:", err);
+                showToast("Erro no Cadastro", err.message, true);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
+        // 5. Visualizador de arquivos selecionados no Upload com Travas
+        document.getElementById("uploadFilesInput").addEventListener("change", (e) => {
+            const files = Array.from(e.target.files);
+            const summary = document.getElementById("selectedFilesSummary");
+            if (files.length === 0) {
+                summary.textContent = "Nenhum arquivo selecionado";
+                summary.className = "text-xs font-semibold text-cyan-400 pt-1";
+                return;
+            }
+
+            const check = validateFiles(files);
+            if (!check.valid) {
+                summary.textContent = `⚠️ ${check.error}`;
+                summary.className = "text-xs font-bold text-rose-400 pt-1";
+            } else {
+                summary.textContent = `✓ ${files.length} arquivo(s) válidos (${(check.totalSize / 1024).toFixed(1)} KB total)`;
+                summary.className = "text-xs font-bold text-emerald-400 pt-1";
+            }
+        });
+
+        // 6. Submissão de Upload Multipart para Cloudflare R2
+        document.getElementById("uploadWorkForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById("uploadFilesInput");
+            const files = Array.from(fileInput.files || []);
+
+            const check = validateFiles(files);
+            if (!check.valid) {
+                showToast("Arquivo Inválido", check.error, true);
+                return;
+            }
+
+            const submitBtn = document.getElementById("submitUploadBtn");
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <div class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-solid border-slate-950 border-r-transparent"></div>
+                <span>Fazendo upload para nuvem R2...</span>
+            `;
+
+            try {
+                const alunoSelectValue = document.getElementById("uploadAlunoSelect").value;
+                const pin = document.getElementById("uploadPinInput").value.trim();
+                const titulo = document.getElementById("uploadTitleInput").value.trim();
+                const modulo = document.getElementById("uploadModuleInput").value.trim();
+                const descricao = document.getElementById("uploadDescriptionInput").value.trim();
+
+                const formData = new FormData();
+                if (alunoSelectValue === "__novo__") {
+                    const novoNome = document.getElementById("uploadNovoNomeInput").value.trim();
+                    if (!novoNome) throw new Error("Informe o seu nome completo.");
+                    formData.append("novo_nome", novoNome);
+                } else {
+                    formData.append("aluno_id", alunoSelectValue);
+                }
+
+                formData.append("pin", pin);
+                formData.append("titulo", titulo);
+                formData.append("modulo", modulo);
+                formData.append("descricao", descricao);
+
+                for (let i = 0; i < files.length; i++) {
+                    formData.append("files", files[i]);
+                }
+
+                const res = await fetch(`${API_BASE_URL}/trabalhos/upload`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Erro ao fazer upload do trabalho.");
+
+                showToast("Trabalho Publicado!", `Apresentação "${titulo}" salva no Cloudflare R2!`);
+                closeModal("uploadWorkModal");
+                document.getElementById("uploadWorkForm").reset();
+                document.getElementById("novoAlunoContainer").classList.add("hidden");
+                document.getElementById("selectedFilesSummary").textContent = "Nenhum arquivo selecionado";
+                await loadStudents();
+            } catch (err) {
+                console.error("Erro no upload:", err);
+                showToast("Erro no Upload", err.message, true);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+
+        // Atalho tecla ESC para fechar modais
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                closeModal("registerStudentModal");
+                closeModal("uploadWorkModal");
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", loadStudents);
     </script>
 </body>
 </html>

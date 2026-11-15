@@ -9,3 +9,7 @@ API_KEY = "senai-dev-secret-key-2026"
 binding = "devsenai_db"
 database_name = "devsenai-db"
 database_id = "fc83c989-48a3-49ed-b159-d31504abae6a"
+
+[[r2_buckets]]
+binding = "devsenai_trabalhos"
+bucket_name = "devsenai-trabalhos"

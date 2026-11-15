@@ -1,4 +1,5 @@
--- Schema D1 SQLite para o Sistema de Cursos DEV SENAI
+-- Schema D1 SQLite para o Sistema DEV SENAI (Cursos + Portfólio de Trabalhos)
+
 -- 1. Tabela de Cursos
 CREATE TABLE IF NOT EXISTS cursos (
     id TEXT PRIMARY KEY,
@@ -20,6 +21,31 @@ CREATE TABLE IF NOT EXISTS videos (
     FOREIGN KEY (course_id) REFERENCES cursos(id) ON DELETE CASCADE
 );
 
--- Índices de Performance
+-- Índices de Cursos
 CREATE INDEX IF NOT EXISTS idx_videos_course_id ON videos(course_id);
 CREATE INDEX IF NOT EXISTS idx_videos_order ON videos(course_id, order_index);
+
+-- 3. Tabela de Alunos (Portfólio Multi-Tenant)
+CREATE TABLE IF NOT EXISTS alunos (
+    id TEXT PRIMARY KEY,
+    nome TEXT NOT NULL,
+    matricula TEXT UNIQUE NOT NULL,
+    pin TEXT NOT NULL,
+    avatar_url TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 4. Tabela de Trabalhos vinculada a Alunos
+CREATE TABLE IF NOT EXISTS trabalhos (
+    id TEXT PRIMARY KEY,
+    aluno_id TEXT NOT NULL,
+    titulo TEXT NOT NULL,
+    modulo TEXT NOT NULL,
+    descricao TEXT,
+    entry_url TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE
+);
+
+-- Índices de Trabalhos
+CREATE INDEX IF NOT EXISTS idx_trabalhos_aluno_id ON trabalhos(aluno_id);
