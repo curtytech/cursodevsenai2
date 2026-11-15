@@ -532,12 +532,27 @@ export default {
 				const r2 = env.devsenai_trabalhos;
 				if (r2) {
 					try {
-						// Remove tanto o prefixo novo quanto o prefixo legado se houver
-						const prefixId = `alunos/${trabalho.aluno_id}/${trabalho.id}/`;
-						const listed = await r2.list({ prefix: prefixId });
-						const keysToDelete = listed.objects.map((obj) => obj.key);
-						if (keysToDelete.length > 0) {
-							await r2.delete(keysToDelete);
+						// Remove objetos sob o prefixo padrão ou o prefixo derivado da entry_url
+						let prefixFromUrl = "";
+						try {
+							const parsedUrl = new URL(trabalho.entry_url);
+							const parts = parsedUrl.pathname.replace(/^\/+/, "").split("/");
+							if (parts.length >= 3) {
+								prefixFromUrl = parts.slice(0, 3).join("/") + "/";
+							}
+						} catch {}
+
+						const prefixes = Array.from(new Set([
+							`alunos/${trabalho.aluno_id}/${trabalho.id}/`,
+							prefixFromUrl
+						].filter(Boolean)));
+
+						for (const pfx of prefixes) {
+							const listed = await r2.list({ prefix: pfx });
+							const keysToDelete = listed.objects.map((obj) => obj.key);
+							if (keysToDelete.length > 0) {
+								await r2.delete(keysToDelete);
+							}
 						}
 					} catch (r2Err) {
 						console.warn("Aviso ao limpar objetos do R2:", r2Err);
