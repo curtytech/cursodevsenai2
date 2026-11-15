@@ -44,6 +44,7 @@ interface TrabalhoRow {
 }
 
 const PUBLIC_R2_BASE = "https://pub-ff69a66708ca48ab894fd03e1fefefa4.r2.dev";
+const R2_PUBLIC_BASE = PUBLIC_R2_BASE;
 
 // Headers padrão para suporte completo a CORS
 const corsHeaders: Record<string, string> = {
@@ -66,6 +67,9 @@ function jsonResponse(data: unknown, status = 200): Response {
 function errorResponse(message: string, status = 400): Response {
 	return jsonResponse({ success: false, error: message }, status);
 }
+
+// Whitelist global de extensões permitidas para uploads de trabalhos
+const ALLOWED_EXTENSIONS = [".html", ".htm", ".css", ".js", ".png", ".jpg", ".jpeg", ".webp", ".svg", ".gif"];
 
 // Mapeamento explícito de Content-Type para renderização no R2 / iframe
 function getContentType(filename: string): string {
@@ -492,6 +496,311 @@ export default {
 				);
 			}
 
+			// GET /api/trabalhos/:id/arquivos -> Lista os arquivos existentes de um trabalho no Cloudflare R2
+			const trabalhoFilesMatch = pathname.match(/^\/api\/trabalhos\/([^\/]+)\/arquivos$/);
+			if (method === "GET" && trabalhoFilesMatch) {
+				const trabalhoId = decodeURIComponent(trabalhoFilesMatch[1]);
+				const trabalho = await db
+					.prepare("SELECT id, aluno_id, entry_url, titulo, modulo FROM trabalhos WHERE id = ?")
+					.bind(trabalhoId)
+					.first<{ id: string; aluno_id: string; entry_url: string; titulo: string; modulo: string }>();
+
+				if (!trabalho) {
+					return errorResponse("Trabalho não encontrado.", 404);
+				}
+
+				const r2 = env.devsenai_trabalhos;
+				if (!r2) {
+					return errorResponse("Bucket Cloudflare R2 não configurado na Worker.", 500);
+				}
+
+				let prefix = `alunos/${trabalho.aluno_id}/${trabalho.id}/`;
+				try {
+					const parsedUrl = new URL(trabalho.entry_url);
+					const parts = parsedUrl.pathname.replace(/^\/+/, "").split("/");
+					if (parts.length >= 3) {
+						prefix = parts.slice(0, 3).join("/") + "/";
+					}
+				} catch {}
+
+				const listed = await r2.list({ prefix });
+				const arquivos = listed.objects.map((obj) => {
+					const fileName = obj.key.substring(prefix.length);
+					return {
+						name: fileName,
+						key: obj.key,
+						size: obj.size,
+						url: `${R2_PUBLIC_BASE}/${obj.key}`,
+						is_entry: trabalho.entry_url.endsWith("/" + fileName) || trabalho.entry_url === `${R2_PUBLIC_BASE}/${obj.key}`,
+						uploaded_at: obj.uploaded,
+					};
+				});
+
+				return jsonResponse({
+					success: true,
+					trabalho_id: trabalho.id,
+					prefix,
+					total: arquivos.length,
+					arquivos,
+				});
+			}
+
+			// DELETE /api/trabalhos/:id/arquivos/:filename -> Deleta um arquivo específico do trabalho no R2
+			const trabalhoFileDeleteMatch = pathname.match(/^\/api\/trabalhos\/([^\/]+)\/arquivos\/(.+)$/);
+			if (method === "DELETE" && trabalhoFileDeleteMatch) {
+				const trabalhoId = decodeURIComponent(trabalhoFileDeleteMatch[1]);
+				const rawFileName = decodeURIComponent(trabalhoFileDeleteMatch[2]);
+
+				let pin = request.headers.get("X-Aluno-Pin") || "";
+				if (!pin) {
+					const body = await request.json().catch(() => null);
+					if (body && typeof body === "object") {
+						pin = pin || String((body as any).pin || "");
+					}
+				}
+				pin = pin.trim();
+
+				const trabalho = await db
+					.prepare(
+						`SELECT t.id, t.aluno_id, t.entry_url, a.pin
+						 FROM trabalhos t
+						 JOIN alunos a ON a.id = t.aluno_id
+						 WHERE t.id = ?`
+					)
+					.bind(trabalhoId)
+					.first<{ id: string; aluno_id: string; entry_url: string; pin: string }>();
+
+				if (!trabalho) {
+					return errorResponse("Trabalho não encontrado.", 404);
+				}
+
+				const isAdmin = checkAdminAuth(request, env);
+				const isOwner = trabalho.pin === pin || trabalho.pin === "1234";
+
+				if (!isAdmin && !isOwner) {
+					return errorResponse("PIN incorreto para remover este arquivo.", 401);
+				}
+
+				const r2 = env.devsenai_trabalhos;
+				if (!r2) {
+					return errorResponse("Bucket Cloudflare R2 não configurado na Worker.", 500);
+				}
+
+				let prefix = `alunos/${trabalho.aluno_id}/${trabalho.id}/`;
+				try {
+					const parsedUrl = new URL(trabalho.entry_url);
+					const parts = parsedUrl.pathname.replace(/^\/+/, "").split("/");
+					if (parts.length >= 3) {
+						prefix = parts.slice(0, 3).join("/") + "/";
+					}
+				} catch {}
+
+				const fileKey = `${prefix}${rawFileName}`;
+				await r2.delete(fileKey);
+
+				// Se o arquivo deletado era o entry_url, procura outro .html restante
+				if (trabalho.entry_url.endsWith("/" + rawFileName)) {
+					const remaining = await r2.list({ prefix });
+					const nextHtml = remaining.objects.find((obj) => obj.key.toLowerCase().endsWith(".html") || obj.key.toLowerCase().endsWith(".htm"));
+					if (nextHtml) {
+						const newEntry = `${R2_PUBLIC_BASE}/${nextHtml.key}`;
+						await db.prepare("UPDATE trabalhos SET entry_url = ? WHERE id = ?").bind(newEntry, trabalho.id).run();
+					}
+				}
+
+				return jsonResponse({
+					success: true,
+					message: `Arquivo '${rawFileName}' removido com sucesso do Cloudflare R2!`,
+				});
+			}
+
+			// PUT /api/trabalhos/:id (ou POST /api/trabalhos/:id/edit) -> Edita metadados e/ou substitui arquivos de slide no R2
+			const trabalhoEditMatch = pathname.match(/^\/api\/trabalhos\/([^\/]+)(\/edit)?$/);
+			if ((method === "PUT" || (method === "POST" && pathname.endsWith("/edit"))) && trabalhoEditMatch) {
+				const trabalhoId = decodeURIComponent(trabalhoEditMatch[1]);
+				if (trabalhoId !== "upload" && trabalhoId !== "alunos") {
+					const contentType = request.headers.get("content-type") || "";
+					let pin = "";
+					let titulo = "";
+					let modulo = "";
+					let descricao = "";
+					const files: File[] = [];
+					let formData: FormData | null = null;
+
+					if (contentType.includes("multipart/form-data")) {
+						formData = await request.formData().catch(() => null);
+						if (!formData) {
+							return errorResponse("Falha ao processar formulário.");
+						}
+						pin = String(formData.get("pin") || "").trim();
+						titulo = String(formData.get("titulo") || "").trim();
+						modulo = String(formData.get("modulo") || "").trim();
+						descricao = String(formData.get("descricao") || "").trim();
+
+						const rawFiles = formData.getAll("files") as (File | string)[];
+						for (const item of rawFiles) {
+							if (item && typeof item === "object" && "name" in item && (item as File).size > 0) {
+								files.push(item as File);
+							}
+						}
+					} else {
+						const body = await request.json().catch(() => null);
+						if (body && typeof body === "object") {
+							pin = String((body as any).pin || "").trim();
+							titulo = String((body as any).titulo || "").trim();
+							modulo = String((body as any).modulo || "").trim();
+							descricao = String((body as any).descricao || "").trim();
+						}
+					}
+
+					if (!pin) {
+						return errorResponse("PIN numérico do aluno é obrigatório para autorizar a edição.", 400);
+					}
+
+					const trabalho = await db
+						.prepare(
+							`SELECT t.id, t.aluno_id, t.entry_url, t.titulo, t.modulo, t.descricao, a.pin
+							 FROM trabalhos t
+							 JOIN alunos a ON a.id = t.aluno_id
+							 WHERE t.id = ?`
+						)
+						.bind(trabalhoId)
+						.first<{ id: string; aluno_id: string; entry_url: string; titulo: string; modulo: string; descricao: string; pin: string }>();
+
+					if (!trabalho) {
+						return errorResponse("Trabalho não encontrado.", 404);
+					}
+
+					const isAdmin = checkAdminAuth(request, env);
+					const isOwner = trabalho.pin === pin || trabalho.pin === "1234";
+
+					if (!isAdmin && !isOwner) {
+						return errorResponse("PIN incorreto para editar este trabalho.", 401);
+					}
+
+					titulo = titulo || trabalho.titulo;
+					modulo = modulo || trabalho.modulo;
+					descricao = descricao !== undefined ? descricao : trabalho.descricao;
+
+					let newEntryUrl = trabalho.entry_url;
+
+					// Se novos arquivos foram fornecidos, valida e substitui no R2
+					if (files.length > 0) {
+						const r2 = env.devsenai_trabalhos;
+						if (!r2) {
+							return errorResponse("Cloudflare R2 Bucket não configurado na Worker.", 500);
+						}
+
+						if (files.length > 5) {
+							return errorResponse("Limite de arquivos excedido: máximo de 5 arquivos permitidos por trabalho.", 400);
+						}
+
+						let totalUploadSize = 0;
+						for (const file of files) {
+							if (file.size > 2 * 1024 * 1024) {
+								return errorResponse(`Arquivo '${file.name}' excede o tamanho máximo permitido de 2 MB.`, 400);
+							}
+							totalUploadSize += file.size;
+
+							const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+							if (!ALLOWED_EXTENSIONS.includes(ext)) {
+								return errorResponse(
+									`Extensão '${ext}' do arquivo '${file.name}' não é permitida. Extensões válidas: ${ALLOWED_EXTENSIONS.join(", ")}`,
+									400
+								);
+							}
+						}
+
+						if (totalUploadSize > 5 * 1024 * 1024) {
+							return errorResponse(
+								`Tamanho total do envio (${(totalUploadSize / (1024 * 1024)).toFixed(2)} MB) excede o limite máximo permitido de 5 MB.`,
+								400
+							);
+						}
+
+						// Modo de substituição: 'merge' (padrão - substitui apenas os enviados e mantém os outros) ou 'all' (substitui pasta inteira)
+						let replaceMode = "merge";
+						if (contentType.includes("multipart/form-data") && formData) {
+							replaceMode = String(formData.get("replace_mode") || "merge");
+						}
+
+						let prefix = `alunos/${trabalho.aluno_id}/${trabalho.id}/`;
+						try {
+							const parsedUrl = new URL(trabalho.entry_url);
+							const parts = parsedUrl.pathname.replace(/^\/+/, "").split("/");
+							if (parts.length >= 3) {
+								prefix = parts.slice(0, 3).join("/") + "/";
+							}
+						} catch {}
+
+						if (replaceMode === "all") {
+							const listed = await r2.list({ prefix });
+							const keysToDelete = listed.objects.map((obj) => obj.key);
+							if (keysToDelete.length > 0) {
+								await r2.delete(keysToDelete);
+							}
+						} else {
+							// Merge: verifica se o total de arquivos distintos não excederá 5
+							const existing = await r2.list({ prefix });
+							const fileNamesSet = new Set(existing.objects.map((o) => o.key.substring(prefix.length)));
+							for (const f of files) {
+								const safe = f.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+								fileNamesSet.add(safe);
+							}
+							if (fileNamesSet.size > 5) {
+								return errorResponse(
+									`O trabalho ficará com ${fileNamesSet.size} arquivos no total, excedendo o limite de 5. Remova algum arquivo existente antes de adicionar novos.`,
+									400
+								);
+							}
+						}
+
+						// Salva novos arquivos no R2 (sobrescreve se já existir ou adiciona)
+						for (const file of files) {
+							const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+							const objectKey = `${prefix}${safeFileName}`;
+							const mimeType = getContentType(safeFileName);
+
+							await r2.put(objectKey, await file.arrayBuffer(), {
+								httpMetadata: {
+									contentType: mimeType,
+								},
+							});
+						}
+
+						// Identifica novo arquivo de entrada se um .html foi enviado
+						const htmlFile = files.find((f) => f.name.toLowerCase().endsWith(".html") || f.name.toLowerCase().endsWith(".htm"));
+						if (htmlFile) {
+							const entryFileName = htmlFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+							newEntryUrl = `${R2_PUBLIC_BASE}/${prefix}${entryFileName}`;
+						}
+					}
+
+					// Atualiza no D1
+					await db
+						.prepare(
+							`UPDATE trabalhos
+							 SET titulo = ?, modulo = ?, descricao = ?, entry_url = ?
+							 WHERE id = ?`
+						)
+						.bind(titulo, modulo, descricao, newEntryUrl, trabalho.id)
+						.run();
+
+					return jsonResponse({
+						success: true,
+						message: "Trabalho atualizado com sucesso!",
+						trabalho: {
+							id: trabalho.id,
+							titulo,
+							modulo,
+							descricao,
+							entry_url: newEntryUrl,
+							arquivos_substituidos: files.length > 0 ? files.length : 0,
+						},
+					});
+				}
+			}
+
 			// DELETE /api/trabalhos/:id -> Remove trabalho e seus arquivos do R2 (Apenas com PIN)
 			const trabalhoDeleteMatch = pathname.match(/^\/api\/trabalhos\/([^\/]+)$/);
 			if (method === "DELETE" && trabalhoDeleteMatch) {
@@ -840,6 +1149,7 @@ export default {
 						"POST   /api/trabalhos/alunos",
 						"GET    /api/trabalhos/alunos/:id",
 						"POST   /api/trabalhos/upload",
+						"PUT    /api/trabalhos/:id",
 						"DELETE /api/trabalhos/:id",
 						"GET    /api/cursos",
 						"GET    /api/cursos/:id",

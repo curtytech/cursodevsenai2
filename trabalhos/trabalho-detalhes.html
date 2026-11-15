@@ -229,6 +229,96 @@
         </div>
     </div>
 
+    <!-- Modal 4: Editar Trabalho e Slides -->
+    <div id="editWorkModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md">
+        <div class="relative w-full max-w-lg rounded-3xl border border-slate-800 bg-slate-900/95 p-6 shadow-2xl backdrop-blur-xl sm:p-8">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div>
+                    <h3 class="text-base font-bold text-white">Editar Trabalho / Apresentação</h3>
+                    <p class="text-xs text-slate-400">Atualize metadados ou envie novos arquivos de slide para o Cloudflare R2.</p>
+                </div>
+                <button type="button" onclick="closeModal('editWorkModal')" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form id="editWorkForm" class="mt-6 space-y-4">
+                <input type="hidden" id="editWorkIdHidden">
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Título do Trabalho *</label>
+                    <input id="editTitleInput" required type="text" placeholder="Ex: Apresentação Protocolo MQTT" 
+                           class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-xs text-white outline-none focus:border-cyan-400">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Módulo / Tema *</label>
+                        <input id="editModuleInput" required type="text" placeholder="Ex: MQTT, WebSocket..." 
+                               class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-xs text-white outline-none focus:border-cyan-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-1.5">PIN do Aluno (4-6 dígitos) *</label>
+                        <input id="editPinInput" required type="password" maxlength="6" placeholder="PIN do seu perfil" 
+                               class="w-full rounded-xl border border-cyan-800/60 bg-slate-950 px-4 py-2.5 text-xs font-mono tracking-widest text-white outline-none focus:border-cyan-400">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Descrição Resumida</label>
+                    <textarea id="editDescriptionInput" rows="2" placeholder="Resumo do conteúdo..." 
+                              class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-xs text-white outline-none focus:border-cyan-400"></textarea>
+                </div>
+
+                <!-- Lista de arquivos existentes na nuvem R2 -->
+                <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+                    <div class="flex items-center justify-between mb-2.5">
+                        <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                            <svg class="h-3.5 w-3.5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+                            Arquivos Atuais no Cloudflare R2
+                        </span>
+                        <span id="existingFilesCountBadge" class="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] font-bold text-slate-300">0 arquivos</span>
+                    </div>
+
+                    <div id="existingFilesList" class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                        <div class="flex items-center justify-center py-4 text-xs text-slate-500">
+                            Carregando arquivos da nuvem...
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                            Substituir ou Adicionar Arquivos
+                        </label>
+                        <span class="text-[10px] text-slate-400">Máx. 5 arquivos no total</span>
+                    </div>
+                    <div class="relative rounded-2xl border-2 border-dashed border-slate-800 bg-slate-950/60 p-5 text-center transition hover:border-cyan-400/70 hover:bg-slate-950">
+                        <input id="editFilesInput" type="file" multiple class="absolute inset-0 h-full w-full cursor-pointer opacity-0" accept=".html,.htm,.css,.js,.png,.jpg,.jpeg,.svg,.webp,.gif">
+                        <div class="flex flex-col items-center justify-center space-y-1.5 pointer-events-none">
+                            <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-cyan-400">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                            </div>
+                            <p class="text-xs font-bold text-slate-200">Clique para selecionar novos arquivos</p>
+                            <p class="text-[10px] text-slate-400">Arquivos com mesmo nome serão substituídos; os outros continuam preservados.</p>
+                            <span id="editSelectedFilesSummary" class="text-[11px] font-medium text-slate-400 pt-0.5">Deixe vazio se não quiser alterar nenhum arquivo</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-5">
+                    <button type="button" onclick="closeModal('editWorkModal')" class="rounded-xl border border-slate-700 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="submitEditBtn" class="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-2.5 text-xs font-bold text-slate-950 shadow-md transition hover:bg-cyan-300">
+                        <span>Salvar Alterações</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Script de Integração -->
     <script>
         const API_BASE_URL = "https://api-cursos.matheusbarroso124.workers.dev/api";
@@ -420,10 +510,17 @@
                             Abrir Apresentação
                         </button>
 
-                        <button onclick="promptDeleteWork('${trab.id}', '${encodeURIComponent(trab.titulo)}')" title="Excluir Trabalho" 
-                                class="rounded-xl border border-slate-700/80 p-2 text-slate-400 transition hover:border-rose-500/50 hover:bg-rose-950/40 hover:text-rose-300">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button onclick="promptEditWork('${encodeURIComponent(JSON.stringify(trab))}')" title="Editar Trabalho / Slides" 
+                                    class="rounded-xl border border-slate-700/80 p-2 text-slate-400 transition hover:border-cyan-500/50 hover:bg-cyan-950/40 hover:text-cyan-300">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+
+                            <button onclick="promptDeleteWork('${trab.id}', '${encodeURIComponent(trab.titulo)}')" title="Excluir Trabalho" 
+                                    class="rounded-xl border border-slate-700/80 p-2 text-slate-400 transition hover:border-rose-500/50 hover:bg-rose-950/40 hover:text-rose-300">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </div>
                     </div>
                 `;
 
@@ -573,12 +670,196 @@
             }
         });
 
+        // 7. Edição de Trabalho e Substituição de Slides
+        async function promptEditWork(encodedTrab) {
+            const trab = JSON.parse(decodeURIComponent(encodedTrab));
+            document.getElementById("editWorkIdHidden").value = trab.id;
+            document.getElementById("editTitleInput").value = trab.titulo || "";
+            document.getElementById("editModuleInput").value = trab.modulo || "";
+            document.getElementById("editDescriptionInput").value = trab.descricao || "";
+            document.getElementById("editPinInput").value = "";
+            document.getElementById("editFilesInput").value = "";
+            
+            const summary = document.getElementById("editSelectedFilesSummary");
+            summary.textContent = "Deixe vazio se não quiser alterar nenhum arquivo";
+            summary.className = "text-[11px] font-medium text-slate-400 pt-0.5";
+
+            openModal("editWorkModal");
+
+            // Carrega os arquivos atuais no Cloudflare R2
+            await loadWorkFiles(trab.id);
+        }
+
+        async function loadWorkFiles(workId) {
+            const listContainer = document.getElementById("existingFilesList");
+            const badge = document.getElementById("existingFilesCountBadge");
+            listContainer.innerHTML = `
+                <div class="flex items-center justify-center py-4 text-xs text-slate-500">
+                    <div class="h-3 w-3 animate-spin rounded-full border-2 border-solid border-cyan-400 border-r-transparent mr-2"></div>
+                    Consultando arquivos no R2...
+                </div>
+            `;
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/trabalhos/${encodeURIComponent(workId)}/arquivos`);
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Erro ao consultar arquivos.");
+
+                const arquivos = data.arquivos || [];
+                badge.textContent = `${arquivos.length} ${arquivos.length === 1 ? "arquivo" : "arquivos"}`;
+
+                if (arquivos.length === 0) {
+                    listContainer.innerHTML = `<p class="py-2 text-center text-xs text-slate-500">Nenhum arquivo encontrado neste trabalho.</p>`;
+                    return;
+                }
+
+                listContainer.innerHTML = arquivos.map((arq) => {
+                    const sizeKb = (arq.size / 1024).toFixed(1);
+                    const ext = arq.name.split(".").pop().toLowerCase();
+                    let iconBg = "text-cyan-400 bg-cyan-950/60 border-cyan-800/50";
+                    if (["css"].includes(ext)) iconBg = "text-sky-400 bg-sky-950/60 border-sky-800/50";
+                    if (["js"].includes(ext)) iconBg = "text-amber-400 bg-amber-950/60 border-amber-800/50";
+                    if (["png", "jpg", "jpeg", "webp", "svg", "gif"].includes(ext)) iconBg = "text-emerald-400 bg-emerald-950/60 border-emerald-800/50";
+
+                    return `
+                        <div class="flex items-center justify-between rounded-xl border border-slate-800/90 bg-slate-900/60 px-3 py-2 text-xs">
+                            <div class="flex items-center gap-2 overflow-hidden pr-2">
+                                <span class="rounded-lg border px-1.5 py-0.5 text-[10px] font-mono font-bold uppercase ${iconBg}">
+                                    .${ext}
+                                </span>
+                                <span class="font-medium text-slate-200 truncate" title="${arq.name}">${arq.name}</span>
+                                <span class="text-[10px] text-slate-500 shrink-0">(${sizeKb} KB)</span>
+                                ${arq.is_entry ? `<span class="shrink-0 rounded-full bg-cyan-500/15 border border-cyan-400/40 px-2 py-0.5 text-[9px] font-bold uppercase text-cyan-300">Principal</span>` : ""}
+                            </div>
+
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <a href="${arq.url}" target="_blank" title="Abrir arquivo em nova aba" 
+                                   class="rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1 text-[10px] font-bold text-slate-300 hover:border-cyan-400 hover:text-white transition">
+                                    Ver
+                                </a>
+                                <button type="button" onclick="deleteIndividualFile('${workId}', '${encodeURIComponent(arq.name)}')" title="Remover este arquivo" 
+                                        class="rounded-lg border border-slate-800 p-1 text-slate-400 hover:border-rose-500/60 hover:bg-rose-950/50 hover:text-rose-300 transition">
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join("");
+            } catch (err) {
+                console.error("Erro ao listar arquivos:", err);
+                listContainer.innerHTML = `<p class="py-2 text-center text-xs text-rose-400">Falha ao carregar arquivos: ${err.message}</p>`;
+            }
+        }
+
+        async function deleteIndividualFile(workId, encodedFileName) {
+            const fileName = decodeURIComponent(encodedFileName);
+            const pin = prompt(`Digite seu PIN para remover o arquivo "${fileName}" do R2:`);
+            if (!pin) return;
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/trabalhos/${encodeURIComponent(workId)}/arquivos/${encodeURIComponent(fileName)}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Aluno-Pin": pin.trim()
+                    }
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Erro ao deletar arquivo.");
+
+                showToast("Arquivo Removido!", `O arquivo "${fileName}" foi apagado do R2.`);
+                await loadWorkFiles(workId);
+                await loadStudentPortfolio();
+            } catch (err) {
+                console.error("Erro na exclusão do arquivo:", err);
+                showToast("Erro na Exclusão", err.message, true);
+            }
+        }
+
+        document.getElementById("editFilesInput").addEventListener("change", (e) => {
+            const files = Array.from(e.target.files);
+            const summary = document.getElementById("editSelectedFilesSummary");
+            if (files.length === 0) {
+                summary.textContent = "Deixe vazio para manter os arquivos atuais da nuvem";
+                summary.className = "text-[11px] font-medium text-slate-400 pt-0.5";
+                return;
+            }
+
+            const check = validateFiles(files);
+            if (!check.valid) {
+                summary.textContent = `⚠️ ${check.error}`;
+                summary.className = "text-[11px] font-bold text-rose-400 pt-0.5";
+            } else {
+                summary.textContent = `✓ ${files.length} novo(s) arquivo(s) prontos para substituição (${(check.totalSize / 1024).toFixed(1)} KB)`;
+                summary.className = "text-[11px] font-bold text-emerald-400 pt-0.5";
+            }
+        });
+
+        document.getElementById("editWorkForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const workId = document.getElementById("editWorkIdHidden").value;
+            const titulo = document.getElementById("editTitleInput").value.trim();
+            const modulo = document.getElementById("editModuleInput").value.trim();
+            const descricao = document.getElementById("editDescriptionInput").value.trim();
+            const pin = document.getElementById("editPinInput").value.trim();
+            const fileInput = document.getElementById("editFilesInput");
+            const files = Array.from(fileInput.files || []);
+
+            if (files.length > 0) {
+                const check = validateFiles(files);
+                if (!check.valid) {
+                    showToast("Arquivo Inválido", check.error, true);
+                    return;
+                }
+            }
+
+            const submitBtn = document.getElementById("submitEditBtn");
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <div class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-solid border-slate-950 border-r-transparent"></div>
+                <span>Atualizando na nuvem...</span>
+            `;
+
+            try {
+                const formData = new FormData();
+                formData.append("pin", pin);
+                formData.append("titulo", titulo);
+                formData.append("modulo", modulo);
+                formData.append("descricao", descricao);
+
+                for (let i = 0; i < files.length; i++) {
+                    formData.append("files", files[i]);
+                }
+
+                const res = await fetch(`${API_BASE_URL}/trabalhos/${encodeURIComponent(workId)}`, {
+                    method: "PUT",
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Erro ao atualizar trabalho.");
+
+                showToast("Trabalho Atualizado!", files.length > 0 ? "Slides e dados substituídos com sucesso no R2!" : "Dados do trabalho atualizados com sucesso!");
+                closeModal("editWorkModal");
+                await loadStudentPortfolio();
+            } catch (err) {
+                console.error("Erro ao atualizar trabalho:", err);
+                showToast("Falha na Edição", err.message, true);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+
         // Atalhos de teclado
         document.addEventListener("keydown", (e) => {
             if (e.key === "Escape") {
                 closePresentationModal();
                 closeModal("deleteWorkModal");
                 closeModal("uploadWorkModal");
+                closeModal("editWorkModal");
             }
         });
 
