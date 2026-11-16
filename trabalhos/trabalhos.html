@@ -16,37 +16,41 @@
         <div class="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
             <div class="flex items-center gap-4">
                 <a href="../index.html" class="group flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/60 px-4 py-2 text-xs font-semibold text-slate-300 transition hover:border-cyan-400/50 hover:bg-slate-800 hover:text-white">
-                    <span class="transition-transform group-hover:-translate-x-1">&larr;</span> Voltar à Home
+                    <svg class="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                    <span>Voltar ao Início</span>
                 </a>
                 <span class="hidden h-4 w-px bg-slate-800 sm:block"></span>
                 <div class="flex items-center gap-2">
-                    <span class="flex h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.8)]"></span>
+                    <span class="flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.7)]"></span>
                     <span class="text-xs font-medium text-slate-400">Turma Dev SENAI</span>
                 </div>
             </div>
 
             <div class="flex items-center gap-3">
                 <button id="openRegisterStudentModalBtn" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/90 px-4 py-2.5 text-xs font-bold text-slate-200 shadow-sm transition hover:border-cyan-400 hover:bg-slate-800 hover:text-cyan-300">
-                    <span class="text-sm font-bold leading-none text-cyan-400">+</span> Cadastrar Aluno
+                    <svg class="h-4 w-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    <span>Cadastrar Aluno</span>
                 </button>
                 <button id="openUploadModalBtn" type="button" class="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-cyan-950/40 transition hover:-translate-y-0.5 hover:bg-cyan-300 active:translate-y-0">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                    Publicar Trabalho
+                    <span>Publicar Trabalho</span>
                 </button>
             </div>
         </div>
     </header>
 
     <!-- Feedback Toast -->
-    <div id="toastNotification" class="fixed right-6 top-24 z-50 hidden max-w-md rounded-2xl border border-cyan-500/40 bg-slate-900/95 p-4 shadow-2xl backdrop-blur-xl transition-all">
-        <div class="flex items-start gap-3">
-            <span id="toastIcon" class="text-xl">✨</span>
-            <div class="flex-1 text-xs">
-                <p id="toastTitle" class="font-bold text-white"></p>
-                <p id="toastMessage" class="mt-0.5 text-slate-300"></p>
-            </div>
-            <button onclick="hideToast()" class="text-slate-400 hover:text-white">&times;</button>
+    <div id="toastNotification" class="fixed right-6 top-24 z-50 hidden max-w-md items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900/95 p-4 shadow-2xl backdrop-blur-xl transition-all">
+        <div id="toastIconContainer" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         </div>
+        <div class="flex-1 text-xs min-w-0">
+            <p id="toastTitle" class="font-bold text-white"></p>
+            <p id="toastMessage" class="mt-0.5 text-slate-300"></p>
+        </div>
+        <button onclick="hideToast()" class="shrink-0 rounded-lg p-1 text-slate-400 transition hover:bg-slate-800 hover:text-white" aria-label="Fechar notificação">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
     </div>
 
     <!-- Conteúdo Principal -->
@@ -111,9 +115,11 @@
             <div class="flex items-center justify-between border-b border-slate-800 pb-4">
                 <div>
                     <h3 class="text-xl font-bold text-white">Cadastrar Novo Aluno</h3>
-                    <p class="text-xs text-slate-400 mt-1">Insira seu nome e crie seu PIN de 4 a 6 números.</p>
+                    <p class="text-xs text-slate-400 mt-1">Defina os dados de identificação e o PIN de segurança.</p>
                 </div>
-                <button type="button" onclick="closeModal('registerStudentModal')" class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white">&times;</button>
+                <button type="button" onclick="closeModal('registerStudentModal')" class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label="Fechar">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
 
             <form id="registerStudentForm" autocomplete="off" class="space-y-4">
@@ -127,13 +133,20 @@
                     <label class="block text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-1.5">Criar PIN Secreto (4 a 6 dígitos numéricos) *</label>
                     <input id="studentPinInput" required type="password" maxlength="6" pattern="[0-9]{4,6}" inputmode="numeric" placeholder="Ex.: 1234" 
                            class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
-                    <p class="mt-1 text-[11px] text-slate-500">Memorize este PIN. Ele será solicitado sempre que você quiser publicar ou excluir trabalhos.</p>
+                    <p class="mt-1 text-[11px] text-slate-500">Este PIN numérico será solicitado para autenticar publicações e alterações.</p>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">URL do Avatar / Foto (Opcional)</label>
+                <div class="space-y-2">
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">URL do Avatar / Foto (Opcional)</label>
                     <input id="studentAvatarInput" type="url" placeholder="https://exemplo.com/foto.jpg" 
                            class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
+                    <div class="relative rounded-xl border border-dashed border-slate-800 bg-slate-950/50 p-2.5 text-center transition hover:border-cyan-400/60">
+                        <input id="studentAvatarFileInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif" class="absolute inset-0 h-full w-full cursor-pointer opacity-0">
+                        <div class="flex items-center justify-center gap-2 pointer-events-none">
+                            <svg class="h-4 w-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span id="studentAvatarFileSummary" class="text-xs text-slate-400">Ou escolha uma imagem do computador (máx. 2MB)</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-5">
@@ -148,41 +161,57 @@
         </div>
     </div>
 
-    <!-- MODAL 2: Publicar Trabalho (Upload R2) -->
+    <!-- MODAL 2: Publicar Trabalho -->
     <div id="uploadWorkModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-md flex items-center justify-center" role="dialog" aria-modal="true">
         <div class="w-full max-w-xl rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl sm:p-8 space-y-6">
             <div class="flex items-center justify-between border-b border-slate-800 pb-4">
                 <div>
-                    <span class="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-2.5 py-0.5 text-[10px] font-bold uppercase text-cyan-300">Upload Cloudflare R2</span>
+                    <span class="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2.5 py-0.5 text-[10px] font-semibold tracking-wider uppercase text-cyan-400">Publicação de Projeto</span>
                     <h3 class="text-xl font-bold text-white mt-1">Publicar Apresentação / Trabalho</h3>
                 </div>
-                <button type="button" onclick="closeModal('uploadWorkModal')" class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white">&times;</button>
+                <button type="button" onclick="closeModal('uploadWorkModal')" class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label="Fechar">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
 
             <form id="uploadWorkForm" autocomplete="off" class="space-y-4">
                 
+                <!-- Seletor de Modo de Publicação -->
+                <div class="grid grid-cols-2 gap-2 rounded-2xl border border-slate-800 bg-slate-950 p-1.5">
+                    <button type="button" id="tabModeUpload" onclick="setPublishMode('upload')" 
+                            class="flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-3 py-2.5 text-xs font-bold text-slate-950 shadow-sm transition">
+                        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                        <span>Enviar Arquivos</span>
+                    </button>
+                    <button type="button" id="tabModeLink" onclick="setPublishMode('link')" 
+                            class="flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-400 transition hover:text-white">
+                        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                        <span>Link Externo</span>
+                    </button>
+                </div>
+
                 <!-- Seleção do Aluno -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Quem é você? (Selecione seu nome) *</label>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Aluno Responsável *</label>
                     <select id="uploadAlunoSelect" required class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400">
-                        <option value="">-- Selecione seu nome na lista da sala --</option>
+                        <option value="">Selecione o aluno na lista da turma</option>
                         <!-- Populado via JS -->
                     </select>
                 </div>
 
                 <!-- Campo dinâmico para cadastrar novo aluno caso não esteja na lista -->
                 <div id="novoAlunoContainer" class="hidden rounded-2xl border border-cyan-500/30 bg-cyan-950/20 p-4 space-y-2">
-                    <label class="block text-xs font-bold text-cyan-300 uppercase tracking-wider">Digite seu Nome Completo *</label>
+                    <label class="block text-xs font-bold text-cyan-300 uppercase tracking-wider">Nome Completo *</label>
                     <input id="uploadNovoNomeInput" type="text" placeholder="Ex.: Gabriel Souza" 
                            class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-xs text-white outline-none focus:border-cyan-400">
-                    <p class="text-[11px] text-cyan-200">Você será cadastrado automaticamente na lista da turma!</p>
+                    <p class="text-[11px] text-cyan-200">Um novo aluno será registrado na turma com este nome.</p>
                 </div>
 
                 <!-- PIN do Aluno -->
                 <div>
                     <div class="flex items-center justify-between mb-1.5">
-                        <label class="block text-xs font-semibold text-cyan-400 uppercase tracking-wider">Seu PIN Secreto (4 a 6 números) *</label>
-                        <span id="pinHelpBadge" class="text-[10px] text-slate-400">Primeira vez? O PIN que digitar será gravado</span>
+                        <label class="block text-xs font-semibold text-cyan-400 uppercase tracking-wider">PIN de Segurança (4 a 6 dígitos) *</label>
+                        <span id="pinHelpBadge" class="text-[10px] text-slate-400">Informe o PIN cadastrado no perfil</span>
                     </div>
                     <input id="uploadPinInput" required type="password" maxlength="6" inputmode="numeric" placeholder="Digite seu PIN numérico" 
                            class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400">
@@ -208,7 +237,7 @@
                 </div>
 
                 <!-- Seletor de Arquivos Múltiplos com Travas -->
-                <div>
+                <div id="uploadFilesContainer">
                     <div class="flex items-center justify-between mb-1.5">
                         <label class="block text-xs font-semibold text-cyan-400 uppercase tracking-wider">
                             Arquivos do Trabalho *
@@ -222,10 +251,23 @@
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
                             </div>
                             <p class="text-xs font-bold text-slate-200">Clique para selecionar arquivos ou arraste até aqui</p>
-                            <p class="text-[11px] text-slate-400">Envie o <code class="text-cyan-300 font-bold">.html</code> principal e arquivos <code class="text-slate-300">.css, .js, imagens</code></p>
-                            <span id="selectedFilesSummary" class="text-xs font-semibold text-cyan-400 pt-1">Nenhum arquivo selecionado</span>
+                            <p class="text-[11px] text-slate-400">Envie o arquivo <code class="text-cyan-300 font-bold">.html</code> principal e arquivos complementares</p>
+                            <div id="selectedFilesSummary" class="text-xs font-semibold text-slate-400 pt-1">Nenhum arquivo selecionado</div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Campo de Link Externo (GitHub Pages / Vercel / Netlify) -->
+                <div id="uploadLinkContainer" class="hidden space-y-2 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+                    <div class="flex items-center justify-between">
+                        <label for="uploadExternalUrlInput" class="block text-xs font-semibold text-cyan-400 uppercase tracking-wider">
+                            URL Pública do Projeto (HTTPS) *
+                        </label>
+                        <span class="text-[10px] text-slate-400">GitHub Pages, Vercel, Netlify</span>
+                    </div>
+                    <input id="uploadExternalUrlInput" type="url" placeholder="https://meu-projeto.vercel.app" 
+                           class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs text-white outline-none focus:border-cyan-400">
+                    <p class="text-[11px] text-slate-400">Informe um endereço público iniciando obrigatoriamente com <code class="text-cyan-300 font-semibold">https://</code>.</p>
                 </div>
 
                 <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-5">
@@ -233,7 +275,96 @@
                         Cancelar
                     </button>
                     <button type="submit" id="submitUploadBtn" class="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-2.5 text-xs font-bold text-slate-950 shadow-md transition hover:bg-cyan-300">
-                        <span>Fazer Upload e Publicar</span>
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        <span>Publicar Trabalho</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Editar Aluno (Foto / Avatar, Nome, PIN) -->
+    <div id="editStudentModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-md flex items-center justify-center" role="dialog" aria-modal="true">
+        <div class="w-full max-w-lg rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div>
+                    <h3 class="text-xl font-bold text-white">Editar Perfil do Aluno</h3>
+                    <p class="text-xs text-slate-400 mt-1">Atualize sua foto, nome ou altere seu PIN de segurança.</p>
+                </div>
+                <button type="button" onclick="closeModal('editStudentModal')" class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label="Fechar">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Preview do Avatar Atual / Novo -->
+            <div class="flex items-center gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+                <div id="editStudentAvatarPreview" class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-cyan-500/40 bg-cyan-950/40 text-xl font-black text-cyan-300 shadow-md overflow-hidden">
+                    <!-- Foto ou Iniciais -->
+                </div>
+                <div class="space-y-1 text-xs">
+                    <strong id="editStudentPreviewName" class="block font-bold text-white text-sm">Nome do Aluno</strong>
+                    <p class="text-slate-400">Cole a URL de uma foto ou envie uma imagem do seu computador.</p>
+                </div>
+            </div>
+
+            <form id="editStudentForm" autocomplete="off" class="space-y-4">
+                <input type="hidden" id="editStudentIdHidden">
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Nome Completo do Aluno *</label>
+                    <input id="editStudentNameInput" required type="text" placeholder="Ex.: Lucas Mendes" 
+                           class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-xs text-white outline-none focus:border-cyan-400">
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">URL do Avatar / Foto (Opcional)</label>
+                            <button type="button" id="removePhotoBtn" onclick="clearStudentPhoto()" class="text-[11px] text-rose-400 hover:underline">Remover Foto</button>
+                        </div>
+                        <input id="editStudentAvatarUrlInput" type="url" placeholder="https://exemplo.com/foto.jpg" 
+                               class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-xs text-white outline-none focus:border-cyan-400">
+                    </div>
+
+                    <div class="relative flex py-1 items-center">
+                        <div class="flex-grow border-t border-slate-800"></div>
+                        <span class="flex-shrink mx-3 text-[10px] uppercase font-bold text-slate-500">ou envie uma foto do dispositivo</span>
+                        <div class="flex-grow border-t border-slate-800"></div>
+                    </div>
+
+                    <div>
+                        <div class="relative rounded-xl border border-dashed border-slate-800 bg-slate-950/50 p-3 text-center transition hover:border-cyan-400/60">
+                            <input id="editStudentAvatarFileInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif" class="absolute inset-0 h-full w-full cursor-pointer opacity-0">
+                            <div class="flex items-center justify-center gap-2 pointer-events-none">
+                                <svg class="h-4 w-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                <span id="editStudentFileSummary" class="text-xs text-slate-300">Escolher imagem do dispositivo (máx. 2MB)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-800">
+                    <div>
+                        <label class="block text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-1.5">PIN Atual *</label>
+                        <input id="editStudentCurrentPinInput" required type="password" maxlength="6" pattern="[0-9]{4,6}" inputmode="numeric" placeholder="4 a 6 dígitos" 
+                               class="w-full rounded-xl border border-cyan-800/60 bg-slate-950 px-4 py-2.5 text-xs font-mono tracking-widest text-white outline-none focus:border-cyan-400">
+                        <p class="mt-1 text-[10px] text-slate-500">Se for primeiro acesso, digite 1234.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Novo PIN (Opcional)</label>
+                        <input id="editStudentNewPinInput" type="password" maxlength="6" pattern="[0-9]{4,6}" inputmode="numeric" placeholder="Em branco = manter" 
+                               class="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-2.5 text-xs font-mono tracking-widest text-white outline-none focus:border-cyan-400">
+                        <p class="mt-1 text-[10px] text-slate-500">Preencha apenas se quiser trocar.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-5">
+                    <button type="button" onclick="closeModal('editStudentModal')" class="rounded-xl border border-slate-700 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="submitEditStudentBtn" class="rounded-xl bg-cyan-500 px-5 py-2.5 text-xs font-bold text-slate-950 shadow-md transition hover:bg-cyan-300">
+                        Salvar Alterações
                     </button>
                 </div>
             </form>
@@ -249,15 +380,27 @@
         const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
         const MAX_TOTAL_SIZE = 5 * 1024 * 1024; // 5 MB
 
+        const ICONS = {
+            success: `<svg class="h-5 w-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`,
+            error: `<svg class="h-5 w-5 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>`,
+            info: `<svg class="h-5 w-5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`
+        };
+
         // Utilitários de UI
         function showToast(title, message, isError = false) {
             const toast = document.getElementById("toastNotification");
             document.getElementById("toastTitle").textContent = title;
             document.getElementById("toastMessage").textContent = message;
-            document.getElementById("toastIcon").textContent = isError ? "⚠️" : "✅";
-            toast.className = `fixed right-6 top-24 z-50 max-w-md rounded-2xl border p-4 shadow-2xl backdrop-blur-xl transition-all ${
-                isError ? "border-rose-500/50 bg-rose-950/90 text-rose-200" : "border-cyan-500/50 bg-slate-900/95 text-slate-100"
-            }`;
+            const iconContainer = document.getElementById("toastIconContainer");
+            if (isError) {
+                iconContainer.className = "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20";
+                iconContainer.innerHTML = ICONS.error;
+                toast.className = "fixed right-6 top-24 z-50 flex max-w-md items-center gap-3 rounded-2xl border border-rose-500/30 bg-slate-900/95 p-4 shadow-2xl backdrop-blur-xl transition-all";
+            } else {
+                iconContainer.className = "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                iconContainer.innerHTML = ICONS.success;
+                toast.className = "fixed right-6 top-24 z-50 flex max-w-md items-center gap-3 rounded-2xl border border-emerald-500/30 bg-slate-900/95 p-4 shadow-2xl backdrop-blur-xl transition-all";
+            }
             toast.classList.remove("hidden");
             setTimeout(hideToast, 5000);
         }
@@ -345,7 +488,7 @@
         // Popula o select do modal de upload
         function populateUploadSelect(students) {
             const select = document.getElementById("uploadAlunoSelect");
-            select.innerHTML = '<option value="">-- Selecione seu nome na lista da sala --</option>';
+            select.innerHTML = '<option value="">Selecione o aluno na lista da turma</option>';
 
             students.forEach((s) => {
                 const opt = document.createElement("option");
@@ -357,8 +500,8 @@
             // Opção para quem ainda não está na lista
             const optNew = document.createElement("option");
             optNew.value = "__novo__";
-            optNew.textContent = "✨ + Não estou na lista (Criar meu nome agora)...";
-            optNew.className = "font-bold text-cyan-300 bg-slate-900";
+            optNew.textContent = "+ Cadastrar novo aluno...";
+            optNew.className = "font-semibold text-cyan-300 bg-slate-900";
             select.appendChild(optNew);
         }
 
@@ -379,9 +522,10 @@
                             <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                         </div>
                         <h3 class="text-base font-bold text-slate-200">Nenhum aluno encontrado</h3>
-                        <p class="mt-1 text-xs text-slate-400">Clique abaixo para cadastrar o primeiro aluno da turma!</p>
-                        <button onclick="openModal('registerStudentModal')" class="mt-5 inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-xs font-bold text-slate-950 hover:bg-cyan-300">
-                            + Cadastrar Aluno Agora
+                        <p class="mt-1 text-xs text-slate-400">Cadastre o primeiro perfil para começar a publicar trabalhos.</p>
+                        <button onclick="openModal('registerStudentModal')" class="mt-5 inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-xs font-bold text-slate-950 transition hover:bg-cyan-300">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                            <span>Cadastrar Aluno</span>
                         </button>
                     </div>
                 `;
@@ -403,7 +547,7 @@
                             <div class="flex items-center gap-3.5">
                                 ${
                                     aluno.avatar_url
-                                        ? `<img src="${aluno.avatar_url}" alt="${aluno.nome}" class="h-12 w-12 rounded-2xl object-cover border border-slate-700">`
+                                        ? `<img src="${aluno.avatar_url}" alt="${aluno.nome}" class="h-12 w-12 rounded-2xl object-cover border border-slate-700" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-500/30 bg-cyan-950/40 text-sm font-extrabold text-cyan-300 shadow-sm\\'>${getInitials(aluno.nome)}</div>';">`
                                         : `<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-500/30 bg-cyan-950/40 text-sm font-extrabold text-cyan-300 shadow-sm">${getInitials(aluno.nome)}</div>`
                                 }
                                 <div class="min-w-0">
@@ -429,11 +573,17 @@
                         </div>
                     </div>
 
-                    <div class="mt-6 pt-4 border-t border-slate-800/60 flex items-center justify-between">
-                        <span class="text-[11px] text-slate-400">Portfólio</span>
+                    <div class="mt-6 pt-4 border-t border-slate-800/60 flex items-center justify-between gap-2">
+                        <button onclick="promptEditStudentFromList('${encodeURIComponent(JSON.stringify(aluno))}')" 
+                                title="Editar dados e foto do aluno" 
+                                class="inline-flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-950/80 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-cyan-400 hover:text-cyan-300">
+                            <svg class="h-3.5 w-3.5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            <span>Editar</span>
+                        </button>
                         <a href="trabalho-detalhes.html?aluno_id=${encodeURIComponent(aluno.id)}" 
-                           class="inline-flex items-center gap-1.5 rounded-xl bg-cyan-500/10 border border-cyan-400/30 px-3.5 py-2 text-xs font-bold text-cyan-300 transition hover:bg-cyan-500 hover:text-slate-950">
-                            Ver Portfólio &rarr;
+                           class="group/link inline-flex items-center gap-1.5 rounded-xl bg-cyan-500/10 border border-cyan-400/30 px-3.5 py-2 text-xs font-bold text-cyan-300 transition hover:bg-cyan-500 hover:text-slate-950">
+                            <span>Ver Portfólio</span>
+                            <svg class="h-3 w-3 transition-transform group-hover/link:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                         </a>
                     </div>
                 `;
@@ -476,6 +626,27 @@
             }
         });
 
+        // Listener para arquivo de avatar no cadastro
+        const studentAvatarFileInput = document.getElementById("studentAvatarFileInput");
+        if (studentAvatarFileInput) {
+            studentAvatarFileInput.addEventListener("change", (e) => {
+                const file = e.target.files && e.target.files[0];
+                const summary = document.getElementById("studentAvatarFileSummary");
+                if (file) {
+                    if (file.size > 2 * 1024 * 1024) {
+                        showToast("Imagem Muito Grande", "Selecione uma imagem de até 2 MB.", true);
+                        e.target.value = "";
+                        summary.textContent = "Ou escolha uma imagem do computador (máx 2MB)";
+                        return;
+                    }
+                    summary.innerHTML = `<span class="inline-flex items-center gap-1.5 text-emerald-400 font-semibold"><svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>${file.name} (${(file.size / 1024).toFixed(0)} KB)</span>`;
+                    document.getElementById("studentAvatarInput").value = "";
+                } else {
+                    summary.textContent = "Ou escolha uma imagem do computador (máx 2MB)";
+                }
+            });
+        }
+
         document.getElementById("registerStudentForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById("submitRegisterBtn");
@@ -487,12 +658,26 @@
                 const nome = document.getElementById("studentNameInput").value.trim();
                 const pin = document.getElementById("studentPinInput").value.trim();
                 const avatar_url = document.getElementById("studentAvatarInput").value.trim();
+                const fileInput = document.getElementById("studentAvatarFileInput");
+                const avatarFile = fileInput && fileInput.files && fileInput.files[0];
 
-                const res = await fetch(`${API_BASE_URL}/trabalhos/alunos`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ nome, pin, avatar_url })
-                });
+                let res;
+                if (avatarFile) {
+                    const formData = new FormData();
+                    formData.append("nome", nome);
+                    formData.append("pin", pin);
+                    formData.append("avatar_file", avatarFile);
+                    res = await fetch(`${API_BASE_URL}/trabalhos/alunos`, {
+                        method: "POST",
+                        body: formData
+                    });
+                } else {
+                    res = await fetch(`${API_BASE_URL}/trabalhos/alunos`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ nome, pin, avatar_url })
+                    });
+                }
 
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || "Falha ao registrar aluno.");
@@ -500,6 +685,9 @@
                 showToast("Aluno Cadastrado!", `${nome} foi adicionado à turma com sucesso!`);
                 closeModal("registerStudentModal");
                 document.getElementById("registerStudentForm").reset();
+                if (document.getElementById("studentAvatarFileSummary")) {
+                    document.getElementById("studentAvatarFileSummary").textContent = "Ou escolha uma imagem do computador (máx 2MB)";
+                }
                 await loadStudents();
             } catch (err) {
                 console.error("Erro no cadastro:", err);
@@ -515,24 +703,134 @@
             const files = Array.from(e.target.files);
             const summary = document.getElementById("selectedFilesSummary");
             if (files.length === 0) {
-                summary.textContent = "Nenhum arquivo selecionado";
-                summary.className = "text-xs font-semibold text-cyan-400 pt-1";
+                summary.innerHTML = `<span>Nenhum arquivo selecionado</span>`;
+                summary.className = "text-xs font-semibold text-slate-400 pt-1";
                 return;
             }
 
             const check = validateFiles(files);
             if (!check.valid) {
-                summary.textContent = `⚠️ ${check.error}`;
-                summary.className = "text-xs font-bold text-rose-400 pt-1";
+                summary.innerHTML = `<span class="inline-flex items-center gap-1.5 text-rose-400 font-semibold"><svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>${check.error}</span>`;
+                summary.className = "text-xs pt-1";
             } else {
-                summary.textContent = `✓ ${files.length} arquivo(s) válidos (${(check.totalSize / 1024).toFixed(1)} KB total)`;
-                summary.className = "text-xs font-bold text-emerald-400 pt-1";
+                summary.innerHTML = `<span class="inline-flex items-center gap-1.5 text-emerald-400 font-semibold"><svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>${files.length} arquivo(s) selecionado(s) (${(check.totalSize / 1024).toFixed(1)} KB)</span>`;
+                summary.className = "text-xs pt-1";
             }
         });
 
-        // 6. Submissão de Upload Multipart para Cloudflare R2
+        let currentPublishMode = "upload";
+
+        function setPublishMode(mode) {
+            currentPublishMode = mode === "link" ? "link" : "upload";
+            const tabUpload = document.getElementById("tabModeUpload");
+            const tabLink = document.getElementById("tabModeLink");
+            const filesContainer = document.getElementById("uploadFilesContainer");
+            const linkContainer = document.getElementById("uploadLinkContainer");
+            const filesInput = document.getElementById("uploadFilesInput");
+            const urlInput = document.getElementById("uploadExternalUrlInput");
+
+            if (currentPublishMode === "link") {
+                tabLink.className = "flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-3 py-2.5 text-xs font-bold text-slate-950 shadow-sm transition";
+                tabUpload.className = "flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-400 transition hover:text-white";
+                filesContainer.classList.add("hidden");
+                linkContainer.classList.remove("hidden");
+                filesInput.required = false;
+                urlInput.required = true;
+            } else {
+                tabUpload.className = "flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-3 py-2.5 text-xs font-bold text-slate-950 shadow-sm transition";
+                tabLink.className = "flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-400 transition hover:text-white";
+                linkContainer.classList.add("hidden");
+                filesContainer.classList.remove("hidden");
+                urlInput.required = false;
+                filesInput.required = true;
+            }
+        }
+
+        function validateHttpsUrl(rawUrl) {
+            const trimmed = (rawUrl || "").trim();
+            if (!trimmed) return { valid: false, error: "Informe a URL pública do projeto." };
+            try {
+                const parsed = new URL(trimmed);
+                if (parsed.protocol !== "https:") {
+                    return { valid: false, error: "A URL precisa começar obrigatoriamente com https://." };
+                }
+                const host = parsed.hostname.toLowerCase();
+                if (host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0" || host === "::1") {
+                    return { valid: false, error: "Endereços locais (localhost/127.0.0.1) não são permitidos." };
+                }
+                return { valid: true, url: parsed.toString() };
+            } catch {
+                return { valid: false, error: "URL inválida. Exemplo: https://meu-projeto.vercel.app" };
+            }
+        }
+
+        // 6. Submissão de Publicação (Upload R2 ou Link Externo)
         document.getElementById("uploadWorkForm").addEventListener("submit", async (e) => {
             e.preventDefault();
+            const alunoSelectValue = document.getElementById("uploadAlunoSelect").value;
+            const pin = document.getElementById("uploadPinInput").value.trim();
+            const titulo = document.getElementById("uploadTitleInput").value.trim();
+            const modulo = document.getElementById("uploadModuleInput").value.trim();
+            const descricao = document.getElementById("uploadDescriptionInput").value.trim();
+
+            const submitBtn = document.getElementById("submitUploadBtn");
+            const originalText = submitBtn.innerHTML;
+
+            if (currentPublishMode === "link") {
+                const urlCheck = validateHttpsUrl(document.getElementById("uploadExternalUrlInput").value);
+                if (!urlCheck.valid) {
+                    showToast("URL Inválida", urlCheck.error, true);
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `
+                    <div class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-solid border-slate-950 border-r-transparent"></div>
+                    <span>Publicando link...</span>
+                `;
+
+                try {
+                    const payload = {
+                        pin,
+                        titulo,
+                        modulo,
+                        descricao,
+                        url: urlCheck.url
+                    };
+
+                    if (alunoSelectValue === "__novo__") {
+                        const novoNome = document.getElementById("uploadNovoNomeInput").value.trim();
+                        if (!novoNome) throw new Error("Informe o seu nome completo.");
+                        payload.novo_nome = novoNome;
+                    } else {
+                        payload.aluno_id = alunoSelectValue;
+                    }
+
+                    const res = await fetch(`${API_BASE_URL}/trabalhos/link`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error || "Erro ao publicar link do trabalho.");
+
+                    showToast("Trabalho Publicado!", `Link do projeto "${titulo}" publicado com sucesso!`);
+                    closeModal("uploadWorkModal");
+                    document.getElementById("uploadWorkForm").reset();
+                    document.getElementById("novoAlunoContainer").classList.add("hidden");
+                    setPublishMode("upload");
+                    await loadStudents();
+                } catch (err) {
+                    console.error("Erro na publicação do link:", err);
+                    showToast("Erro na Publicação", err.message, true);
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+                return;
+            }
+
             const fileInput = document.getElementById("uploadFilesInput");
             const files = Array.from(fileInput.files || []);
 
@@ -542,21 +840,13 @@
                 return;
             }
 
-            const submitBtn = document.getElementById("submitUploadBtn");
-            const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
             submitBtn.innerHTML = `
                 <div class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-solid border-slate-950 border-r-transparent"></div>
-                <span>Fazendo upload para nuvem R2...</span>
+                <span>Publicando arquivos...</span>
             `;
 
             try {
-                const alunoSelectValue = document.getElementById("uploadAlunoSelect").value;
-                const pin = document.getElementById("uploadPinInput").value.trim();
-                const titulo = document.getElementById("uploadTitleInput").value.trim();
-                const modulo = document.getElementById("uploadModuleInput").value.trim();
-                const descricao = document.getElementById("uploadDescriptionInput").value.trim();
-
                 const formData = new FormData();
                 if (alunoSelectValue === "__novo__") {
                     const novoNome = document.getElementById("uploadNovoNomeInput").value.trim();
@@ -583,7 +873,7 @@
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || "Erro ao fazer upload do trabalho.");
 
-                showToast("Trabalho Publicado!", `Apresentação "${titulo}" salva no Cloudflare R2!`);
+                showToast("Trabalho Publicado!", `Apresentação "${titulo}" salva com sucesso!`);
                 closeModal("uploadWorkModal");
                 document.getElementById("uploadWorkForm").reset();
                 document.getElementById("novoAlunoContainer").classList.add("hidden");
@@ -598,11 +888,173 @@
             }
         });
 
+        // ----------------------------------------------------
+        // LÓGICA DE EDIÇÃO DO ALUNO (LISTA)
+        // ----------------------------------------------------
+        let studentBeingEdited = null;
+
+        function updateEditStudentPreview(name, avatarUrl) {
+            const preview = document.getElementById("editStudentAvatarPreview");
+            const previewName = document.getElementById("editStudentPreviewName");
+            if (previewName) previewName.textContent = name || (studentBeingEdited ? studentBeingEdited.nome : "Nome do Aluno");
+
+            if (avatarUrl) {
+                preview.innerHTML = `<img src="${avatarUrl}" class="h-full w-full rounded-2xl object-cover" onerror="this.onerror=null; this.parentElement.textContent='${getInitials(name)}';">`;
+            } else {
+                preview.textContent = getInitials(name);
+            }
+        }
+
+        function promptEditStudentFromList(encodedStudentJson) {
+            try {
+                const aluno = JSON.parse(decodeURIComponent(encodedStudentJson));
+                studentBeingEdited = aluno;
+                document.getElementById("editStudentIdHidden").value = aluno.id;
+                document.getElementById("editStudentNameInput").value = aluno.nome || "";
+                document.getElementById("editStudentAvatarUrlInput").value = aluno.avatar_url || "";
+                document.getElementById("editStudentAvatarFileInput").value = "";
+                document.getElementById("editStudentFileSummary").textContent = "Escolher imagem do dispositivo (máx. 2MB)";
+                document.getElementById("editStudentCurrentPinInput").value = "";
+                document.getElementById("editStudentNewPinInput").value = "";
+
+                updateEditStudentPreview(aluno.nome, aluno.avatar_url);
+                openModal("editStudentModal");
+            } catch (err) {
+                console.error("Erro ao abrir modal de edição:", err);
+            }
+        }
+
+        function clearStudentPhoto() {
+            document.getElementById("editStudentAvatarUrlInput").value = "";
+            document.getElementById("editStudentAvatarFileInput").value = "";
+            document.getElementById("editStudentFileSummary").textContent = "Escolher imagem do dispositivo (máx. 2MB)";
+            const name = document.getElementById("editStudentNameInput").value.trim() || (studentBeingEdited ? studentBeingEdited.nome : "");
+            updateEditStudentPreview(name, "");
+        }
+
+        document.getElementById("editStudentAvatarUrlInput").addEventListener("input", (e) => {
+            const url = e.target.value.trim();
+            const name = document.getElementById("editStudentNameInput").value.trim() || (studentBeingEdited ? studentBeingEdited.nome : "");
+            if (url) {
+                document.getElementById("editStudentAvatarFileInput").value = "";
+                document.getElementById("editStudentFileSummary").textContent = "Escolher imagem do dispositivo (máx. 2MB)";
+            }
+            updateEditStudentPreview(name, url);
+        });
+
+        document.getElementById("editStudentNameInput").addEventListener("input", (e) => {
+            const name = e.target.value.trim() || (studentBeingEdited ? studentBeingEdited.nome : "");
+            const fileInput = document.getElementById("editStudentAvatarFileInput");
+            let previewUrl = document.getElementById("editStudentAvatarUrlInput").value.trim();
+            if (fileInput.files && fileInput.files[0]) {
+                previewUrl = URL.createObjectURL(fileInput.files[0]);
+            }
+            updateEditStudentPreview(name, previewUrl);
+        });
+
+        document.getElementById("editStudentAvatarFileInput").addEventListener("change", (e) => {
+            const file = e.target.files && e.target.files[0];
+            const summary = document.getElementById("editStudentFileSummary");
+            const name = document.getElementById("editStudentNameInput").value.trim() || (studentBeingEdited ? studentBeingEdited.nome : "");
+
+            if (!file) {
+                summary.textContent = "Escolher imagem do dispositivo (máx. 2MB)";
+                updateEditStudentPreview(name, document.getElementById("editStudentAvatarUrlInput").value.trim());
+                return;
+            }
+
+            if (file.size > 2 * 1024 * 1024) {
+                showToast("Imagem Muito Grande", "Selecione uma imagem de no máximo 2 MB.", true);
+                e.target.value = "";
+                summary.textContent = "Escolher imagem do dispositivo (máx. 2MB)";
+                return;
+            }
+
+            summary.innerHTML = `<span class="inline-flex items-center gap-1.5 text-emerald-400 font-semibold"><svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>${file.name} (${(file.size / 1024).toFixed(0)} KB)</span>`;
+            document.getElementById("editStudentAvatarUrlInput").value = "";
+            const previewUrl = URL.createObjectURL(file);
+            updateEditStudentPreview(name, previewUrl);
+        });
+
+        document.getElementById("editStudentForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const alunoId = document.getElementById("editStudentIdHidden").value;
+            const nome = document.getElementById("editStudentNameInput").value.trim();
+            const avatarUrl = document.getElementById("editStudentAvatarUrlInput").value.trim();
+            const fileInput = document.getElementById("editStudentAvatarFileInput");
+            const avatarFile = fileInput.files && fileInput.files[0];
+            const currentPin = document.getElementById("editStudentCurrentPinInput").value.trim();
+            const newPin = document.getElementById("editStudentNewPinInput").value.trim();
+
+            if (!alunoId) return;
+
+            if (!nome) {
+                showToast("Campo Obrigatório", "O nome do aluno não pode ficar vazio.", true);
+                return;
+            }
+
+            if (!currentPin) {
+                showToast("PIN Obrigatório", "Informe seu PIN atual para autorizar as alterações.", true);
+                return;
+            }
+
+            if (newPin && !/^\d{4,6}$/.test(newPin)) {
+                showToast("Novo PIN Inválido", "O novo PIN deve ser numérico e conter de 4 a 6 dígitos.", true);
+                return;
+            }
+
+            const submitBtn = document.getElementById("submitEditStudentBtn");
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Salvando...";
+
+            try {
+                let res;
+                if (avatarFile) {
+                    const formData = new FormData();
+                    formData.append("pin", currentPin);
+                    formData.append("nome", nome);
+                    formData.append("avatar_file", avatarFile);
+                    if (newPin) formData.append("novo_pin", newPin);
+
+                    res = await fetch(`${API_BASE_URL}/trabalhos/alunos/${encodeURIComponent(alunoId)}`, {
+                        method: "PUT",
+                        body: formData
+                    });
+                } else {
+                    res = await fetch(`${API_BASE_URL}/trabalhos/alunos/${encodeURIComponent(alunoId)}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            pin: currentPin,
+                            nome,
+                            avatar_url: avatarUrl,
+                            novo_pin: newPin || undefined
+                        })
+                    });
+                }
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Erro ao atualizar dados do aluno.");
+
+                showToast("Aluno Atualizado!", "Os dados e foto do aluno foram atualizados com sucesso!");
+                closeModal("editStudentModal");
+                await loadStudents();
+            } catch (err) {
+                console.error("Erro na atualização do aluno:", err);
+                showToast("Falha na Edição", err.message, true);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
         // Atalho tecla ESC para fechar modais
         document.addEventListener("keydown", (e) => {
             if (e.key === "Escape") {
                 closeModal("registerStudentModal");
                 closeModal("uploadWorkModal");
+                closeModal("editStudentModal");
             }
         });
 

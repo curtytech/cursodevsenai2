@@ -40,6 +40,8 @@ interface TrabalhoRow {
 	modulo: string;
 	descricao: string | null;
 	entry_url: string;
+	tipo?: string;
+	total_bytes?: number;
 	created_at: string;
 }
 
@@ -114,6 +116,128 @@ function checkAdminAuth(request: Request, env: Env): boolean {
 	if (!expectedKey) return true;
 	const providedKey = request.headers.get("X-Access-Key");
 	return providedKey === expectedKey;
+}
+
+const MAX_TRABALHOS_POR_ALUNO = 15;
+
+// Validação estrita de URL externa HTTPS (bloqueia protocolos inseguros e IPs locais)
+function validateExternalHttpsUrl(rawUrl: string): { valid: boolean; url?: string; error?: string } {
+	const trimmed = (rawUrl || "").trim();
+	if (!trimmed) {
+		return { valid: false, error: "A URL pública do projeto é obrigatória." };
+	}
+
+	const lower = trimmed.toLowerCase();
+	if (lower.startsWith("javascript:") || lower.startsWith("data:") || lower.startsWith("vbscript:") || lower.startsWith("file:")) {
+		return { valid: false, error: "Protocolo de URL não permitido." };
+	}
+
+	let parsed: URL;
+	try {
+		parsed = new URL(trimmed);
+	} catch {
+		return { valid: false, error: "URL inválida. Informe um endereço completo começando com https://." };
+	}
+
+	if (parsed.protocol !== "https:") {
+		return { valid: false, error: "Por segurança, apenas URLs HTTPS (https://) são permitidas." };
+	}
+
+	const host = parsed.hostname.toLowerCase();
+	if (
+		!host ||
+		host === "localhost" ||
+		host === "127.0.0.1" ||
+		host === "0.0.0.0" ||
+		host === "::1" ||
+		host === "[::1]" ||
+		host.endsWith(".local") ||
+		host.startsWith("10.") ||
+		host.startsWith("192.168.") ||
+		/^172\.(1[6-9]|2\d|3[01])\./.test(host)
+	) {
+		return { valid: false, error: "Endereços locais ou redes privadas não são permitidos." };
+	}
+
+	return { valid: true, url: parsed.toString() };
+}
+
+// Resolve aluno (por id, matrícula ou novo_nome), valida PIN e trava de 15 trabalhos
+async function resolveAndAuthenticateStudentForWork(
+	db: D1Database,
+	params: { aluno_id?: string; matricula?: string; novo_nome?: string; pin: string }
+): Promise<{ aluno?: AlunoRow; error?: { message: string; status: number } }> {
+	const { aluno_id, matricula, novo_nome, pin } = params;
+	let aluno: AlunoRow | null = null;
+
+	const lookupKey = (aluno_id || matricula || "").trim();
+
+	if (lookupKey) {
+		aluno = await db
+			.prepare("SELECT id, nome, matricula, pin, avatar_url, created_at FROM alunos WHERE id = ? OR matricula = ?")
+			.bind(lookupKey, lookupKey)
+			.first<AlunoRow>();
+
+		if (!aluno) {
+			return { error: { message: "Aluno selecionado não foi encontrado.", status: 404 } };
+		}
+
+		if (aluno.pin === "1234" || !aluno.pin) {
+			await db.prepare("UPDATE alunos SET pin = ? WHERE id = ?").bind(pin, aluno.id).run();
+			aluno.pin = pin;
+		} else if (aluno.pin !== pin) {
+			return { error: { message: "PIN incorreto para este aluno. Digite o PIN que você cadastrou.", status: 401 } };
+		}
+	} else if (novo_nome) {
+		const existing = await db
+			.prepare("SELECT id, nome, matricula, pin, avatar_url, created_at FROM alunos WHERE LOWER(nome) = LOWER(?)")
+			.bind(novo_nome)
+			.first<AlunoRow>();
+
+		if (existing) {
+			aluno = existing;
+			if (aluno.pin === "1234" || !aluno.pin) {
+				await db.prepare("UPDATE alunos SET pin = ? WHERE id = ?").bind(pin, aluno.id).run();
+				aluno.pin = pin;
+			} else if (aluno.pin !== pin) {
+				return { error: { message: `Aluno '${novo_nome}' já cadastrado. O PIN informado está incorreto.`, status: 401 } };
+			}
+		} else {
+			const newId = `aluno_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+			const generatedMatricula = `ALU${Date.now().toString().slice(-7)}`;
+			await db
+				.prepare("INSERT INTO alunos (id, nome, matricula, pin, avatar_url) VALUES (?, ?, ?, ?, ?)")
+				.bind(newId, novo_nome, generatedMatricula, pin, "")
+				.run();
+
+			aluno = {
+				id: newId,
+				nome: novo_nome,
+				matricula: generatedMatricula,
+				pin,
+				avatar_url: "",
+				created_at: new Date().toISOString(),
+			};
+		}
+	} else {
+		return { error: { message: "Selecione um aluno da lista, informe a matrícula ou um novo nome.", status: 400 } };
+	}
+
+	const countRow = await db
+		.prepare("SELECT COUNT(*) as total FROM trabalhos WHERE aluno_id = ?")
+		.bind(aluno.id)
+		.first<{ total: number }>();
+
+	if (Number(countRow?.total || 0) >= MAX_TRABALHOS_POR_ALUNO) {
+		return {
+			error: {
+				message: `Limite máximo de ${MAX_TRABALHOS_POR_ALUNO} trabalhos por aluno atingido. Exclua um trabalho antigo antes de publicar um novo.`,
+				status: 400,
+			},
+		};
+	}
+
+	return { aluno };
 }
 
 export default {
@@ -191,23 +315,39 @@ export default {
 				return jsonResponse(payload);
 			}
 
-			// POST /api/trabalhos/alunos -> Cadastro de novo perfil de aluno (Apenas Nome + PIN)
+			// POST /api/trabalhos/alunos -> Cadastro de novo perfil de aluno (Nome + PIN + Avatar opcional)
 			if (method === "POST" && pathname === "/api/trabalhos/alunos") {
-				const body = await request.json().catch(() => null);
-				if (!body || typeof body !== "object") {
-					return errorResponse("Corpo da requisição inválido.");
+				const contentType = request.headers.get("content-type") || "";
+				let nome = "";
+				let pin = "";
+				let avatar_url = "";
+				let avatarFile: File | null = null;
+
+				if (contentType.includes("multipart/form-data")) {
+					const formData = await request.formData().catch(() => null);
+					if (!formData) {
+						return errorResponse("Corpo da requisição multipart inválido.");
+					}
+					nome = String(formData.get("nome") || "").trim();
+					pin = String(formData.get("pin") || "").trim();
+					avatar_url = String(formData.get("avatar_url") || "").trim();
+					const fileEntry = formData.get("avatar_file") || formData.get("file");
+					if (fileEntry instanceof File && fileEntry.size > 0) {
+						avatarFile = fileEntry;
+					}
+				} else {
+					const body = await request.json().catch(() => null);
+					if (!body || typeof body !== "object") {
+						return errorResponse("Corpo da requisição inválido.");
+					}
+					nome = String((body as any).nome || "").trim();
+					pin = String((body as any).pin || "").trim();
+					avatar_url = String((body as any).avatar_url || "").trim();
 				}
 
-				const { nome, pin, avatar_url } = body as {
-					nome?: string;
-					pin?: string;
-					avatar_url?: string;
-				};
-
-				if (!nome || typeof nome !== "string" || !nome.trim()) {
+				if (!nome) {
 					return errorResponse("O campo 'nome' é obrigatório.");
 				}
-
 				const cleanNome = nome.trim();
 				const cleanPin = String(pin || "").trim();
 				if (!/^\d{4,6}$/.test(cleanPin)) {
@@ -226,7 +366,20 @@ export default {
 
 				const id = `aluno_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
 				const generatedMatricula = `ALU${Date.now().toString().slice(-7)}`;
-				const cleanAvatar = (avatar_url || "").trim();
+				let cleanAvatar = (avatar_url || "").trim();
+
+				if (avatarFile) {
+					const r2 = env.devsenai_trabalhos;
+					if (r2) {
+						const ext = "." + (avatarFile.name.split(".").pop() || "png").toLowerCase();
+						const avatarKey = `avatars/${id}_${Date.now()}${ext}`;
+						const mimeType = getContentType(avatarFile.name);
+						await r2.put(avatarKey, await avatarFile.arrayBuffer(), {
+							httpMetadata: { contentType: mimeType },
+						});
+						cleanAvatar = `${PUBLIC_R2_BASE}/${avatarKey}`;
+					}
+				}
 
 				await db
 					.prepare("INSERT INTO alunos (id, nome, matricula, pin, avatar_url) VALUES (?, ?, ?, ?, ?)")
@@ -263,7 +416,10 @@ export default {
 
 				const trabalhosQuery = await db
 					.prepare(
-						`SELECT id, aluno_id, titulo, modulo, descricao, entry_url, created_at
+						`SELECT id, aluno_id, titulo, modulo, descricao, entry_url,
+						        COALESCE(tipo, 'upload') as tipo,
+						        COALESCE(total_bytes, 0) as total_bytes,
+						        created_at
 						 FROM trabalhos
 						 WHERE aluno_id = ?
 						 ORDER BY created_at DESC`
@@ -282,6 +438,186 @@ export default {
 				});
 			}
 
+			// PUT /api/trabalhos/alunos/:id (ou POST /api/trabalhos/alunos/:id/edit) -> Edita dados do aluno (Nome, Avatar/Foto, PIN)
+			const alunoEditMatch = pathname.match(/^\/api\/trabalhos\/alunos\/([^\/]+)(\/edit)?$/);
+			if ((method === "PUT" || (method === "POST" && pathname.endsWith("/edit"))) && alunoEditMatch) {
+				const alunoId = decodeURIComponent(alunoEditMatch[1]);
+				const contentType = request.headers.get("content-type") || "";
+
+				let pin = "";
+				let nome: string | undefined;
+				let avatar_url: string | undefined;
+				let novo_pin: string | undefined;
+				let avatarFile: File | null = null;
+
+				if (contentType.includes("multipart/form-data")) {
+					const formData = await request.formData().catch(() => null);
+					if (!formData) {
+						return errorResponse("Falha ao processar formulário.");
+					}
+					pin = String(formData.get("pin") || "").trim();
+					if (formData.has("nome")) nome = String(formData.get("nome") || "").trim();
+					if (formData.has("avatar_url")) avatar_url = String(formData.get("avatar_url") || "").trim();
+					if (formData.has("novo_pin")) novo_pin = String(formData.get("novo_pin") || "").trim();
+
+					const fileEntry = formData.get("avatar_file") || formData.get("file");
+					if (fileEntry instanceof File && fileEntry.size > 0) {
+						avatarFile = fileEntry;
+					}
+				} else {
+					const body = await request.json().catch(() => null);
+					if (body && typeof body === "object") {
+						pin = String((body as any).pin || "").trim();
+						if ("nome" in body) nome = String((body as any).nome || "").trim();
+						if ("avatar_url" in body) avatar_url = String((body as any).avatar_url || "").trim();
+						if ("novo_pin" in body) novo_pin = String((body as any).novo_pin || "").trim();
+					}
+				}
+
+				if (!pin) {
+					pin = request.headers.get("X-Aluno-Pin")?.trim() || "";
+				}
+
+				if (!pin) {
+					return errorResponse("O PIN secreto atual do aluno é obrigatório para autorizar a edição.", 400);
+				}
+
+				const aluno = await db
+					.prepare("SELECT id, nome, matricula, pin, avatar_url FROM alunos WHERE id = ? OR LOWER(nome) = LOWER(?)")
+					.bind(alunoId, alunoId)
+					.first<AlunoRow>();
+
+				if (!aluno) {
+					return errorResponse("Aluno não encontrado.", 404);
+				}
+
+				const isAdmin = checkAdminAuth(request, env);
+				const isOwner = aluno.pin === pin || aluno.pin === "1234" || !aluno.pin;
+
+				if (!isAdmin && !isOwner) {
+					return errorResponse("PIN incorreto para editar o perfil deste aluno.", 401);
+				}
+
+				let updatedNome = aluno.nome;
+				if (nome !== undefined && nome !== "") {
+					if (nome.toLowerCase() !== aluno.nome.toLowerCase()) {
+						const conflict = await db
+							.prepare("SELECT id FROM alunos WHERE LOWER(nome) = LOWER(?) AND id != ?")
+							.bind(nome, aluno.id)
+							.first();
+						if (conflict) {
+							return errorResponse(`Já existe outro aluno cadastrado com o nome '${nome}'.`, 409);
+						}
+					}
+					updatedNome = nome;
+				}
+
+				let updatedAvatar = aluno.avatar_url || "";
+				if (avatarFile) {
+					const r2 = env.devsenai_trabalhos;
+					if (!r2) {
+						return errorResponse("Bucket Cloudflare R2 não configurado na Worker.", 500);
+					}
+
+					const ext = "." + (avatarFile.name.split(".").pop() || "png").toLowerCase();
+					const validImgExts = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"];
+					if (!validImgExts.includes(ext)) {
+						return errorResponse(`Arquivo de imagem inválido (${ext}). Formatos aceitos: .png, .jpg, .jpeg, .webp, .gif, .svg`, 400);
+					}
+
+					if (avatarFile.size > 2 * 1024 * 1024) {
+						return errorResponse("A imagem de avatar deve ter no máximo 2 MB.", 400);
+					}
+
+					const avatarKey = `avatars/${aluno.id}_${Date.now()}${ext}`;
+					const mimeType = getContentType(avatarFile.name);
+					await r2.put(avatarKey, await avatarFile.arrayBuffer(), {
+						httpMetadata: { contentType: mimeType },
+					});
+					updatedAvatar = `${PUBLIC_R2_BASE}/${avatarKey}`;
+				} else if (avatar_url !== undefined) {
+					updatedAvatar = avatar_url;
+				}
+
+				let updatedPin = aluno.pin;
+				if (novo_pin) {
+					if (!/^\d{4,6}$/.test(novo_pin)) {
+						return errorResponse("O novo PIN deve ser numérico e conter de 4 a 6 dígitos.", 400);
+					}
+					updatedPin = novo_pin;
+				} else if (aluno.pin === "1234" || !aluno.pin) {
+					updatedPin = pin;
+				}
+
+				await db
+					.prepare("UPDATE alunos SET nome = ?, avatar_url = ?, pin = ? WHERE id = ?")
+					.bind(updatedNome, updatedAvatar, updatedPin, aluno.id)
+					.run();
+
+				return jsonResponse({
+					success: true,
+					message: "Perfil do aluno atualizado com sucesso!",
+					aluno: {
+						id: aluno.id,
+						nome: updatedNome,
+						avatar_url: updatedAvatar,
+						primeiro_acesso: false,
+					},
+				});
+			}
+
+			// DELETE /api/trabalhos/alunos/:id -> Remove perfil do aluno e seus trabalhos
+			const alunoDeleteMatch = pathname.match(/^\/api\/trabalhos\/alunos\/([^\/]+)$/);
+			if (method === "DELETE" && alunoDeleteMatch) {
+				const alunoId = decodeURIComponent(alunoDeleteMatch[1]);
+				let pin = request.headers.get("X-Aluno-Pin") || "";
+				if (!pin) {
+					const body = await request.json().catch(() => null);
+					if (body && typeof body === "object") {
+						pin = pin || String((body as any).pin || "");
+					}
+				}
+				pin = pin.trim();
+
+				const aluno = await db
+					.prepare("SELECT id, nome, pin FROM alunos WHERE id = ? OR LOWER(nome) = LOWER(?)")
+					.bind(alunoId, alunoId)
+					.first<AlunoRow>();
+
+				if (!aluno) {
+					return errorResponse("Aluno não encontrado.", 404);
+				}
+
+				const isAdmin = checkAdminAuth(request, env);
+				const isOwner = aluno.pin === pin || aluno.pin === "1234";
+
+				if (!isAdmin && !isOwner) {
+					return errorResponse("PIN incorreto para remover este aluno.", 401);
+				}
+
+				const r2 = env.devsenai_trabalhos;
+				if (r2) {
+					try {
+						const prefix = `alunos/${aluno.id}/`;
+						const listed = await r2.list({ prefix });
+						const keysToDelete = listed.objects.map((obj) => obj.key);
+						if (keysToDelete.length > 0) {
+							await r2.delete(keysToDelete);
+						}
+					} catch (r2Err) {
+						console.warn("Aviso ao limpar pasta do aluno no R2:", r2Err);
+					}
+				}
+
+				await db.prepare("DELETE FROM trabalhos WHERE aluno_id = ?").bind(aluno.id).run();
+				await db.prepare("DELETE FROM alunos WHERE id = ?").bind(aluno.id).run();
+
+				return jsonResponse({
+					success: true,
+					message: `Aluno '${aluno.nome}' removido com sucesso.`,
+				});
+			}
+
 			// POST /api/trabalhos/upload -> Upload de múltiplos arquivos para o R2 e registro no D1
 			if (method === "POST" && pathname === "/api/trabalhos/upload") {
 				const r2 = env.devsenai_trabalhos;
@@ -295,6 +631,7 @@ export default {
 				}
 
 				const aluno_id = String(formData.get("aluno_id") || "").trim();
+				const matricula = String(formData.get("matricula") || "").trim();
 				const novo_nome = String(formData.get("novo_nome") || "").trim();
 				const pin = String(formData.get("pin") || "").trim();
 				const titulo = String(formData.get("titulo") || "").trim();
@@ -314,62 +651,16 @@ export default {
 					return errorResponse("O módulo/disciplina do trabalho é obrigatório.", 400);
 				}
 
-				let aluno: AlunoRow | null = null;
-
-				// Caso 1: Aluno existente selecionado
-				if (aluno_id) {
-					aluno = await db
-						.prepare("SELECT id, nome, matricula, pin, avatar_url, created_at FROM alunos WHERE id = ?")
-						.bind(aluno_id)
-						.first<AlunoRow>();
-
-					if (!aluno) {
-						return errorResponse("Aluno selecionado não foi encontrado.", 404);
-					}
-
-					// Se o aluno ainda estava com o PIN default inicial ("1234"), grava o PIN que ele escolheu no primeiro acesso!
-					if (aluno.pin === "1234" || !aluno.pin) {
-						await db.prepare("UPDATE alunos SET pin = ? WHERE id = ?").bind(pin, aluno.id).run();
-						aluno.pin = pin;
-					} else if (aluno.pin !== pin) {
-						return errorResponse("PIN incorreto para este aluno. Digite o PIN que você cadastrou.", 401);
-					}
+				const authResult = await resolveAndAuthenticateStudentForWork(db, {
+					aluno_id,
+					matricula,
+					novo_nome,
+					pin,
+				});
+				if (authResult.error || !authResult.aluno) {
+					return errorResponse(authResult.error?.message || "Erro de autenticação.", authResult.error?.status || 400);
 				}
-				// Caso 2: Cadastrando novo aluno diretamente no upload
-				else if (novo_nome) {
-					const existing = await db
-						.prepare("SELECT id, nome, pin FROM alunos WHERE LOWER(nome) = LOWER(?)")
-						.bind(novo_nome)
-						.first<AlunoRow>();
-
-					if (existing) {
-						aluno = existing;
-						if (aluno.pin === "1234" || !aluno.pin) {
-							await db.prepare("UPDATE alunos SET pin = ? WHERE id = ?").bind(pin, aluno.id).run();
-							aluno.pin = pin;
-						} else if (aluno.pin !== pin) {
-							return errorResponse(`Aluno '${novo_nome}' já cadastrado. O PIN informado está incorreto.`, 401);
-						}
-					} else {
-						const newId = `aluno_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
-						const generatedMatricula = `ALU${Date.now().toString().slice(-7)}`;
-						await db
-							.prepare("INSERT INTO alunos (id, nome, matricula, pin, avatar_url) VALUES (?, ?, ?, ?, ?)")
-							.bind(newId, novo_nome, generatedMatricula, pin, "")
-							.run();
-
-						aluno = {
-							id: newId,
-							nome: novo_nome,
-							matricula: generatedMatricula,
-							pin,
-							avatar_url: "",
-							created_at: new Date().toISOString(),
-						};
-					}
-				} else {
-					return errorResponse("Selecione um aluno da lista ou informe um novo nome.", 400);
-				}
+				const aluno = authResult.aluno;
 
 				// Coleta todos os arquivos enviados
 				const rawFiles = formData.getAll("files");
@@ -472,10 +763,10 @@ export default {
 				// Salva o registro na tabela trabalhos do D1
 				await db
 					.prepare(
-						`INSERT INTO trabalhos (id, aluno_id, titulo, modulo, descricao, entry_url)
-						 VALUES (?, ?, ?, ?, ?, ?)`
+						`INSERT INTO trabalhos (id, aluno_id, titulo, modulo, descricao, entry_url, tipo, total_bytes)
+						 VALUES (?, ?, ?, ?, ?, ?, 'upload', ?)`
 					)
-					.bind(trabalho_id, aluno.id, titulo, modulo, descricao, entry_url)
+					.bind(trabalho_id, aluno.id, titulo, modulo, descricao, entry_url, totalUploadSize)
 					.run();
 
 				return jsonResponse(
@@ -489,7 +780,83 @@ export default {
 							modulo,
 							descricao,
 							entry_url,
+							tipo: "upload",
+							total_bytes: totalUploadSize,
 							arquivos_enviados: files.length,
+						},
+					},
+					201
+				);
+			}
+
+			// POST /api/trabalhos/link -> Cadastro de trabalho hospedado externamente (GitHub Pages, Vercel, Netlify, etc.)
+			if (method === "POST" && pathname === "/api/trabalhos/link") {
+				const body = await request.json().catch(() => null);
+				if (!body || typeof body !== "object") {
+					return errorResponse("Corpo da requisição JSON inválido.", 400);
+				}
+
+				const aluno_id = String((body as any).aluno_id || "").trim();
+				const matricula = String((body as any).matricula || "").trim();
+				const novo_nome = String((body as any).novo_nome || "").trim();
+				const pin = String((body as any).pin || "").trim();
+				const titulo = String((body as any).titulo || "").trim();
+				const modulo = String((body as any).modulo || "").trim();
+				const descricao = String((body as any).descricao || "").trim();
+				const rawUrl = String((body as any).url || (body as any).entry_url || "").trim();
+
+				if (!pin) {
+					return errorResponse("O PIN secreto (4 a 6 dígitos) é obrigatório.", 400);
+				}
+				if (!/^\d{4,6}$/.test(pin)) {
+					return errorResponse("O PIN deve ser numérico e ter de 4 a 6 dígitos.", 400);
+				}
+				if (!titulo) {
+					return errorResponse("O título do trabalho é obrigatório.", 400);
+				}
+				if (!modulo) {
+					return errorResponse("O módulo/disciplina do trabalho é obrigatório.", 400);
+				}
+
+				const urlValidation = validateExternalHttpsUrl(rawUrl);
+				if (!urlValidation.valid || !urlValidation.url) {
+					return errorResponse(urlValidation.error || "URL externa inválida.", 400);
+				}
+
+				const authResult = await resolveAndAuthenticateStudentForWork(db, {
+					aluno_id,
+					matricula,
+					novo_nome,
+					pin,
+				});
+				if (authResult.error || !authResult.aluno) {
+					return errorResponse(authResult.error?.message || "Erro de autenticação.", authResult.error?.status || 400);
+				}
+				const aluno = authResult.aluno;
+
+				const trabalho_id = `trab_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+				await db
+					.prepare(
+						`INSERT INTO trabalhos (id, aluno_id, titulo, modulo, descricao, entry_url, tipo, total_bytes)
+						 VALUES (?, ?, ?, ?, ?, ?, 'link', 0)`
+					)
+					.bind(trabalho_id, aluno.id, titulo, modulo, descricao, urlValidation.url)
+					.run();
+
+				return jsonResponse(
+					{
+						success: true,
+						message: "Link de projeto publicado com sucesso no portfólio!",
+						trabalho: {
+							id: trabalho_id,
+							aluno_id: aluno.id,
+							titulo,
+							modulo,
+							descricao,
+							entry_url: urlValidation.url,
+							tipo: "link",
+							total_bytes: 0,
 						},
 					},
 					201
@@ -501,12 +868,22 @@ export default {
 			if (method === "GET" && trabalhoFilesMatch) {
 				const trabalhoId = decodeURIComponent(trabalhoFilesMatch[1]);
 				const trabalho = await db
-					.prepare("SELECT id, aluno_id, entry_url, titulo, modulo FROM trabalhos WHERE id = ?")
+					.prepare("SELECT id, aluno_id, entry_url, titulo, modulo, COALESCE(tipo, 'upload') as tipo FROM trabalhos WHERE id = ?")
 					.bind(trabalhoId)
-					.first<{ id: string; aluno_id: string; entry_url: string; titulo: string; modulo: string }>();
+					.first<{ id: string; aluno_id: string; entry_url: string; titulo: string; modulo: string; tipo: string }>();
 
 				if (!trabalho) {
 					return errorResponse("Trabalho não encontrado.", 404);
+				}
+
+				if (trabalho.tipo === "link") {
+					return jsonResponse({
+						success: true,
+						trabalho_id: trabalho.id,
+						tipo: "link",
+						total: 0,
+						arquivos: [],
+					});
 				}
 
 				const r2 = env.devsenai_trabalhos;
@@ -614,16 +991,17 @@ export default {
 				});
 			}
 
-			// PUT /api/trabalhos/:id (ou POST /api/trabalhos/:id/edit) -> Edita metadados e/ou substitui arquivos de slide no R2
+			// PUT /api/trabalhos/:id (ou POST /api/trabalhos/:id/edit) -> Edita metadados e/ou substitui arquivos de slide no R2 ou URL externa
 			const trabalhoEditMatch = pathname.match(/^\/api\/trabalhos\/([^\/]+)(\/edit)?$/);
 			if ((method === "PUT" || (method === "POST" && pathname.endsWith("/edit"))) && trabalhoEditMatch) {
 				const trabalhoId = decodeURIComponent(trabalhoEditMatch[1]);
-				if (trabalhoId !== "upload" && trabalhoId !== "alunos") {
+				if (trabalhoId !== "upload" && trabalhoId !== "link" && trabalhoId !== "alunos") {
 					const contentType = request.headers.get("content-type") || "";
 					let pin = "";
 					let titulo = "";
 					let modulo = "";
 					let descricao = "";
+					let newUrlRaw = "";
 					const files: File[] = [];
 					let formData: FormData | null = null;
 
@@ -636,6 +1014,7 @@ export default {
 						titulo = String(formData.get("titulo") || "").trim();
 						modulo = String(formData.get("modulo") || "").trim();
 						descricao = String(formData.get("descricao") || "").trim();
+						newUrlRaw = String(formData.get("url") || formData.get("entry_url") || "").trim();
 
 						const rawFiles = formData.getAll("files") as (File | string)[];
 						for (const item of rawFiles) {
@@ -650,6 +1029,7 @@ export default {
 							titulo = String((body as any).titulo || "").trim();
 							modulo = String((body as any).modulo || "").trim();
 							descricao = String((body as any).descricao || "").trim();
+							newUrlRaw = String((body as any).url || (body as any).entry_url || "").trim();
 						}
 					}
 
@@ -659,13 +1039,13 @@ export default {
 
 					const trabalho = await db
 						.prepare(
-							`SELECT t.id, t.aluno_id, t.entry_url, t.titulo, t.modulo, t.descricao, a.pin
+							`SELECT t.id, t.aluno_id, t.entry_url, t.titulo, t.modulo, t.descricao, COALESCE(t.tipo, 'upload') as tipo, a.pin
 							 FROM trabalhos t
 							 JOIN alunos a ON a.id = t.aluno_id
 							 WHERE t.id = ?`
 						)
 						.bind(trabalhoId)
-						.first<{ id: string; aluno_id: string; entry_url: string; titulo: string; modulo: string; descricao: string; pin: string }>();
+						.first<{ id: string; aluno_id: string; entry_url: string; titulo: string; modulo: string; descricao: string; tipo: string; pin: string }>();
 
 					if (!trabalho) {
 						return errorResponse("Trabalho não encontrado.", 404);
@@ -683,6 +1063,14 @@ export default {
 					descricao = descricao !== undefined ? descricao : trabalho.descricao;
 
 					let newEntryUrl = trabalho.entry_url;
+
+					if (trabalho.tipo === "link" && newUrlRaw) {
+						const urlValidation = validateExternalHttpsUrl(newUrlRaw);
+						if (!urlValidation.valid || !urlValidation.url) {
+							return errorResponse(urlValidation.error || "URL externa inválida.", 400);
+						}
+						newEntryUrl = urlValidation.url;
+					}
 
 					// Se novos arquivos foram fornecidos, valida e substitui no R2
 					if (files.length > 0) {
@@ -818,13 +1206,13 @@ export default {
 				// Busca o trabalho e o aluno associado
 				const trabalho = await db
 					.prepare(
-						`SELECT t.id, t.aluno_id, t.entry_url, a.pin
+						`SELECT t.id, t.aluno_id, t.entry_url, COALESCE(t.tipo, 'upload') as tipo, a.pin
 						 FROM trabalhos t
 						 JOIN alunos a ON a.id = t.aluno_id
 						 WHERE t.id = ?`
 					)
 					.bind(trabalhoId)
-					.first<{ id: string; aluno_id: string; entry_url: string; pin: string }>();
+					.first<{ id: string; aluno_id: string; entry_url: string; tipo: string; pin: string }>();
 
 				if (!trabalho) {
 					return errorResponse("Trabalho não encontrado.", 404);
@@ -837,34 +1225,36 @@ export default {
 					return errorResponse("PIN incorreto para exclusão deste trabalho.", 401);
 				}
 
-				// Deleta objetos correspondentes no R2 sob o prefixo do trabalho
-				const r2 = env.devsenai_trabalhos;
-				if (r2) {
-					try {
-						// Remove objetos sob o prefixo padrão ou o prefixo derivado da entry_url
-						let prefixFromUrl = "";
+				// Deleta objetos correspondentes no R2 apenas se for trabalho do tipo 'upload'
+				if (trabalho.tipo === "upload") {
+					const r2 = env.devsenai_trabalhos;
+					if (r2) {
 						try {
-							const parsedUrl = new URL(trabalho.entry_url);
-							const parts = parsedUrl.pathname.replace(/^\/+/, "").split("/");
-							if (parts.length >= 3) {
-								prefixFromUrl = parts.slice(0, 3).join("/") + "/";
-							}
-						} catch {}
+							// Remove objetos sob o prefixo padrão ou o prefixo derivado da entry_url
+							let prefixFromUrl = "";
+							try {
+								const parsedUrl = new URL(trabalho.entry_url);
+								const parts = parsedUrl.pathname.replace(/^\/+/, "").split("/");
+								if (parts.length >= 3) {
+									prefixFromUrl = parts.slice(0, 3).join("/") + "/";
+								}
+							} catch {}
 
-						const prefixes = Array.from(new Set([
-							`alunos/${trabalho.aluno_id}/${trabalho.id}/`,
-							prefixFromUrl
-						].filter(Boolean)));
+							const prefixes = Array.from(new Set([
+								`alunos/${trabalho.aluno_id}/${trabalho.id}/`,
+								prefixFromUrl
+							].filter(Boolean)));
 
-						for (const pfx of prefixes) {
-							const listed = await r2.list({ prefix: pfx });
-							const keysToDelete = listed.objects.map((obj) => obj.key);
-							if (keysToDelete.length > 0) {
-								await r2.delete(keysToDelete);
+							for (const pfx of prefixes) {
+								const listed = await r2.list({ prefix: pfx });
+								const keysToDelete = listed.objects.map((obj) => obj.key);
+								if (keysToDelete.length > 0) {
+									await r2.delete(keysToDelete);
+								}
 							}
+						} catch (r2Err) {
+							console.warn("Aviso ao limpar objetos do R2:", r2Err);
 						}
-					} catch (r2Err) {
-						console.warn("Aviso ao limpar objetos do R2:", r2Err);
 					}
 				}
 
@@ -873,7 +1263,9 @@ export default {
 
 				return jsonResponse({
 					success: true,
-					message: "Trabalho e arquivos excluídos com sucesso.",
+					message: trabalho.tipo === "link"
+						? "Link do trabalho removido com sucesso."
+						: "Trabalho e arquivos excluídos com sucesso.",
 				});
 			}
 
@@ -1148,7 +1540,10 @@ export default {
 						"GET    /api/trabalhos/alunos",
 						"POST   /api/trabalhos/alunos",
 						"GET    /api/trabalhos/alunos/:id",
+						"PUT    /api/trabalhos/alunos/:id",
+						"DELETE /api/trabalhos/alunos/:id",
 						"POST   /api/trabalhos/upload",
+						"POST   /api/trabalhos/link",
 						"PUT    /api/trabalhos/:id",
 						"DELETE /api/trabalhos/:id",
 						"GET    /api/cursos",
