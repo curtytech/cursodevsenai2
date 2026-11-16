@@ -43,6 +43,8 @@ CREATE TABLE IF NOT EXISTS trabalhos (
     modulo TEXT NOT NULL,
     descricao TEXT,
     entry_url TEXT NOT NULL,
+    tipo TEXT NOT NULL DEFAULT 'upload',
+    total_bytes INTEGER NOT NULL DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE
 );
