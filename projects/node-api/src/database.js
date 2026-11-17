@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
+const migrations = require('./migrations');
 
 const dataDirectory = path.join(__dirname, '..', 'data');
 const dbPath = path.join(dataDirectory, 'users.db');
@@ -50,16 +51,41 @@ function all(sql, params = []) {
   });
 }
 
-async function initialize() {
-  await run(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      email TEXT NOT NULL UNIQUE
-    )
-  `);
+let initializationPromise = null;
 
-  return db;
+async function initialize() {
+  if (initializationPromise) {
+    return initializationPromise;
+  }
+
+  initializationPromise = (async () => {
+    await run(`
+      CREATE TABLE IF NOT EXISTS schema_migrations (
+        name TEXT PRIMARY KEY,
+        applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    for (const migration of migrations) {
+      const alreadyApplied = await get('SELECT 1 FROM schema_migrations WHERE name = ?', [migration.name]);
+
+      if (alreadyApplied) {
+        continue;
+      }
+
+      await run(migration.sql);
+      await run('INSERT INTO schema_migrations (name) VALUES (?)', [migration.name]);
+    }
+
+    return db;
+  })();
+
+  try {
+    return await initializationPromise;
+  } catch (error) {
+    initializationPromise = null;
+    throw error;
+  }
 }
 
 let initialized = false;

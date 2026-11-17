@@ -1,11 +1,12 @@
 const express = require('express');
 const usersRoutes = require('./routes/users.routes');
+const tasksRoutes = require('./routes/tasks.routes');
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/api', usersRoutes);
+app.use('/api', usersRoutes, tasksRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'API funcionando' });
