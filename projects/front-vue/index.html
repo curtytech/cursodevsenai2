@@ -1,12 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task List Online</title>
-    
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
 </head>
-<body>
-    
+
+<body id="app">
+    {{ message }}
+    <div class="flex flex-col items-center justify-center mt-5 w-full">
+        <div
+            class="animate animate-pulse flex items-center justify-center mt-5 bg-linear-to-r from-sky-700 to-blue-500 rounded px-4 py-2">
+            <p class="text-4xl font-bold text-white"> Lista de Tarefas Online </p>
+        </div>
+
+        <div class="flex items-center justify-center mt-5 gap-3 w-80">
+            <input type="text" placeholder="Digite sua tarefa" class="border border-gray-300 rounded px-4 py-2 w-64">
+            <button @click="addTask" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                <i class="ph ph-plus-circle text-xl font-bold"></i>
+            </button>
+        </div>
+
+        <div class="flex flex-col items-center justify-center mt-5 gap-3 w-80 ">
+            <div class="flex items-center justify-between gap-3 border border-gray-300 rounded px-4 py-2 w-full">
+                <input @click="checkTask" type="checkbox" class="w-4 h-4">
+                <p class="text-lg">Tarefa 1</p>
+
+                <div class="flex gap-2">
+                    <button @click="editTask" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">
+                        <i class="ph ph-pen text-md font-bold"></i>
+                    </button>
+                    <button class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
+                        <i class="ph ph-trash text-md font-bold"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between gap-3 border border-gray-300 rounded px-4 py-2 w-full">
+                <input type="checkbox" class="w-4 h-4">
+                <p class="text-lg">Tarefa 2</p>
+
+                <div class="flex gap-2">
+                    <button @click="editTask" class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">
+                        <i class="ph ph-pen text-md font-bold"></i>
+                    </button>
+                    <button @click="deleteTask" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
+                        <i class="ph ph-trash text-md font-bold"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    message: 'Hello Vue!'
+                }
+            },
+
+            methods: {
+                addTask() {
+                    // Lógica para adicionar uma nova tarefa
+                    console.log('Adicionar tarefa');
+                },
+                editTask(task) {
+                    // Lógica para editar uma tarefa existente
+                    console.log('Editar tarefa');
+                },
+                deleteTask(task) {
+                    // Lógica para excluir uma tarefa existente
+                    console.log('Excluir tarefa');
+                }
+            }
+        })
+
+        app.mount('#app')
+    </script>
+
 </body>
+
 </html>
