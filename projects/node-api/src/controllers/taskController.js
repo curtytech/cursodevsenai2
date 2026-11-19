@@ -49,9 +49,9 @@ async function update(req, res) {
   }
 }
 
-async function deletetask (req, res) {
+async function deleteTask (req, res) {
   try {
-    const task = await taskService.deletetask(req.params.id);
+    const task = await taskService.deleteTask(req.params.id);
     if (!task) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
@@ -67,5 +67,5 @@ module.exports = {
   show,
   create,
   update,
-  deletetask
+  deleteTask
 };
