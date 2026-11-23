@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task List Online</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+</head>
+
+<body id="app">
+    <div class="flex flex-col items-center justify-center mt-5 w-full">
+        <div
+            class="animate animate-pulse flex items-center justify-center mt-5 bg-linear-to-r from-sky-700 to-blue-500 rounded px-4 py-2">
+            <p class="text-4xl font-bold text-white"> Lista de Tarefas Online </p>
+        </div>
+
+        <div class="flex items-center justify-center mt-5 gap-3 w-80">
+            <input v-model="taskTitle" type="text" placeholder="Digite sua tarefa"
+                class="border border-gray-300 rounded px-4 py-2 w-64">
+            <button v-if="!isEditing" @click="addTask"
+                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                <i class="ph ph-plus-circle text-xl font-bold"></i>
+            </button>
+            <button v-else @click="editTask" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                <i class="ph ph-check text-xl font-bold"></i>
+            </button>
+        </div>
+        <p v-if="feedbackMessage" class="mt-2 text-sm text-gray-700">{{ feedbackMessage }}</p>
+
+        <div class="flex flex-col items-center justify-center mt-5 gap-3 w-80 ">
+            <div v-for="task in tasks" :key="task.id"
+                class="flex items-center justify-between gap-3 border border-gray-300 rounded px-4 py-2 w-full ">
+                <button v-if="task.is_completed" @click="checkTask(task)"
+                    class="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center">
+                    <i class="ph ph-check-circle text-xl font-bold text-white"></i>
+                </button>
+                <button v-else @click="checkTask(task)"
+                    class="w-8 h-8 rounded-lg bg-gray-500 flex items-center justify-center">
+                    <i class="ph ph-circle text-xl font-bold text-white"></i>
+                </button>
+                <p class="text-lg">{{ task.title }}</p>
+
+                <div class="flex gap-2">
+                    <button @click="getEditingTask(task)"
+                        class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">
+                        <i class="ph ph-pen text-md font-bold"></i>
+                    </button>
+                    <button @click="deleteTask(task)" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
+                        <i class="ph ph-trash text-md font-bold"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    taskTitle: '',
+                    feedbackMessage: '',
+                    tasks: [],
+                    isEditing: false,
+                    editingTaskId: null
+                }
+            },
+
+            mounted() {
+                this.getTask()
+            },
+
+            methods: {
+                async getTask() {
+                    console.log('Obtendo tarefas...');
+                    try {
+                        const response = await fetch('http://localhost:3000/api/tasks');
+                        if (!response.ok) {
+                            throw new Error(`Erro ao obter tarefas (${response.status}).`);
+                        }
+                        const tasks = await response.json();
+                        this.tasks = tasks;
+                        console.log('Tarefas obtidas:', tasks);
+                    } catch (error) {
+                        console.error('Não foi possível obter as tarefas:', error);
+                    }
+                },
+                async addTask() {
+                    const title = this.taskTitle.trim();
+                    if (!title) {
+                        this.feedbackMessage = 'Digite uma tarefa antes de adicionar.';
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch('http://localhost:3000/api/tasks', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ title })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Erro ao adicionar tarefa (${response.status}).`);
+                        }
+
+                        await response.json();
+                        this.taskTitle = '';
+                        this.feedbackMessage = 'Tarefa adicionada com sucesso.';
+                        this.getTask();
+                    } catch (error) {
+                        console.error('Não foi possível adicionar a tarefa:', error);
+                        this.feedbackMessage = 'Não foi possível adicionar a tarefa. Verifique se a API está disponível.';
+                    }
+                },
+                async checkTask(Task) {
+                    try {
+                        const response = await fetch(`http://localhost:3000/api/tasks/${Task.id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ id: Task.id, is_completed: !Task.is_completed })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Erro ao adicionar tarefa (${response.status}).`);
+                        }
+
+                        await response.json();
+                        this.feedbackMessage = 'Tarefa atualizada com sucesso.';
+                        this.getTask();
+                    } catch (error) {
+                        console.error('Não foi possível atualizar a tarefa:', error);
+                        this.feedbackMessage = 'Não foi possível atualizar a tarefa. Verifique se a API está disponível.';
+                    }
+                },
+                async getEditingTask(task) {
+                    this.taskTitle = task.title;
+                    this.isEditing = true;
+                    this.editingTaskId = task.id;
+                },
+                async editTask() {
+                    try {
+                        const response = await fetch(`http://localhost:3000/api/tasks/${this.editingTaskId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ title: this.taskTitle })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Erro ao atualizar tarefa (${response.status}).`);
+                        }
+
+                        await response.json();
+                        this.taskTitle = '';
+                        this.feedbackMessage = 'Tarefa atualizada com sucesso.';
+                        this.isEditing = false;
+                        this.editingTaskId = null;
+                        console.log('Tarefa editada com sucesso:', this.isEditing);
+                        this.getTask();
+
+                    } catch (error) {
+                        console.error('Não foi possível atualizar a tarefa:', error);
+                        this.feedbackMessage = 'Não foi possível atualizar a tarefa. Verifique se a API está disponível.';
+                    }
+
+                    // Lógica para editar uma tarefa existente
+                    console.log('Editar tarefa');
+                },
+                async deleteTask(task) {
+                    // Lógica para excluir uma tarefa existente
+                    try {
+                        const response = await fetch(`http://localhost:3000/api/tasks/${task.id}`, {
+                            method: 'DELETE'
+                        });
+                        if (!response.ok) {
+                            throw new Error(`Erro ao excluir tarefa (${response.status}).`);
+                        }
+                        const tasks = await response.json();
+                        this.tasks = tasks;
+                        console.log('Tarefas obtidas:', tasks);
+                        this.getTask();
+                    } catch (error) {
+                        console.error('Não foi possível obter as tarefas:', error);
+                    }
+                }
+            }
+        })
+
+        app.mount('#app')
+    </script>
+
+</body>
+
+</html>

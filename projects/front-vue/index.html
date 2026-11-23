@@ -149,7 +149,6 @@
                     this.isEditing = true;
                     this.editingTaskId = task.id;
                 },
-
                 async editTask() {
                     try {
                         const response = await fetch(`http://localhost:3000/api/tasks/${this.editingTaskId}`, {
