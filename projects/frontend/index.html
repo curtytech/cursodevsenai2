@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task List Online</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css"
+    />
+  </head>
+  <body>
+    <div id="app" class="flex flex-col items-center justify-center mt-5 w-full">
+      <div
+        class="flex items-center justify-center mt-5 bg-gradient-to-r from-blue-600 to-blue-300 px-6 py-4 rounded-xl shadow-sm w-full max-w-md"
+      >
+        <p
+          class="text-2xl font-extrabold tracking-tight text-white whitespace-nowrap"
+        >
+          Lista de Tarefas Online
+        </p>
+      </div>
+
+      <form
+        @submit.prevent="isEditing ? editTask() : addTask()"
+        class="flex items-center justify-center mt-5 gap-3 w-full max-w-md"
+      >
+        <input
+          v-model="taskTitle"
+          type="text"
+          placeholder="Digite sua tarefa"
+          class="border border-gray-300 rounded px-4 py-2 flex-1"
+        />
+        <button
+          type="submit"
+          class="bg-green-500 text-white px-4 py-2.5 rounded hover:bg-green-600 flex items-center justify-center"
+        >
+          <i class="ph ph-plus-circle text-xl font-bold leading-none"></i>
+        </button>
+      </form>
+      <p v-if="feedbackMessage" class="text-red-500 mt-2">
+        {{ feedbackMessage }}
+      </p>
+
+      <div
+        class="flex flex-col items-center justify-center mt-5 gap-3 w-full max-w-md"
+      >
+        <div
+          v-for="task in tasks"
+          :key="task.id"
+          class="flex items-center justify-between gap-3 border border-gray-300 rounded px-4 py-2 w-full"
+        >
+          <button
+            @click="checkTask(task)"
+            type="button"
+            class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center"
+            :class="task.is_completed ? 'bg-green-500' : 'bg-white border-2 border-gray-300'"
+          >
+            <i
+              v-if="task.is_completed"
+              class="ph ph-check-circle text-xl font-bold text-white"
+            ></i>
+          </button>
+          <p
+            class="text-lg flex-1"
+            :class="{ 'line-through text-gray-400': task.is_completed }"
+          >
+            {{ task.title }}
+          </p>
+
+          <div class="flex items-center gap-3">
+            <button
+              @click="startEdit(task)"
+              class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              <i class="ph ph-pencil text-md font-bold"></i>
+            </button>
+            <button
+              @click="openDeleteModal(task)"
+              class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            >
+              <i class="ph ph-trash text-md font-bold"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        v-if="taskToDelete"
+        @click.self="cancelDelete"
+        class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4"
+      >
+        <div class="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
+          <p class="text-xl font-bold text-gray-800">Excluir tarefa?</p>
+          <p class="text-gray-600 mt-2">
+            Tem certeza que deseja excluir "{{ taskToDelete.title }}"?
+          </p>
+          <div class="flex justify-end gap-3 mt-6">
+            <button
+              @click="cancelDelete"
+              class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300"
+            >
+              Cancelar
+            </button>
+            <button
+              @click="deleteTask"
+              class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+            >
+              Excluir
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const app = Vue.createApp({
+        data() {
+          return {
+            taskTitle: "",
+            feedbackMessage: "",
+            tasks: [],
+            isEditing: false,
+            editingTaskId: null,
+            taskToDelete: null,
+          };
+        },
+
+        mounted() {
+          this.getTask();
+        },
+
+        methods: {
+          async getTask() {
+            console.log("Obtendo tarefas...");
+            try {
+              const response = await fetch("http://localhost:3000/api/tasks");
+              if (!response.ok) {
+                throw new Error(`Erro ao obter tarefas (${response.status})`);
+              }
+              const tasks = await response.json();
+              this.tasks = tasks;
+              console.log("Tarefas obtidas:", tasks);
+            } catch (error) {
+              console.error("Não foi possível obter tarefas:", error);
+            }
+          },
+
+          async addTask() {
+            const title = this.taskTitle.trim();
+            if (!title) {
+              this.feedbackMessage = "Digite uma tarefa antes de adicionar.";
+              return;
+            }
+
+            try {
+              const response = await fetch("http://localhost:3000/api/tasks", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ title }),
+              });
+              if (!response.ok) {
+                throw new Error(
+                  `Erro ao adicionar tarefa (${response.status})`,
+                );
+              }
+              const newTask = await response.json();
+              this.tasks.push(newTask);
+              this.taskTitle = "";
+              this.feedbackMessage = "Tarefa adicionada com sucesso!";
+            } catch (error) {
+              console.error("Não foi possível adicionar tarefa:", error);
+              this.feedbackMessage =
+                "Não foi possível adicionar tarefa. Verifique o console para mais detalhes.";
+            }
+          },
+          async checkTask(task) {
+            try {
+              const response = await fetch(
+                `http://localhost:3000/api/tasks/${task.id}`,
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    id: task.id,
+                    is_completed: !task.is_completed,
+                  }),
+                },
+              );
+
+              if (!response.ok) {
+                throw new Error(
+                  `Erro ao atualizar tarefa (${response.status})`,
+                );
+              }
+
+              await response.json();
+              this.feedbackMessage = "Tarefa atualizada com sucesso!";
+              this.getTask();
+            } catch (error) {
+              console.error("Não foi possível atualizar tarefa:", error);
+              this.feedbackMessage =
+                "Não foi possível atualizar tarefa. Verifique o console para mais detalhes.";
+            }
+          },
+
+          startEdit(task) {
+            this.isEditing = true;
+            this.editingTaskId = task.id;
+            this.taskTitle = task.title;
+          },
+
+          async editTask() {
+            try {
+              const response = await fetch(
+                `http://localhost:3000/api/tasks/${this.editingTaskId}`,
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ title: this.taskTitle }),
+                },
+              );
+              if (!response.ok) {
+                throw new Error(
+                  `Erro ao atualizar tarefa (${response.status})`,
+                );
+              }
+
+              await response.json();
+              this.taskTitle = "";
+              this.feedbackMessage = "Tarefa atualizada com sucesso!";
+              this.isEditing = false;
+              this.editingTaskId = null;
+              console.log("Tarefa atualizada com sucesso: ", this.isEditing);
+              this.getTask();
+            } catch (error) {
+              console.error("Não foi possível atualizar tarefa:", error);
+              this.feedbackMessage =
+                "Não foi possível atualizar tarefa. Verifique o console para mais detalhes.";
+            }
+          },
+          openDeleteModal(task) {
+            this.taskToDelete = task;
+          },
+          cancelDelete() {
+            this.taskToDelete = null;
+          },
+          async deleteTask() {
+            if (!this.taskToDelete) return;
+            const id = this.taskToDelete.id;
+            try {
+              const response = await fetch(
+                `http://localhost:3000/api/tasks/${id}`,
+                {
+                  method: "DELETE",
+                },
+              );
+              if (!response.ok) {
+                throw new Error(`Erro ao excluir tarefa (${response.status})`);
+              }
+              await response.json();
+              this.tasks = this.tasks.filter((task) => task.id !== id);
+              
+              let timerInterval;
+              Swal.fire({
+                toast : true,
+                position: "bottom-end",
+                icon: "success",
+                title: "Tarefa excluída!",
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+              });
+            
+            } catch (error) {
+              console.error("Não foi possível excluir tarefa:", error);
+              this.feedbackMessage =
+                "Não foi possível excluir tarefa. Verifique o console para mais detalhes.";
+            } finally {
+              this.taskToDelete = null;
+            }
+          },
+        },
+      });
+
+      app.mount("#app");
+    </script>
+  </body>
+</html>
