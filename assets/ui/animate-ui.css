@@ -1,0 +1,259 @@
+/* ==========================================================================
+   Animate UI Pattern Layer — Motion Design Calibrado & Full-Bleed Editorial
+   Inspirado em https://animate-ui.com/docs (física de mola suave, 60fps GPU)
+   ========================================================================== */
+
+/* 1. Scroll Progress Bar (Topo fixo da viewport) */
+.aui-scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  z-index: 95;
+  pointer-events: none;
+  transform-origin: 0% 50%;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, var(--ds-accent), var(--ds-emerald), var(--ds-indigo));
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.45);
+  will-change: transform;
+}
+
+/* 2. Gravity Stars + Soft Topography Full-Bleed Background Canvas */
+.aui-gravity-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.78;
+  transition: opacity 420ms var(--ease-standard);
+}
+
+:root[data-theme="light"] .aui-gravity-canvas {
+  opacity: 0.58;
+}
+
+/* 3. Splitting Text (Blur + Slide Word-by-Word Reveal) */
+.aui-split-word {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(14px);
+  transition:
+    opacity 540ms var(--ease-fluid),
+    filter 560ms var(--ease-fluid),
+    transform 540ms var(--ease-fluid);
+  transition-delay: var(--split-delay, 0ms);
+  will-change: opacity, filter, transform;
+}
+
+.is-split-visible .aui-split-word {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translateY(0);
+}
+
+/* 4. Rotating / Sliding Words (Vertical Spring Morph) */
+.aui-rotate-wrap {
+  display: inline-grid;
+  vertical-align: bottom;
+  overflow: hidden;
+  padding: 0 0.25rem;
+  border-radius: 0.45rem;
+  background: var(--ds-accent-soft);
+  border: 1px solid var(--ds-accent-border);
+  color: var(--ds-accent);
+  line-height: 1.28;
+}
+
+.aui-rotate-item {
+  grid-area: 1 / 1;
+  display: inline-block;
+  white-space: nowrap;
+  opacity: 0;
+  filter: blur(5px);
+  transform: translateY(72%);
+  transition:
+    transform 500ms var(--ease-fluid),
+    opacity 400ms var(--ease-standard),
+    filter 420ms var(--ease-standard);
+}
+
+.aui-rotate-item.is-current {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translateY(0%);
+}
+
+.aui-rotate-item.is-exiting {
+  opacity: 0;
+  filter: blur(5px);
+  transform: translateY(-72%);
+}
+
+/* 5. Shimmering Badge (Brilho sutil editorial) */
+.aui-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.aui-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-110%) skewX(-18deg);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.16) 50%,
+    transparent 100%
+  );
+  animation: auiShimmerSweep 5.2s var(--ease-fluid) infinite;
+  pointer-events: none;
+}
+
+@keyframes auiShimmerSweep {
+  0%, 62% { transform: translateX(-120%) skewX(-18deg); }
+  100% { transform: translateX(140%) skewX(-18deg); }
+}
+
+/* 6. Motion Highlight / Sliding Pill Tabs */
+[data-sliding-tabs] {
+  position: relative;
+  isolation: isolate;
+}
+
+.aui-tab-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  border-radius: 0.75rem;
+  background: var(--ds-accent);
+  box-shadow: 0 6px 18px -6px rgba(34, 211, 238, 0.36);
+  pointer-events: none;
+  transition:
+    transform 420ms var(--ease-fluid),
+    width 420ms var(--ease-fluid),
+    height 420ms var(--ease-fluid),
+    opacity 260ms var(--ease-standard);
+  will-change: transform, width;
+}
+
+:root[data-theme="light"] .aui-tab-indicator {
+  box-shadow: 0 6px 18px -6px rgba(2, 132, 199, 0.3);
+}
+
+[data-sliding-tabs] > button {
+  position: relative;
+  z-index: 1;
+}
+
+[data-sliding-tabs] > button.is-tab-active {
+  color: var(--ds-accent-ink) !important;
+  border-color: transparent !important;
+  background: transparent !important;
+}
+
+/* 7. Spotlight + 3D Spring Tilt Animated Cards */
+[data-spotlight-card] {
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  --mx: 50%;
+  --my: 50%;
+  --spot-opacity: 0;
+  --spot-color: rgba(34, 211, 238, 0.13);
+  --spot-border: rgba(34, 211, 238, 0.42);
+}
+
+:root[data-theme="light"] [data-spotlight-card] {
+  --spot-color: rgba(2, 132, 199, 0.085);
+  --spot-border: rgba(2, 132, 199, 0.34);
+}
+
+[data-spotlight-card]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: var(--spot-opacity);
+  background: radial-gradient(
+    460px circle at var(--mx) var(--my),
+    var(--spot-color),
+    transparent 62%
+  );
+  transition: opacity 380ms var(--ease-standard);
+  z-index: 0;
+}
+
+[data-spotlight-card]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--spot-opacity);
+  background: radial-gradient(
+    320px circle at var(--mx) var(--my),
+    var(--spot-border),
+    transparent 68%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  transition: opacity 380ms var(--ease-standard);
+  z-index: 2;
+}
+
+[data-spotlight-card] > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* 8. Magnetic CTA Smooth Return */
+[data-magnetic] {
+  will-change: transform;
+}
+
+/* 9. Animated Copy Feedback Badge */
+.aui-copy-btn {
+  position: relative;
+}
+
+.aui-copy-btn.is-copied {
+  border-color: rgba(16, 185, 129, 0.45) !important;
+  color: var(--ds-emerald) !important;
+}
+
+/* 10. Blur-Slide Section Reveal (Animate UI Effect Primitive) */
+[data-reveal] {
+  filter: blur(4px);
+  transition:
+    opacity var(--dur-reveal) var(--ease-fluid),
+    transform var(--dur-reveal) var(--ease-fluid),
+    filter var(--dur-reveal) var(--ease-fluid);
+}
+
+[data-reveal].is-revealed {
+  filter: blur(0px);
+}
+
+/* Circular Progress Ring (Task Lists Workspace) */
+.aui-ring-progress {
+  transition: stroke-dashoffset 680ms var(--ease-fluid);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aui-gravity-canvas { display: none !important; }
+  .aui-split-word { opacity: 1 !important; filter: none !important; transform: none !important; }
+  .aui-shimmer::after { animation: none !important; }
+  [data-spotlight-card]::before,
+  [data-spotlight-card]::after { display: none !important; }
+}

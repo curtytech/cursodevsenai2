@@ -1,0 +1,732 @@
+/* ==========================================================================
+   Guia do Curso — Modo Live Total (Google Gemini Live Nativo)
+   Zero TTS do computador • Conversa full-duplex em tempo real com Orb Líquido
+   ========================================================================== */
+
+.guide-launcher {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.76rem 1.28rem;
+  border-radius: 999px;
+  background: var(--ds-surface);
+  color: var(--ds-ink);
+  border: 1px solid var(--ds-border-strong);
+  box-shadow: var(--ds-shadow-md);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 340ms var(--ease-fluid),
+    border-color 280ms var(--ease-standard),
+    box-shadow 340ms var(--ease-fluid),
+    opacity 320ms var(--ease-standard);
+}
+
+.guide-launcher:hover {
+  transform: translateY(-2.5px);
+  border-color: var(--ds-accent-border);
+  box-shadow: var(--ds-shadow-lg);
+}
+
+.guide-launcher.is-live {
+  border-color: rgba(16, 185, 129, 0.58);
+  box-shadow: 0 0 0 4px var(--ds-emerald-soft), var(--ds-shadow-md);
+}
+
+.guide-launcher.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px) scale(0.96);
+}
+
+.guide-launcher-dot {
+  width: 0.52rem;
+  height: 0.52rem;
+  border-radius: 999px;
+  background: var(--ds-emerald);
+  box-shadow: 0 0 0 3px var(--ds-emerald-soft);
+}
+
+.guide-launcher.is-live .guide-launcher-dot {
+  animation: guideLivePulse 1.35s ease-in-out infinite;
+}
+
+@keyframes guideLivePulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 3px var(--ds-emerald-soft); }
+  50% { transform: scale(1.24); box-shadow: 0 0 0 7px rgba(16, 185, 129, 0.14); }
+}
+
+.guide-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 64;
+  background: rgba(5, 9, 16, 0.45);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 380ms var(--ease-standard);
+}
+
+.guide-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (min-width: 1024px) {
+  .guide-backdrop {
+    background: transparent;
+    backdrop-filter: none;
+    pointer-events: none !important;
+  }
+}
+
+/* Drawer Lateral Full-Height — Experiência Gemini Live */
+.guide-drawer {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 65;
+  width: min(440px, calc(100vw - 2rem));
+  display: flex;
+  flex-direction: column;
+  border-radius: 1.65rem;
+  background: var(--ds-surface);
+  color: var(--ds-ink);
+  border: 1px solid var(--ds-border-strong);
+  box-shadow: var(--ds-shadow-lg);
+  overflow: hidden;
+  transform: translateX(calc(100% + 2rem));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 480ms var(--ease-fluid),
+    opacity 380ms var(--ease-standard);
+}
+
+.guide-drawer.is-open {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.guide-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  padding: 0.92rem 1.15rem;
+  border-bottom: 1px solid var(--ds-border);
+  background: var(--ds-surface-elevated);
+}
+
+.guide-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.72rem;
+  min-width: 0;
+}
+
+.guide-emblem {
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ds-accent-soft);
+  border: 1px solid var(--ds-accent-border);
+  color: var(--ds-accent);
+  flex-shrink: 0;
+}
+
+.guide-title {
+  font-family: var(--font-display);
+  font-size: 0.96rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ds-ink);
+}
+
+.guide-subtitle {
+  font-size: 0.71rem;
+  color: var(--ds-ink-muted);
+  margin-top: 0.14rem;
+}
+
+.guide-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.guide-voice-select {
+  height: 2rem;
+  padding: 0 0.55rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--ds-border-strong);
+  background: var(--ds-surface);
+  color: var(--ds-ink);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 240ms var(--ease-standard);
+}
+
+.guide-voice-select:focus {
+  border-color: var(--ds-accent);
+}
+
+.guide-scope-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.48rem 1.15rem;
+  font-size: 0.71rem;
+  color: var(--ds-ink-muted);
+  background: var(--ds-bg-subtle);
+  border-bottom: 1px solid var(--ds-border);
+}
+
+.guide-scope-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  color: var(--ds-emerald);
+}
+
+.guide-scope-badge.is-warn {
+  color: var(--ds-amber);
+}
+
+.guide-scope-badge.is-blocked {
+  color: var(--ds-rose);
+}
+
+/* ==========================================================================
+   Palco Principal — Modo Live Total (Full-Stage Google Gemini Live)
+   ========================================================================== */
+.guide-live-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.95rem;
+  padding: 1.5rem 1.35rem 1.15rem;
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 50% 34%, var(--ds-accent-soft) 0%, transparent 66%),
+    var(--ds-surface);
+  transition:
+    flex 420ms var(--ease-fluid),
+    padding 420ms var(--ease-fluid),
+    background 480ms var(--ease-standard);
+}
+
+.guide-live-stage.is-listening {
+  background:
+    radial-gradient(circle at 50% 34%, rgba(16, 185, 129, 0.14) 0%, transparent 68%),
+    var(--ds-surface);
+}
+
+.guide-live-stage.is-speaking {
+  background:
+    radial-gradient(circle at 50% 34%, rgba(217, 119, 6, 0.19) 0%, transparent 70%),
+    var(--ds-surface);
+}
+
+.guide-live-stage.is-thinking {
+  background:
+    radial-gradient(circle at 50% 34%, rgba(99, 102, 241, 0.16) 0%, transparent 68%),
+    var(--ds-surface);
+}
+
+/* Quando a gaveta de legendas/texto está aberta, o palco se acomoda com fluidez */
+.guide-drawer.has-transcript-open .guide-live-stage {
+  flex: 0 0 auto;
+  padding: 0.95rem 1.15rem 0.85rem;
+  gap: 0.55rem;
+  border-bottom: 1px solid var(--ds-border);
+}
+
+.guide-live-orb-btn {
+  position: relative;
+  width: 224px;
+  height: 224px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  padding: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    width 420ms var(--ease-fluid),
+    height 420ms var(--ease-fluid),
+    transform 340ms var(--ease-fluid);
+}
+
+.guide-drawer.has-transcript-open .guide-live-orb-btn {
+  width: 126px;
+  height: 126px;
+}
+
+.guide-live-orb-btn:hover {
+  transform: scale(1.035);
+}
+
+.guide-live-orb-btn:active {
+  transform: scale(0.975);
+}
+
+.guide-live-orb-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.guide-live-orb-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  color: var(--ds-ink);
+}
+
+.guide-live-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.34rem 0.88rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--ds-border-strong);
+  background: var(--ds-surface-elevated);
+  color: var(--ds-ink-secondary);
+  transition: border-color 280ms var(--ease-standard), color 280ms var(--ease-standard), background 280ms var(--ease-standard);
+}
+
+.guide-live-status-pill.is-listening {
+  border-color: rgba(16, 185, 129, 0.5);
+  background: var(--ds-emerald-soft);
+  color: var(--ds-emerald);
+}
+
+.guide-live-status-pill.is-speaking {
+  border-color: var(--ds-accent-border);
+  background: var(--ds-accent-soft);
+  color: var(--ds-accent);
+}
+
+.guide-live-status-pill.is-thinking {
+  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--ds-ink);
+}
+
+.guide-live-status-pill.is-error {
+  border-color: rgba(244, 63, 94, 0.45);
+  background: var(--ds-rose-soft);
+  color: var(--ds-rose);
+}
+
+.guide-live-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.guide-live-status-pill.is-listening .guide-live-status-dot,
+.guide-live-status-pill.is-speaking .guide-live-status-dot,
+.guide-live-status-pill.is-thinking .guide-live-status-dot {
+  animation: guideLivePulse 1.1s ease-in-out infinite;
+}
+
+/* Legendas ao vivo suaves no centro do palco */
+.guide-live-caption {
+  width: 100%;
+  max-width: 360px;
+  min-height: 2.6rem;
+  max-height: 5.4rem;
+  overflow-y: auto;
+  text-align: center;
+  font-size: 0.87rem;
+  line-height: 1.55;
+  color: var(--ds-ink-secondary);
+  padding: 0 0.4rem;
+}
+
+.guide-live-caption strong {
+  color: var(--ds-ink);
+  font-weight: 600;
+}
+
+.guide-live-caption code {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.35rem;
+  background: var(--ds-bg-subtle);
+  border: 1px solid var(--ds-border);
+}
+
+/* Cartão flutuante de atalho sugerido durante a fala */
+.guide-live-shortcut {
+  display: none;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.42rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  background: var(--ds-surface-elevated);
+  border: 1px solid var(--ds-accent-border);
+  color: var(--ds-accent);
+  text-decoration: none;
+  box-shadow: var(--ds-shadow-sm);
+  animation: guideMsgIn 340ms var(--ease-fluid) both;
+  transition: transform 280ms var(--ease-fluid), border-color 240ms var(--ease-standard);
+}
+
+.guide-live-shortcut.is-visible {
+  display: inline-flex;
+}
+
+.guide-live-shortcut:hover {
+  transform: translateY(-1.5px);
+  border-color: var(--ds-accent);
+}
+
+/* Chips iniciais discretos no modo ocioso */
+.guide-live-starters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.42rem;
+  max-width: 370px;
+  margin-top: 0.25rem;
+}
+
+.guide-drawer.has-transcript-open .guide-live-starters,
+.guide-live-stage.is-session-on .guide-live-starters {
+  display: none;
+}
+
+.guide-chip {
+  font-size: 0.73rem;
+  font-weight: 500;
+  padding: 0.38rem 0.74rem;
+  border-radius: 999px;
+  border: 1px solid var(--ds-border);
+  background: var(--ds-bg-subtle);
+  color: var(--ds-ink-secondary);
+  cursor: pointer;
+  transition:
+    transform 280ms var(--ease-fluid),
+    border-color 240ms var(--ease-standard),
+    color 240ms var(--ease-standard);
+}
+
+.guide-chip:hover:not(:disabled) {
+  transform: translateY(-1.5px);
+  border-color: var(--ds-accent-border);
+  color: var(--ds-ink);
+}
+
+/* ==========================================================================
+   Gaveta Expansível de Transcrição & Teclado (Opcional durante o Live)
+   ========================================================================== */
+.guide-transcript-panel {
+  display: none;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  background: var(--ds-surface);
+}
+
+.guide-drawer.has-transcript-open .guide-transcript-panel {
+  display: flex;
+}
+
+.guide-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.9rem 1.05rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.72rem;
+  scroll-behavior: smooth;
+}
+
+@keyframes guideMsgIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(2.5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
+}
+
+.guide-msg {
+  max-width: 92%;
+  padding: 0.72rem 0.9rem;
+  border-radius: 1rem;
+  font-size: 0.82rem;
+  line-height: 1.54;
+  animation: guideMsgIn 340ms var(--ease-fluid) both;
+}
+
+.guide-msg--assistant {
+  align-self: flex-start;
+  background: var(--ds-bg-subtle);
+  border: 1px solid var(--ds-border);
+  color: var(--ds-ink);
+  border-bottom-left-radius: 0.3rem;
+}
+
+.guide-msg--user {
+  align-self: flex-end;
+  background: var(--ds-accent);
+  color: var(--ds-accent-ink);
+  font-weight: 500;
+  border-bottom-right-radius: 0.3rem;
+}
+
+.guide-msg--warn {
+  align-self: flex-start;
+  max-width: 96%;
+  background: var(--ds-amber-soft);
+  border: 1px solid rgba(245, 158, 11, 0.38);
+  color: var(--ds-ink);
+}
+
+.guide-msg--blocked {
+  align-self: flex-start;
+  max-width: 96%;
+  background: var(--ds-rose-soft);
+  border: 1px solid rgba(244, 63, 94, 0.42);
+  color: var(--ds-ink);
+}
+
+.guide-msg--live-draft {
+  opacity: 0.85;
+  border-style: dashed;
+}
+
+.guide-msg-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+  padding: 0.28rem 0.6rem;
+  border-radius: 0.58rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border-strong);
+  color: var(--ds-accent);
+  text-decoration: none;
+}
+
+.guide-form {
+  display: flex;
+  align-items: center;
+  gap: 0.48rem;
+  padding: 0.62rem 1rem 0.72rem;
+  border-top: 1px solid var(--ds-border);
+  background: var(--ds-surface-elevated);
+}
+
+.guide-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.58rem 0.85rem;
+  border-radius: 0.82rem;
+  font-size: 0.82rem;
+}
+
+.guide-send-btn {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.82rem;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Dock Inferior Estilo Google Gemini Live (Mic • Chamada Live • Legendas)
+   ========================================================================== */
+.guide-live-dock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  padding: 0.95rem 1.15rem 1.05rem;
+  border-top: 1px solid var(--ds-border);
+  background: var(--ds-surface-elevated);
+}
+
+.guide-dock-circle {
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ds-border-strong);
+  background: var(--ds-surface);
+  color: var(--ds-ink);
+  cursor: pointer;
+  transition:
+    transform 300ms var(--ease-fluid),
+    border-color 240ms var(--ease-standard),
+    background 240ms var(--ease-standard),
+    color 240ms var(--ease-standard),
+    opacity 220ms var(--ease-standard);
+}
+
+.guide-dock-circle:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--ds-accent-border);
+}
+
+.guide-dock-circle:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.guide-dock-circle.is-active {
+  border-color: var(--ds-accent-border);
+  background: var(--ds-accent-soft);
+  color: var(--ds-accent);
+}
+
+.guide-dock-circle.is-muted {
+  border-color: rgba(245, 158, 11, 0.55);
+  background: var(--ds-amber-soft);
+  color: var(--ds-amber);
+}
+
+.guide-dock-primary {
+  min-width: 11.5rem;
+  height: 3.1rem;
+  padding: 0 1.35rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    transform 320ms var(--ease-fluid),
+    box-shadow 320ms var(--ease-fluid),
+    background 260ms var(--ease-standard),
+    border-color 260ms var(--ease-standard);
+}
+
+.guide-dock-primary.is-start {
+  background: var(--ds-accent);
+  color: var(--ds-accent-ink);
+  box-shadow: 0 10px 26px -10px var(--ds-accent);
+}
+
+.guide-dock-primary.is-start:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -10px var(--ds-accent);
+}
+
+.guide-dock-primary.is-hangup {
+  background: var(--ds-rose-soft);
+  color: var(--ds-rose);
+  border-color: rgba(244, 63, 94, 0.48);
+}
+
+.guide-dock-primary.is-hangup:hover {
+  transform: translateY(-2px);
+  background: rgba(244, 63, 94, 0.22);
+}
+
+/* ==========================================================================
+   Overlay de Bloqueio de Sessão Anti-Burla (Estágio 2 — Impede Avanço)
+   ========================================================================== */
+.guide-lock-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(7, 10, 17, 0.86);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: uxBackdropIn 360ms var(--ease-standard) both;
+}
+
+.guide-lock-card {
+  width: min(490px, 100%);
+  border-radius: 1.5rem;
+  padding: 1.75rem;
+  background: var(--ds-surface);
+  border: 1px solid rgba(244, 63, 94, 0.42);
+  box-shadow: var(--ds-shadow-lg);
+  animation: uxModalIn 440ms var(--ease-fluid) both;
+}
+
+.guide-lock-icon {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ds-rose-soft);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  color: var(--ds-rose);
+  margin-bottom: 1rem;
+}
+
+.guide-lock-log {
+  margin-top: 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.85rem;
+  background: var(--ds-bg-subtle);
+  border: 1px solid var(--ds-border);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--ds-ink-secondary);
+}
+
+.guide-lock-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+  font-size: 0.8rem;
+  color: var(--ds-ink-secondary);
+  cursor: pointer;
+}

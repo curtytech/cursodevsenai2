@@ -1,25 +1,41 @@
 const database = require('../database');
 
+function mapTaskRow(row) {
+    if (!row) {
+        return undefined;
+    }
+
+    return {
+        id: row.id,
+        title: row.title,
+        is_completed: Boolean(row.is_completed)
+    };
+}
+
 async function findAll() {
     await database.ensureInitialized();
-    return database.all('SELECT id, title, is_completed FROM tasks ORDER BY id');
+    const rows = await database.all('SELECT id, title, is_completed FROM tasks ORDER BY id');
+    return rows.map(mapTaskRow);
 }
 
 async function findById(id) {
     await database.ensureInitialized();
     const numericId = Number(id);
-    return database.get('SELECT id, title, is_completed FROM tasks WHERE id = ?', [numericId]);
+    const row = await database.get('SELECT id, title, is_completed FROM tasks WHERE id = ?', [numericId]);
+    return mapTaskRow(row);
 }
 
 
-async function create(userData) {
+async function create(taskData = {}) {
     await database.ensureInitialized();
 
-    const title = userData.title?.trim();
-    const is_completed = userData.is_completed ?? false;
+    const title = taskData.title?.trim();
+    const is_completed = taskData.is_completed ? 1 : 0;
 
     if (!title) {
-        throw new Error('Título é obrigatório');
+        const error = new Error('Título é obrigatório');
+        error.statusCode = 400;
+        throw error;
     }
 
     const result = await database.run('INSERT INTO tasks (title, is_completed) VALUES (?, ?)', [title, is_completed]);
@@ -27,21 +43,27 @@ async function create(userData) {
 }
 
 
-async function update(id, userData) {
+async function update(id, taskData = {}) {
     await database.ensureInitialized();
 
     const numericId = Number(id);
-    const currentUser = await findById(numericId);
-    if (!currentUser) {
+    const currentTask = await findById(numericId);
+    if (!currentTask) {
         return null;
     }
 
-    const nextTask = {
-        title: userData.title?.trim() || currentUser.title,
-        is_completed: userData.is_completed ?? currentUser.is_completed
-    };
+    const nextTitle = taskData.title !== undefined ? String(taskData.title).trim() : currentTask.title;
+    if (!nextTitle) {
+        const error = new Error('Título é obrigatório');
+        error.statusCode = 400;
+        throw error;
+    }
 
-    await database.run('UPDATE tasks SET title = ?, is_completed = ? WHERE id = ?', [nextTask.title, nextTask.is_completed, numericId]);
+    const nextCompleted = taskData.is_completed !== undefined
+        ? (taskData.is_completed ? 1 : 0)
+        : (currentTask.is_completed ? 1 : 0);
+
+    await database.run('UPDATE tasks SET title = ?, is_completed = ? WHERE id = ?', [nextTitle, nextCompleted, numericId]);
     return findById(numericId);
 }
 

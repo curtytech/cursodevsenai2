@@ -18,7 +18,9 @@ async function create(userData) {
     const email = userData.email?.trim();
 
     if (!name || !email) {
-        throw new Error('Nome e email são obrigatórios');
+        const error = new Error('Nome e email são obrigatórios');
+        error.statusCode = 400;
+        throw error;
     }
 
     const result = await database.run('INSERT INTO users (name, email) VALUES (?, ?)', [name, email]);

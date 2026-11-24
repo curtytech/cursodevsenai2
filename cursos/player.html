@@ -4,29 +4,47 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Player de Curso - DEV SENAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../assets/ui/motion.css" />
+    <link rel="stylesheet" href="../assets/ui/animate-ui.css" />
+    <link rel="stylesheet" href="../assets/ui/iconsax-animated.css" />
+    <link rel="stylesheet" href="../assets/ui/project-assistant.css" />
+    <script src="../assets/ui/iconsax-animated.js" defer></script>
+    <script src="../assets/ui/theme-and-motion.js"></script>
+    <script src="../assets/ui/animate-ui.js" defer></script>
+    <script src="../assets/ui/project-assistant.js" defer></script>
   </head>
   <body
     class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased"
+    data-assistant-auto-open="false"
+    data-root-prefix="../"
+    data-animate-bg="gravity"
   >
     <!-- Topbar / Navbar -->
     <header
-      class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50"
+      class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40"
     >
       <div
-        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"
+        class="max-w-[1560px] mx-auto px-4 sm:px-8 lg:px-12 h-16 flex items-center justify-between"
       >
         <div class="flex items-center gap-3">
           <a
             href="index.html"
-            class="text-sm font-semibold text-slate-400 hover:text-white transition-colors flex items-center gap-1"
+            class="ux-btn rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:border-cyan-400/40 hover:text-white"
           >
-            &larr; Voltar aos Cursos
+            <isax-anim name="arrow-left" size="15"></isax-anim>
+            <span>Voltar aos Cursos</span>
           </a>
           <span class="text-slate-700">|</span>
           <h1
             id="headerCourseTitle"
-            class="text-base font-bold text-white truncate max-w-xs sm:max-w-md"
+            class="ds-display text-base font-bold text-white truncate max-w-xs sm:max-w-md"
           >
             Carregando Curso...
           </h1>
@@ -35,15 +53,17 @@
         <button
           id="openAddLessonModalBtn"
           type="button"
-          class="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2 text-xs font-bold text-slate-950 shadow-md transition hover:bg-cyan-300"
+          data-magnetic
+          class="ux-btn inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2 text-xs font-bold text-slate-950 shadow-md hover:bg-cyan-300"
         >
-          <span class="text-sm leading-none">+</span> Adicionar Aula
+          <isax-anim name="add-circle" size="16"></isax-anim>
+          <span>Adicionar Aula</span>
         </button>
       </div>
     </header>
 
     <!-- Conteúdo Principal -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+    <main class="relative z-10 flex-1 max-w-[1560px] w-full mx-auto px-4 py-6 sm:px-8 lg:px-12">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Player de Vídeo -->
         <section class="lg:col-span-2 space-y-4">
@@ -75,19 +95,7 @@
               <div
                 class="w-12 h-12 rounded-2xl bg-slate-800/80 border border-slate-700/80 flex items-center justify-center text-cyan-400 mb-3 shadow-lg"
               >
-                <svg
-                  class="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                  />
-                </svg>
+                <isax-anim name="video-play" size="24" trigger="ambient"></isax-anim>
               </div>
               <p class="text-sm font-bold text-slate-200">
                 Nenhuma aula cadastrada neste curso
@@ -624,6 +632,17 @@
             submitBtn.textContent = "Salvar Aula";
           }
         });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          modal.classList.add("hidden");
+          const delModal = document.getElementById("deleteLessonModal");
+          if (delModal) {
+            delModal.classList.add("hidden");
+            delModal.classList.remove("flex");
+          }
+        }
+      });
 
       document.addEventListener("DOMContentLoaded", loadCoursePlayer);
     </script>

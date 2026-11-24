@@ -6,17 +6,25 @@
     <title>Portfólios & Trabalhos da Turma — Dev SENAI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="../assets/ui/motion.css">
+    <link rel="stylesheet" href="../assets/ui/animate-ui.css">
+    <link rel="stylesheet" href="../assets/ui/iconsax-animated.css">
+    <link rel="stylesheet" href="../assets/ui/project-assistant.css">
+    <script src="../assets/ui/iconsax-animated.js" defer></script>
+    <script src="../assets/ui/theme-and-motion.js"></script>
+    <script src="../assets/ui/animate-ui.js" defer></script>
+    <script src="../assets/ui/project-assistant.js" defer></script>
 </head>
-<body class="min-h-screen bg-slate-950 font-['Inter',sans-serif] text-slate-100 antialiased selection:bg-cyan-500 selection:text-slate-950">
+<body class="min-h-screen bg-slate-950 font-['Inter',sans-serif] text-slate-100 antialiased selection:bg-cyan-500 selection:text-slate-950" data-assistant-auto-open="false" data-root-prefix="../" data-animate-bg="gravity">
 
     <!-- Topbar / Header -->
     <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
-        <div class="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto flex h-20 w-full max-w-[1560px] items-center justify-between px-4 sm:px-8 lg:px-12">
             <div class="flex items-center gap-4">
-                <a href="../index.html" class="group flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/60 px-4 py-2 text-xs font-semibold text-slate-300 transition hover:border-cyan-400/50 hover:bg-slate-800 hover:text-white">
-                    <svg class="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                <a href="../index.html" class="ux-btn group flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/60 px-4 py-2 text-xs font-semibold text-slate-300 hover:border-cyan-400/50 hover:bg-slate-800 hover:text-white">
+                    <isax-anim name="arrow-left" size="15"></isax-anim>
                     <span>Voltar ao Início</span>
                 </a>
                 <span class="hidden h-4 w-px bg-slate-800 sm:block"></span>
@@ -27,12 +35,12 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <button id="openRegisterStudentModalBtn" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/90 px-4 py-2.5 text-xs font-bold text-slate-200 shadow-sm transition hover:border-cyan-400 hover:bg-slate-800 hover:text-cyan-300">
-                    <svg class="h-4 w-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                <button id="openRegisterStudentModalBtn" type="button" class="ux-btn inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/90 px-4 py-2.5 text-xs font-bold text-slate-200 shadow-sm hover:border-cyan-400 hover:bg-slate-800 hover:text-cyan-300">
+                    <isax-anim name="user-add" size="16" class="text-cyan-400"></isax-anim>
                     <span>Cadastrar Aluno</span>
                 </button>
-                <button id="openUploadModalBtn" type="button" class="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-cyan-950/40 transition hover:-translate-y-0.5 hover:bg-cyan-300 active:translate-y-0">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                <button id="openUploadModalBtn" type="button" class="ux-btn inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-cyan-950/40 hover:bg-cyan-300">
+                    <isax-anim name="upload" size="16"></isax-anim>
                     <span>Publicar Trabalho</span>
                 </button>
             </div>
@@ -54,19 +62,19 @@
     </div>
 
     <!-- Conteúdo Principal -->
-    <main class="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <main class="relative z-10 mx-auto w-full max-w-[1560px] px-4 py-10 sm:px-8 lg:px-12">
         
         <!-- Hero Section -->
-        <div class="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 via-slate-900/50 to-slate-950 p-8 sm:p-12">
+        <div data-spotlight-card="flat" data-reveal class="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 via-slate-900/50 to-slate-950 p-8 sm:p-12">
             <div class="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl"></div>
             <div class="absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl"></div>
 
             <div class="relative max-w-3xl space-y-4">
-                <span class="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-300">
+                <span class="aui-shimmer inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-300">
                     Portfólios da Turma
                 </span>
-                <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-5xl">
-                    Trabalhos & Apresentações
+                <h1 data-split-text class="ds-display text-3xl font-extrabold tracking-tight text-white sm:text-5xl">
+                    Trabalhos &amp; Apresentações
                 </h1>
                 <p class="text-sm text-slate-400 sm:text-base leading-relaxed">
                     Explore os trabalhos práticos e apresentações interativas de cada aluno da turma. Escolha um aluno abaixo para visualizar seu portfólio completo ou publique seu próprio trabalho.
@@ -76,9 +84,9 @@
             <!-- Barra de Busca e Filtros -->
             <div class="relative mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
                 <div class="relative flex-1">
-                    <svg class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
+                    <span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                        <isax-anim name="search" size="18"></isax-anim>
+                    </span>
                     <input id="searchInput" type="search" autocomplete="off" placeholder="Buscar aluno por nome ou por tema de trabalho..." 
                            class="w-full rounded-2xl border border-slate-800 bg-slate-950/80 py-3.5 pl-12 pr-4 text-sm text-white placeholder-slate-500 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20">
                 </div>
@@ -103,7 +111,7 @@
                 <span class="text-xs text-slate-400">Clique para abrir o portfólio individual</span>
             </div>
 
-            <div id="studentsGrid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div id="studentsGrid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 <!-- Inserido dinamicamente via JS -->
             </div>
         </section>

@@ -1,6 +1,8 @@
+require('./env');
 const express = require('express');
 const usersRoutes = require('./routes/users.routes');
 const tasksRoutes = require('./routes/tasks.routes');
+const assistantRoutes = require('./routes/assistant.routes');
 
 const app = express();
 
@@ -16,9 +18,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use('/api', usersRoutes, tasksRoutes);
+app.use(express.json({ limit: '8mb' }));
+app.use(express.urlencoded({ extended: true, limit: '8mb' }));
+app.use('/api', usersRoutes, tasksRoutes, assistantRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'API funcionando' });
