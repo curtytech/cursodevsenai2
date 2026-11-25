@@ -47,6 +47,28 @@ async function transcribe(req, res) {
   }
 }
 
+async function liveTokenStatus(req, res) {
+  const st = assistantService.getStatus();
+  return res.json({
+    liveReady: st.liveReady,
+    mode: 'local-ephemeral-token',
+    model: st.liveModel,
+    voice: st.voice
+  });
+}
+
+async function liveTokenCreate(req, res) {
+  try {
+    const { voice } = req.body || {};
+    const result = await assistantService.createLiveEphemeralToken({ voice });
+    return res.json(result);
+  } catch (error) {
+    const code = error.statusCode || 500;
+    console.error('Erro ao emitir token Gemini Live:', error.message);
+    return res.status(code).json({ error: error.message });
+  }
+}
+
 function reset(req, res) {
   const { sessionId } = req.body || {};
   assistantService.resetSession(sessionId);
@@ -58,5 +80,7 @@ module.exports = {
   ask,
   tts,
   transcribe,
+  liveTokenStatus,
+  liveTokenCreate,
   reset
 };

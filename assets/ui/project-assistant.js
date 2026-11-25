@@ -1,28 +1,59 @@
 /**
- * Guia do Curso — Modo Live Total (100% Google Gemini Live Nativo)
+ * Guia do Curso — Modo Live Total Nativo na Vercel (100% Google Gemini Live)
  * ---------------------------------------------------------------------------
- * - ZERO TTS do computador e ZERO reconhecimento robótico do navegador:
- *   100% da conversa em tempo real acontece via Google Gemini Live
- *   (`BidiGenerateContent` através do relay seguro ws://localhost:3000/api/assistant/live).
- * - Áudio bidirecional full-duplex de baixíssima latência:
- *     • Entrada: Microfone (AEC/NS/AGC) → AudioWorklet 16kHz Int16 PCM (chunks de 40ms)
- *     • Saída: Stream nativo Google Gemini Live 24kHz PCM gapless via Web Audio API
- * - Interrupção natural (barge-in): basta falar por cima da Guia para interrompê-la.
- * - Orb acústico líquido em Canvas (60fps) reativo às frequências reais de entrada e saída.
- * - Legendas ao vivo + gaveta expansível de transcrição/texto integrada ao stream Live.
- * - Guardrail anti-burla em 2 estágios (1/2 aviso natural -> 2/2 bloqueio total de avanço).
+ * - Arquitetura 100% nativa na Vercel (sem servidor WebSocket persistente,
+ *   sem `node server.js`, sem expor a GEMINI_API_KEY):
+ *     1. Pede um Token Efêmero de uso único à Vercel Function `POST /api/live-token`
+ *        (com `systemInstruction`, voz e VAD criptograficamente travados no Google).
+ *     2. Conecta o navegador DIRETAMENTE à borda do Google Gemini Live
+ *        (`BidiGenerateContentConstrained?access_token=...`) com latência mínima.
+ * - ZERO TTS do computador e ZERO voz sintética do sistema operacional.
+ * - Áudio bidirecional full-duplex: Microfone 16kHz PCM (40ms) ⇄ Gemini 24kHz PCM.
+ * - Interrupção natural (*barge-in*), Orb líquido 60fps e Guardrail 2 estágios.
  */
 (() => {
   const SESSION_STATE_KEY = 'devsenai-guide-state-v1';
   const SESSION_DISMISSED_KEY = 'devsenai-guide-dismissed-v1';
   const VOICE_PREF_KEY = 'devsenai-guide-live-voice-v1';
   const COOLDOWN_SECONDS = 30;
-  const API_HTTP_BASE = 'http://localhost:3000/api/assistant';
-  const API_WS_BASE = 'ws://localhost:3000/api/assistant/live';
+  const VALID_VOICES = ['Kore', 'Aoede', 'Puck', 'Zephyr', 'Fenrir'];
 
   function getRootPrefix() {
     const attr = document.body.getAttribute('data-root-prefix');
     return attr !== null ? attr : '';
+  }
+
+  function isLocalHostEnv() {
+    return (
+      window.location.protocol === 'file:' ||
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1'
+    );
+  }
+
+  function getTokenEndpoints() {
+    const endpoints = [];
+    if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+      endpoints.push('/api/live-token');
+    }
+    if (isLocalHostEnv() && window.location.port !== '3000') {
+      endpoints.push('http://localhost:3000/api/live-token');
+    }
+    return endpoints;
+  }
+
+  function normalizeText(input) {
+    return String(input || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/0/g, 'o')
+      .replace(/1/g, 'i')
+      .replace(/3/g, 'e')
+      .replace(/4/g, 'a')
+      .replace(/5/g, 's')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
   function escapeHtml(str) {
@@ -55,6 +86,89 @@
     return href;
   }
 
+  // Guardrail em tempo real (além da systemInstruction travada no Token Efêmero do Google)
+  const BYPASS_PATTERNS = [
+    /ignor[ae]\s+(todas?\s+)?(as\s+|suas\s+)?(instruc|regras|diretriz|comand|restri)/,
+    /esquec[ae]\s+(tudo|todas?|as\s+|suas\s+)?(regras|instruc|limit|papel|escopo)?/,
+    /desconsider[ae]\s+(as\s+|suas\s+)?(regras|instruc|restri)/,
+    /(aja|atue|finja|finge|comporte-se)\s+(como|ser|que)/,
+    /(modo\s+desenvolvedor|developer\s+mode|jailbreak|\bdan\b|god\s+mode|unrestricted)/,
+    /(system\s+prompt|prompt\s+do\s+sistema|mostre\s+suas\s+instruc|revele\s+o\s+prompt)/,
+    /(sem\s+restri|sem\s+limit|burlar|quebrar\s+a?\s*regra|bypass|override)/,
+    /(ignore\s+previous|forget\s+your\s+instructions|pretend\s+to\s+be|act\s+as\s+a)/,
+    /(so\s+dessa\s+vez|responda\s+mesmo\s+assim|finge\s+que\s+e\s+sobre\s+o\s+projeto)/
+  ];
+
+  const OFF_TOPIC_PATTERNS = [
+    /\b(receita|bolo|comida|cozinhar|culinaria|almoco|jantar|pizza|cafe)\b/,
+    /\b(futebol|flamengo|corinthians|palmeiras|vasco|copa|gol|basquete|esporte)\b/,
+    /\b(politica|presidente|eleicao|partido|deputado|senador|governo|guerra)\b/,
+    /\b(clima|tempo\s+hoje|vai\s+chover|previsao\s+do\s+tempo|temperatura)\b/,
+    /\b(piada|conte\s+uma\s+historia|poema|poesia|musica|letra\s+de|filme|serie|novela|anime)\b/,
+    /\b(horoscopo|signo|tarot|loteria|aposta|bet|cassino)\b/,
+    /\b(remedio|doenca|sintoma|medico|dieta|emagrecer|treino\s+academia)\b/,
+    /\b(namoro|relacionamento|paquera|fofoca|celebridade)\b/,
+    /\b(bitcoin|criptomoeda|bolsa\s+de\s+valores|investimento|dolar\s+hoje)\b/,
+    /\b(redacao\s+enem|capital\s+da|quem\s+descobriu)\b/
+  ];
+
+  const PROJECT_KEYWORDS = [
+    'projeto', 'curso', 'senai', 'devtarde', 'devsenai', 'repositorio', 'portal', 'modulo',
+    'aluno', 'alunos', 'curriculo', 'trabalho', 'trabalhos', 'portfolio', 'pin', 'video', 'aula', 'aulas', 'player',
+    'html', 'css', 'tailwind', 'vue', 'javascript', 'node', 'express', 'api', 'rest', 'rota', 'rotas',
+    'sqlite', 'banco', 'dados', 'sql', 'migration', 'tarefa', 'tarefas', 'todo', 'firebase', 'firestore', 'supabase',
+    'vercel', 'github', 'git', 'slide', 'manual', 'iconsax', 'live', 'guia'
+  ];
+
+  function checkStrictGuardrail(rawMessage) {
+    const text = normalizeText(rawMessage);
+    if (!text) return null;
+
+    for (const pattern of BYPASS_PATTERNS) {
+      if (pattern.test(text)) {
+        return { kind: 'bypass', reason: 'Tentativa de contorno das diretrizes do Guia do Curso detectada.' };
+      }
+    }
+
+    const hasProjectTerm = PROJECT_KEYWORDS.some((kw) => new RegExp(`(^|[^a-z0-9])${kw}([^a-z0-9]|$)`).test(text));
+    if (!hasProjectTerm && OFF_TOPIC_PATTERNS.some((p) => p.test(text))) {
+      return { kind: 'off_topic', reason: 'Assunto fora do escopo exclusivo do projeto Curso DEV SENAI.' };
+    }
+    return null;
+  }
+
+  function isAssistantScopeRefusal(assistantSpeech) {
+    const text = normalizeText(assistantSpeech);
+    if (!text) return false;
+    return /(fora\s+do\s+escopo|apenas\s+sobre\s+o\s+projeto|so\s+posso\s+(conversar|falar|ajudar|responder)\s+sobre\s+o\s+(projeto|curso)|exclusiv[ao]\s+(para|do)\s+(este\s+)?(projeto|curso)|nao\s+posso\s+(ajudar|falar|responder)\s+sobre\s+(esse\s+assunto|isso|temas?\s+externos?))/.test(text);
+  }
+
+  function detectProjectShortcut(combinedText) {
+    const text = normalizeText(combinedText);
+    if (/\b(front-vue|task\s*list|lista\s+de\s+tarefas|tarefas)\b/.test(text)) {
+      return { label: 'Abrir Task List Vue', href: 'projects/front-vue/index.html' };
+    }
+    if (/\b(banco\s+de\s+dados|sqlite|sql|migration|modelagem|sgbd)\b/.test(text)) {
+      return { label: 'Módulo Banco de Dados', href: 'Modulos/BancoDeDados/repositorio.html' };
+    }
+    if (/\b(trabalho|trabalhos|portfolio|pin|upload|r2)\b/.test(text)) {
+      return { label: 'Trabalhos da Turma', href: 'trabalhos/trabalhos.html' };
+    }
+    if (/\b(curso|cursos|videoaula|playlist|player)\b/.test(text)) {
+      return { label: 'Cursos & Vídeos', href: 'cursos/index.html' };
+    }
+    if (/\b(firebase|firestore|nosql)\b/.test(text)) {
+      return { label: 'Manual Firebase & Firestore', href: 'documents/manual-firebase-firestore.html' };
+    }
+    if (/\b(express|node\.?js|slides|camadas|controller)\b/.test(text)) {
+      return { label: 'Slides Node.js & Express', href: 'documents/nodejs-slide.html' };
+    }
+    if (/\b(alunos?\s+devtarde|curriculos?|matricula)\b/.test(text)) {
+      return { label: 'Alunos DevTarde', href: '#trilhas', action: 'open-students' };
+    }
+    return null;
+  }
+
   function loadSessionState() {
     try {
       const parsed = JSON.parse(sessionStorage.getItem(SESSION_STATE_KEY) || '{}');
@@ -83,12 +197,12 @@
   function loadPreferredVoice() {
     try {
       const saved = localStorage.getItem(VOICE_PREF_KEY);
-      if (saved && ['Kore', 'Aoede', 'Puck', 'Zephyr', 'Fenrir'].includes(saved)) return saved;
+      if (saved && VALID_VOICES.includes(saved)) return saved;
     } catch {}
     return 'Kore';
   }
 
-  // AudioWorklet inline: captura contínua em chunks rápidos de 40ms (640 amostras @ 16kHz Int16)
+  // AudioWorklet inline: resampling limpo em chunks rápidos de 40ms (640 amostras @ 16kHz Int16)
   const MIC_WORKLET_CODE = `
     class Pcm16kLiveProcessor extends AudioWorkletProcessor {
       constructor() {
@@ -96,7 +210,7 @@
         this.targetRate = 16000;
         this.ratio = sampleRate / this.targetRate;
         this.frac = 0;
-        this.chunkSize = 640; // 40ms @ 16kHz para resposta ultra-rápida do Gemini Live
+        this.chunkSize = 640; // 40ms @ 16kHz
         this.buf = new Int16Array(this.chunkSize);
         this.offset = 0;
       }
@@ -137,11 +251,13 @@
     let liveActive = false;
     let liveConnecting = false;
     let liveMuted = false;
-    let liveState = 'idle'; // idle | connecting | listening | user-speaking | thinking | speaking | muted | error
+    let liveState = 'idle';
     let liveWs = null;
     let pendingPromptOnConnect = null;
+    let lastGuardrailTs = 0;
+    let lastShortcutHref = '';
 
-    // Web Audio API (full-duplex)
+    // Web Audio API full-duplex
     let micStream = null;
     let micCtx = null;
     let micAnalyser = null;
@@ -151,7 +267,7 @@
     let nextPlayTime = 0;
     const activeSources = new Set();
 
-    // Transcrição em tempo real
+    // Transcrições ao vivo
     let userDraftText = '';
     let assistantDraftText = '';
     let userDraftBubble = null;
@@ -237,14 +353,14 @@
         </a>
 
         <div class="guide-live-starters" aria-label="Sugestões para começar">
-          <button type="button" class="guide-chip" data-live-prompt="Oi! Me explica rapidinho como funciona este portal do Curso DEV SENAI.">Apresentar o portal</button>
-          <button type="button" class="guide-chip" data-live-prompt="Como faço para rodar a API Node com SQLite aqui no projeto?">Rodar API SQLite</button>
+          <button type="button" class="guide-chip" data-live-prompt="Oi! Me apresenta rapidinho o que tem neste portal do Curso DEV SENAI.">Apresentar o portal</button>
+          <button type="button" class="guide-chip" data-live-prompt="Me explica como funciona a lista de tarefas em Vue e a API do curso.">Task List &amp; API</button>
           <button type="button" class="guide-chip" data-live-prompt="Quais aulas existem no módulo de Banco de Dados?">Aulas de SQL</button>
-          <button type="button" class="guide-chip" data-live-prompt="Como funciona para publicar um trabalho da turma?">Publicar trabalho</button>
+          <button type="button" class="guide-chip" data-live-prompt="Como faço para publicar um trabalho da turma?">Publicar trabalho</button>
         </div>
       </section>
 
-      <!-- Gaveta Expansível de Transcrição & Texto (Integrada ao Live) -->
+      <!-- Gaveta Expansível de Transcrição & Teclado -->
       <section id="guideTranscriptPanel" class="guide-transcript-panel" aria-label="Transcrição da conversa">
         <div id="guideMessages" class="guide-messages" aria-live="polite"></div>
         <form id="guideForm" class="guide-form" autocomplete="off">
@@ -310,7 +426,7 @@
     voiceSelectEl.value = selectedVoice;
 
     // =========================================================================
-    // Orb Líquido Acústico em Canvas (Reativo ao Microfone + Áudio 24kHz Live)
+    // Orb Líquido Acústico em Canvas (60fps reativo a Microfone & Voz 24kHz)
     // =========================================================================
     const orbCtx = orbCanvasEl.getContext('2d');
     const micBins = new Uint8Array(64);
@@ -352,7 +468,7 @@
       smoothEnergy += (targetEnergy - smoothEnergy) * 0.16;
       phase += reducedMotion ? 0.008 : 0.028 + smoothEnergy * 0.058;
 
-      let r = 217, g = 119, b = 6; // Âmbar editorial (fala / idle)
+      let r = 217, g = 119, b = 6;
       if (state.locked || liveState === 'error') {
         r = 244; g = 63; b = 94;
       } else if (isSpeaking) {
@@ -362,10 +478,9 @@
       } else if (liveActive && liveMuted) {
         r = 148; g = 163; b = 184;
       } else if (liveActive) {
-        r = 16; g = 185; b = 129; // Esmeralda ouvindo você
+        r = 16; g = 185; b = 129;
       }
 
-      // Halo radial atmosférico
       const haloR = 92 + smoothEnergy * 78;
       const halo = orbCtx.createRadialGradient(cx, cy, 24, cx, cy, haloR);
       halo.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${0.28 + smoothEnergy * 0.3})`);
@@ -376,7 +491,6 @@
       orbCtx.arc(cx, cy, haloR, 0, Math.PI * 2);
       orbCtx.fill();
 
-      // 3 anéis orgânicos fluidos
       const rings = [
         { base: 74, amp: 10 + smoothEnergy * 30, speed: 1.0, alpha: 0.62, lw: 3.0 },
         { base: 92, amp: 8 + smoothEnergy * 24, speed: -0.78, alpha: 0.36, lw: 2.1 },
@@ -403,7 +517,6 @@
         orbCtx.stroke();
       }
 
-      // Barras sutis de espectro ao redor do núcleo quando falando/ouvindo
       if (liveActive && !liveMuted && !reducedMotion) {
         const activeBins = isSpeaking ? outBins : micBins;
         const barCount = 24;
@@ -422,7 +535,6 @@
         }
       }
 
-      // Núcleo translúcido
       const core = orbCtx.createRadialGradient(cx - 14, cy - 14, 6, cx, cy, 62);
       core.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${0.34 + smoothEnergy * 0.24})`);
       core.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0.1)`);
@@ -541,6 +653,8 @@
     }
 
     function showLiveShortcut(link) {
+      if (!link || link.href === lastShortcutHref) return;
+      lastShortcutHref = link.href;
       shortcutLabelEl.textContent = link.label;
       shortcutEl.href = resolveLinkHref(link.href || '#', prefix);
       shortcutEl.onclick = link.action === 'open-students'
@@ -651,7 +765,7 @@
     // =========================================================================
     async function startMicrophoneCapture(onPcmChunk) {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('Seu navegador bloqueou acesso ao microfone (abra via http://localhost ou autorize o microfone).');
+        throw new Error('Navegador sem acesso ao microfone (HTTPS ou localhost necessário).');
       }
 
       micStream = await navigator.mediaDevices.getUserMedia({
@@ -766,7 +880,50 @@
     }
 
     // =========================================================================
-    // Conexão Pura Google Gemini Live (WebSocket Full-Duplex)
+    // Emissão de Token Efêmero via Vercel Function (/api/live-token)
+    // =========================================================================
+    async function requestEphemeralLiveToken(voice) {
+      const endpoints = getTokenEndpoints();
+      let lastError = 'Endpoint /api/live-token indisponível.';
+
+      for (const url of endpoints) {
+        const controller = new AbortController();
+        const t = setTimeout(() => controller.abort(), 9000);
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ voice }),
+            signal: controller.signal
+          });
+          clearTimeout(t);
+
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data && data.wsUrl) {
+            return data;
+          }
+          if (res.status === 503) {
+            throw new Error(
+              'Configure a variável <code>GEMINI_API_KEY</code> em <strong>Vercel → Settings → Environment Variables</strong> e faça um novo deploy.'
+            );
+          }
+          lastError = data.error || `Erro HTTP ${res.status} em ${url}`;
+        } catch (err) {
+          clearTimeout(t);
+          if (err.message && err.message.includes('GEMINI_API_KEY')) throw err;
+          lastError = err.message || lastError;
+        }
+      }
+
+      throw new Error(
+        isLocalHostEnv()
+          ? 'Para testar o Gemini Live localmente, execute <code>vercel dev</code> na raiz do projeto (ou publique direto na Vercel com <code>GEMINI_API_KEY</code> configurada).'
+          : lastError
+      );
+    }
+
+    // =========================================================================
+    // Conexão Direta Browser → Google Gemini Live Edge (Token Efêmero)
     // =========================================================================
     async function startLiveSession({ initialPrompt = null } = {}) {
       if (state.locked) {
@@ -789,66 +946,87 @@
       ensurePlaybackContext();
       liveConnecting = true;
       liveMuted = false;
+      lastShortcutHref = '';
       shortcutEl.classList.remove('is-visible');
       setLiveVisualState(
         'connecting',
         'Conectando ao Google Gemini Live...',
-        `Estabelecendo canal de voz em tempo real (voz <strong>${escapeHtml(selectedVoice)}</strong>)...`
+        `Autenticando sessão segura (voz <strong>${escapeHtml(selectedVoice)}</strong>)...`
       );
 
-      // 1. Libera o microfone (dentro do clique do usuário)
+      // 1. Solicita microfone + token efêmero na Vercel em paralelo
+      let tokenInfo;
       try {
-        await startMicrophoneCapture((pcmBytes) => {
-          if (liveWs && liveWs.readyState === WebSocket.OPEN && liveActive && !liveMuted) {
-            liveWs.send(JSON.stringify({ type: 'audio', data: uint8ToBase64(pcmBytes) }));
-          }
-        });
+        const [, fetchedToken] = await Promise.all([
+          startMicrophoneCapture((pcmBytes) => {
+            if (liveWs && liveWs.readyState === WebSocket.OPEN && liveActive && !liveMuted) {
+              liveWs.send(
+                JSON.stringify({
+                  realtimeInput: {
+                    audio: {
+                      mimeType: 'audio/pcm;rate=16000',
+                      data: uint8ToBase64(pcmBytes)
+                    }
+                  }
+                })
+              );
+            }
+          }),
+          requestEphemeralLiveToken(selectedVoice)
+        ]);
+        tokenInfo = fetchedToken;
       } catch (err) {
         liveConnecting = false;
-        stopLiveSession(
-          `Não foi possível ativar o microfone. Libere a permissão no navegador (em <code>http://localhost</code>) para conversar ao vivo.`,
-          true
-        );
+        stopLiveSession(err.message || 'Não foi possível iniciar o Google Gemini Live.', true);
         return;
       }
 
-      // 2. Abre WebSocket direto para o relay seguro Google Gemini Live
-      const wsUrl = `${API_WS_BASE}?sessionId=${encodeURIComponent(state.sessionId)}&violations=${state.violations}&voice=${encodeURIComponent(selectedVoice)}`;
-      let connectedOnce = false;
-      const connectTimeout = setTimeout(() => {
-        if (!connectedOnce && liveConnecting) {
-          stopLiveSession(
-            'Não consegui conectar ao servidor Gemini Live na porta <code>3000</code>. Rode <code>node server.js</code> em <code>projects/node-api</code> e clique em <strong>Conversar ao Vivo</strong>.',
-            true
-          );
+      // 2. Conecta DIRETAMENTE ao WebSocket do Google Gemini Live (BidiGenerateContentConstrained)
+      let setupDone = false;
+      const wsTimeout = setTimeout(() => {
+        if (!setupDone && liveConnecting) {
+          stopLiveSession('Tempo limite ao conectar com o Google Gemini Live. Tente novamente.', true);
         }
-      }, 9000);
+      }, 10000);
 
       try {
-        liveWs = new WebSocket(wsUrl);
+        liveWs = new WebSocket(tokenInfo.wsUrl);
       } catch {
-        clearTimeout(connectTimeout);
-        stopLiveSession(
-          'Servidor Gemini Live indisponível. Inicie <code>node server.js</code> em <code>projects/node-api</code>.',
-          true
-        );
+        clearTimeout(wsTimeout);
+        stopLiveSession('Não foi possível abrir a conexão WebSocket com o Google Gemini Live.', true);
         return;
       }
 
-      liveWs.onmessage = (ev) => {
-        let msg;
-        try { msg = JSON.parse(ev.data); } catch { return; }
+      liveWs.onopen = () => {
+        // As configurações completas (systemInstruction, voz, VAD) já estão travadas no token efêmero
+        liveWs.send(
+          JSON.stringify({
+            setup: {
+              model: `models/${tokenInfo.model || 'gemini-3.1-flash-live-preview'}`
+            }
+          })
+        );
+      };
 
-        if (msg.type === 'ready') {
-          clearTimeout(connectTimeout);
-          connectedOnce = true;
+      liveWs.onmessage = async (ev) => {
+        let msg;
+        try {
+          const raw = typeof ev.data === 'string' ? ev.data : await ev.data.text();
+          msg = JSON.parse(raw);
+        } catch {
+          return;
+        }
+
+        if (msg.setupComplete) {
+          clearTimeout(wsTimeout);
+          setupDone = true;
           liveConnecting = false;
           liveActive = true;
-          engineTagEl.textContent = `${msg.model || 'gemini-live'} • ${msg.voice || selectedVoice}`;
+          engineTagEl.textContent = `${tokenInfo.model || 'gemini-live'} • ${tokenInfo.voice || selectedVoice}`;
           setLiveVisualState(
             'listening',
             'Ao vivo — pode falar naturalmente',
-            'Conectado ao <strong>Google Gemini Live</strong>! Pode falar como numa conversa normal.'
+            'Conectado direto ao <strong>Google Gemini Live</strong>! Fale normalmente — pode interromper quando quiser.'
           );
 
           if (pendingPromptOnConnect) {
@@ -856,39 +1034,56 @@
             pendingPromptOnConnect = null;
             sendTextIntoLive(firstMsg);
           } else {
-            liveWs.send(JSON.stringify({ type: 'greet', pageTitle: document.title || 'Portal Curso DEV SENAI' }));
+            const pageTitle = (document.title || 'Portal Curso DEV SENAI').slice(0, 80);
+            liveWs.send(
+              JSON.stringify({
+                clientContent: {
+                  turns: [
+                    {
+                      role: 'user',
+                      parts: [
+                        {
+                          text: `O aluno acabou de abrir a conversa ao vivo na página "${pageTitle}". Dê um oi bem caloroso, natural e curto em 1 frase convidando-o a conversar sobre o projeto Curso DEV SENAI.`
+                        }
+                      ]
+                    }
+                  ],
+                  turnComplete: true
+                }
+              })
+            );
           }
           return;
         }
 
-        if (msg.type === 'voiceActivity') {
-          if (msg.state === 'ACTIVITY_START' && !liveMuted) {
+        // Eventos VAD nativos do Google Gemini Live
+        if (msg.voiceActivity && msg.voiceActivity.type) {
+          if (msg.voiceActivity.type === 'ACTIVITY_START' && !liveMuted) {
             setLiveVisualState('user-speaking', 'Ouvindo você...');
-          } else if (msg.state === 'ACTIVITY_END' && activeSources.size === 0 && !liveMuted) {
+          } else if (msg.voiceActivity.type === 'ACTIVITY_END' && activeSources.size === 0 && !liveMuted) {
             setLiveVisualState('thinking', 'Pensando...');
           }
-          return;
         }
 
-        if (msg.type === 'audio' && msg.data) {
-          enqueueLivePcmAudio(msg.data, msg.sampleRate || 24000);
-          return;
-        }
+        const sc = msg.serverContent;
+        if (!sc) return;
 
-        if (msg.type === 'interrupted') {
+        // Interrupção natural (barge-in)
+        if (sc.interrupted) {
           flushPlaybackQueue();
           finalizeDrafts();
           setLiveVisualState('user-speaking', 'Ouvindo você...', '<em>Você interrompeu — pode falar!</em>');
           return;
         }
 
-        if (msg.type === 'inputTranscript' && msg.text) {
+        // Transcrição ao vivo da fala do aluno
+        if (sc.inputTranscription && sc.inputTranscription.text) {
           if (assistantDraftBubble) {
             assistantDraftBubble.classList.remove('guide-msg--live-draft');
             assistantDraftBubble = null;
             assistantDraftText = '';
           }
-          userDraftText += msg.text;
+          userDraftText += sc.inputTranscription.text;
           const clean = userDraftText.trim();
           if (clean) {
             captionEl.innerHTML = `<strong>Você:</strong> ${escapeHtml(clean)}`;
@@ -898,17 +1093,23 @@
               userDraftBubble.textContent = clean;
               messagesEl.scrollTop = messagesEl.scrollHeight;
             }
+
+            const violation = checkStrictGuardrail(clean);
+            if (violation) {
+              registerViolation(violation.reason);
+              if (state.locked) return;
+            }
           }
-          return;
         }
 
-        if (msg.type === 'outputTranscript' && msg.text) {
+        // Transcrição ao vivo da fala da Guia
+        if (sc.outputTranscription && sc.outputTranscription.text) {
           if (userDraftBubble) {
             userDraftBubble.classList.remove('guide-msg--live-draft');
             userDraftBubble = null;
             userDraftText = '';
           }
-          assistantDraftText += msg.text;
+          assistantDraftText += sc.outputTranscription.text;
           const clean = assistantDraftText.trim();
           if (clean) {
             captionEl.innerHTML = `<strong>Guia:</strong> ${escapeHtml(clean)}`;
@@ -918,11 +1119,28 @@
               assistantDraftBubble.textContent = clean;
               messagesEl.scrollTop = messagesEl.scrollHeight;
             }
+
+            if (isAssistantScopeRefusal(clean)) {
+              registerViolation('Assunto fora do escopo exclusivo do projeto Curso DEV SENAI.');
+              if (state.locked) return;
+            }
           }
-          return;
         }
 
-        if (msg.type === 'turnComplete') {
+        // Áudio PCM 24kHz nativo do Google Gemini Live
+        if (sc.modelTurn && Array.isArray(sc.modelTurn.parts)) {
+          for (const part of sc.modelTurn.parts) {
+            if (part.inlineData && part.inlineData.data) {
+              const mime = part.inlineData.mimeType || 'audio/pcm;rate=24000';
+              const rateMatch = /rate=(\d+)/.exec(mime);
+              enqueueLivePcmAudio(part.inlineData.data, rateMatch ? Number(rateMatch[1]) : 24000);
+            }
+          }
+        }
+
+        if (sc.turnComplete) {
+          const link = detectProjectShortcut(`${userDraftText} ${assistantDraftText}`);
+          if (link) showLiveShortcut(link);
           finalizeDrafts();
           if (activeSources.size === 0 && liveActive) {
             setLiveVisualState(
@@ -930,42 +1148,20 @@
               liveMuted ? 'Microfone silenciado' : 'Pode falar — ouvindo em tempo real'
             );
           }
-          return;
-        }
-
-        if (msg.type === 'link') {
-          showLiveShortcut(msg);
-          return;
-        }
-
-        if (msg.type === 'guardrail') {
-          handleServerGuardrail(msg);
-          return;
-        }
-
-        if (msg.type === 'error') {
-          clearTimeout(connectTimeout);
-          stopLiveSession(escapeHtml(msg.message || 'Erro na conexão com o Google Gemini Live.'), true);
         }
       };
 
       liveWs.onerror = () => {
-        clearTimeout(connectTimeout);
-        if (!connectedOnce) {
-          stopLiveSession(
-            'Servidor Gemini Live offline na porta <code>3000</code>. Rode <code>node server.js</code> em <code>projects/node-api</code> e tente novamente.',
-            true
-          );
+        clearTimeout(wsTimeout);
+        if (!setupDone) {
+          stopLiveSession('Não foi possível conectar ao Google Gemini Live. Verifique sua conexão e tente novamente.', true);
         }
       };
 
       liveWs.onclose = () => {
-        clearTimeout(connectTimeout);
-        if (!connectedOnce && liveConnecting) {
-          stopLiveSession(
-            'Servidor Gemini Live offline na porta <code>3000</code>. Rode <code>node server.js</code> em <code>projects/node-api</code> e tente novamente.',
-            true
-          );
+        clearTimeout(wsTimeout);
+        if (!setupDone && liveConnecting) {
+          stopLiveSession('Conexão encerrada antes da inicialização do Gemini Live. Tente novamente.', true);
         } else if (liveActive) {
           stopLiveSession('Conversa ao vivo encerrada. Clique em <strong>Conversar ao Vivo</strong> para continuar quando quiser.');
         }
@@ -980,6 +1176,34 @@
         return;
       }
 
+      const violation = checkStrictGuardrail(trimmed);
+      if (violation) {
+        appendTranscriptMessage('user', escapeHtml(trimmed));
+        registerViolation(violation.reason);
+        if (state.locked) return;
+        if (liveActive && liveWs && liveWs.readyState === WebSocket.OPEN) {
+          flushPlaybackQueue();
+          liveWs.send(
+            JSON.stringify({
+              clientContent: {
+                turns: [
+                  {
+                    role: 'user',
+                    parts: [
+                      {
+                        text: `[AVISO: O aluno enviou tema fora do projeto (${violation.reason}). Aviso 1 de 2 registrado. Lembre-o em uma frase natural e simpática que você só conversa sobre o Curso DEV SENAI e que insistir bloqueia a sessão.]`
+                      }
+                    ]
+                  }
+                ],
+                turnComplete: true
+              }
+            })
+          );
+        }
+        return;
+      }
+
       if (!liveActive || !liveWs || liveWs.readyState !== WebSocket.OPEN) {
         startLiveSession({ initialPrompt: trimmed });
         return;
@@ -989,11 +1213,18 @@
       captionEl.innerHTML = `<strong>Você:</strong> ${escapeHtml(trimmed)}`;
       flushPlaybackQueue();
       setLiveVisualState('thinking', 'Pensando...');
-      liveWs.send(JSON.stringify({ type: 'text', text: trimmed }));
+      liveWs.send(
+        JSON.stringify({
+          clientContent: {
+            turns: [{ role: 'user', parts: [{ text: trimmed }] }],
+            turnComplete: true
+          }
+        })
+      );
     }
 
     // =========================================================================
-    // Bloqueio Anti-Burla em 2 Estágios (Guardrail Rigoroso do Projeto)
+    // Bloqueio Anti-Burla em 2 Estágios (Guardrail Rigoroso)
     // =========================================================================
     let lockTimerInterval = null;
 
@@ -1066,13 +1297,6 @@
       releaseBtn.addEventListener('click', () => {
         if (Date.now() < state.lockUntil || !checkEl.checked) return;
         clearInterval(lockTimerInterval);
-        const oldSessionId = state.sessionId;
-        fetch(`${API_HTTP_BASE}/reset`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: oldSessionId })
-        }).catch(() => {});
-
         state.sessionId = `sess_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
         state.violations = 0;
         state.locked = false;
@@ -1094,21 +1318,22 @@
       });
     }
 
-    function handleServerGuardrail(msg) {
-      state.violations = Math.max(state.violations + 1, Number(msg.violations || 1));
-      if (msg.locked || state.violations >= 2) {
+    function registerViolation(reason) {
+      const now = Date.now();
+      if (now - lastGuardrailTs < 2400) return;
+      lastGuardrailTs = now;
+
+      state.violations += 1;
+      if (state.violations >= 2) {
         state.locked = true;
-        state.lockReason = msg.reason || 'Reincidência fora do escopo do projeto.';
+        state.lockReason = reason || 'Reincidência fora do escopo do projeto.';
         state.lockUntil = Date.now() + COOLDOWN_SECONDS * 1000;
         saveSessionState(state);
         callBtnEl.disabled = true;
         inputEl.disabled = true;
         sendBtnEl.disabled = true;
         updateScopeIndicator();
-        appendTranscriptMessage(
-          'blocked',
-          `<strong>Sessão bloqueada (2/2):</strong> ${escapeHtml(state.lockReason)}`
-        );
+        appendTranscriptMessage('blocked', `<strong>Sessão bloqueada (2/2):</strong> ${escapeHtml(state.lockReason)}`);
         stopLiveSession('Sessão bloqueada (2/2) por política de escopo fechado.', true);
         setTimeout(showSecurityLockOverlay, 400);
       } else {
@@ -1116,26 +1341,31 @@
         updateScopeIndicator();
         appendTranscriptMessage(
           'warn',
-          `<strong>Aviso de escopo (1/2):</strong> ${escapeHtml(msg.reason || 'Assunto fora do projeto.')}<br>Uma nova tentativa fora do escopo <strong>bloqueará o avanço</strong>.`
+          `<strong>Aviso de escopo (1/2):</strong> ${escapeHtml(reason || 'Assunto fora do projeto.')}<br>Uma nova tentativa fora do escopo <strong>bloqueará o avanço</strong>.`
         );
       }
     }
 
-    async function checkBackendStatus() {
-      try {
+    async function checkLiveStatus() {
+      const endpoints = getTokenEndpoints();
+      for (const url of endpoints) {
         const controller = new AbortController();
-        const t = setTimeout(() => controller.abort(), 2400);
-        const res = await fetch(`${API_HTTP_BASE}/status`, { signal: controller.signal });
-        clearTimeout(t);
-        if (res.ok) {
-          const data = await res.json();
-          engineTagEl.textContent = data.liveReady
-            ? `${data.liveModel || 'gemini-live'} • ${selectedVoice}`
-            : 'Chave Gemini ausente';
-          return;
+        const t = setTimeout(() => controller.abort(), 2500);
+        try {
+          const res = await fetch(url, { signal: controller.signal });
+          clearTimeout(t);
+          if (res.ok) {
+            const data = await res.json();
+            engineTagEl.textContent = data.liveReady
+              ? `Gemini Live • ${selectedVoice}`
+              : 'Configure GEMINI_API_KEY';
+            return;
+          }
+        } catch {
+          clearTimeout(t);
         }
-      } catch {}
-      engineTagEl.textContent = 'Servidor porta 3000 offline';
+      }
+      engineTagEl.textContent = isLocalHostEnv() ? 'Use vercel dev / Vercel' : 'Gemini Live';
     }
 
     function openDrawer() {
@@ -1154,7 +1384,7 @@
     }
 
     updateScopeIndicator();
-    checkBackendStatus();
+    checkLiveStatus();
 
     // =========================================================================
     // Eventos da Interface
@@ -1179,7 +1409,6 @@
       if (!liveActive && !liveConnecting) {
         startLiveSession();
       } else if (activeSources.size > 0) {
-        // Toque no Orb interrompe imediatamente a fala da Guia
         flushPlaybackQueue();
       }
     });
@@ -1190,7 +1419,7 @@
       muteBtnEl.classList.toggle('is-muted', liveMuted);
       muteIconEl.setAttribute('name', liveMuted ? 'volume-slash' : 'microphone');
       if (liveMuted && liveWs && liveWs.readyState === WebSocket.OPEN) {
-        liveWs.send(JSON.stringify({ type: 'audioStreamEnd' }));
+        liveWs.send(JSON.stringify({ realtimeInput: { audioStreamEnd: true } }));
       }
       setLiveVisualState(
         liveMuted ? 'muted' : activeSources.size > 0 ? 'speaking' : 'listening',
@@ -1201,16 +1430,13 @@
     transcriptToggleBtnEl.addEventListener('click', () => {
       const open = drawer.classList.toggle('has-transcript-open');
       transcriptToggleBtnEl.classList.toggle('is-active', open);
-      if (open) {
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-      }
+      if (open) messagesEl.scrollTop = messagesEl.scrollHeight;
     });
 
     voiceSelectEl.addEventListener('change', () => {
       selectedVoice = voiceSelectEl.value;
       try { localStorage.setItem(VOICE_PREF_KEY, selectedVoice); } catch {}
-      checkBackendStatus();
-      // Se já estiver em chamada ao vivo, reconecta suavemente na nova voz escolhida!
+      checkLiveStatus();
       if (liveActive) {
         stopLiveSession(`Trocando para a voz <strong>${escapeHtml(selectedVoice)}</strong>...`);
         setTimeout(() => startLiveSession(), 250);

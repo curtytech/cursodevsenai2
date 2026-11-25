@@ -189,24 +189,24 @@
                     </div>
                 </div>
 
-                <!-- Coluna Direita: Painel Interativo de Métricas + Comandos Copy (5 colunas) -->
+                <!-- Coluna Direita: Painel Interativo de Métricas + Acesso Rápido (5 colunas) -->
                 <div class="lg:col-span-5" data-reveal data-reveal-delay="100">
                     <div class="ux-surface rounded-3xl p-6 sm:p-7" data-spotlight-card="flat">
                         <div class="flex items-center justify-between border-b pb-4 portal-border">
                             <div class="flex items-center gap-2.5">
                                 <span class="flex h-8 w-8 items-center justify-center rounded-xl"
                                     style="background:var(--ds-emerald-soft);color:var(--ds-emerald);">
-                                    <isax-anim name="terminal" size="17"></isax-anim>
+                                    <isax-anim name="microphone" size="17"></isax-anim>
                                 </span>
                                 <div>
-                                    <p class="ds-display text-sm font-bold portal-ink">Atalho do Ambiente Local</p>
-                                    <p class="text-[11px] portal-muted">Inicie a API SQLite + Voz Neural Gemini</p>
+                                    <p class="ds-display text-sm font-bold portal-ink">Guia do Curso • Ao Vivo</p>
+                                    <p class="text-[11px] portal-muted">Conversa natural por voz com Google Gemini Live</p>
                                 </div>
                             </div>
                             <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold"
                                 style="background:var(--ds-emerald-soft);border-color:rgba(16,185,129,0.3);color:var(--ds-emerald);">
                                 <isax-anim name="volume-high" size="13" trigger="ambient"></isax-anim>
-                                <span>Kore pt-BR</span>
+                                <span>Gemini Live</span>
                             </span>
                         </div>
 
@@ -221,31 +221,42 @@
                                 <span class="text-[11px] font-medium portal-muted">Módulos</span>
                             </div>
                             <div class="portal-subtle rounded-2xl border p-3.5 text-center portal-border">
-                                <span data-count-to="45" data-count-suffix="+" class="ds-display block text-2xl font-extrabold" style="color:var(--ds-emerald);">0</span>
+                                <span data-count-to="46" data-count-suffix="+" class="ds-display block text-2xl font-extrabold" style="color:var(--ds-emerald);">0</span>
                                 <span class="text-[11px] font-medium portal-muted">Ícones Anim.</span>
                             </div>
                         </div>
 
-                        <!-- Comandos rápidos com Copy Button animado -->
-                        <div class="mt-5 space-y-2.5">
-                            <div class="portal-subtle flex items-center justify-between gap-2 rounded-xl border px-3.5 py-2.5 portal-border">
-                                <code class="ds-mono truncate text-xs portal-secondary">cd projects/node-api &amp;&amp; npm run migrate</code>
-                                <button type="button" data-copy-text="cd projects/node-api && npm run migrate"
-                                    class="ux-btn ux-btn-ghost shrink-0 rounded-lg px-2.5 py-1.5 text-[11px]"
-                                    aria-label="Copiar comando de migration">
-                                    <isax-anim name="copy" size="14"></isax-anim>
-                                    <span data-copy-label>Copiar</span>
-                                </button>
-                            </div>
-                            <div class="portal-subtle flex items-center justify-between gap-2 rounded-xl border px-3.5 py-2.5 portal-border">
-                                <code class="ds-mono truncate text-xs portal-secondary">cd projects/node-api &amp;&amp; npm run dev</code>
-                                <button type="button" data-copy-text="cd projects/node-api && npm run dev"
-                                    class="ux-btn ux-btn-ghost shrink-0 rounded-lg px-2.5 py-1.5 text-[11px]"
-                                    aria-label="Copiar comando dev">
-                                    <isax-anim name="copy" size="14"></isax-anim>
-                                    <span data-copy-label>Copiar</span>
-                                </button>
-                            </div>
+                        <!-- Atalhos rápidos interativos do portal -->
+                        <div class="mt-5 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                            <button type="button" data-open-voice-guide data-magnetic
+                                class="portal-subtle flex items-center justify-between gap-2.5 rounded-xl border px-3.5 py-3 text-left transition hover:border-amber-500/40 portal-border">
+                                <span class="flex items-center gap-2.5 min-w-0">
+                                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                                        style="background:var(--ds-accent-soft);color:var(--ds-accent);">
+                                        <isax-anim name="microphone" size="15"></isax-anim>
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="block truncate text-xs font-bold portal-ink">Conversar ao Vivo</span>
+                                        <span class="block truncate text-[11px] portal-muted">Voz natural pt-BR</span>
+                                    </span>
+                                </span>
+                                <isax-anim name="arrow-right" size="14"></isax-anim>
+                            </button>
+
+                            <a href="cursos/index.html"
+                                class="portal-subtle flex items-center justify-between gap-2.5 rounded-xl border px-3.5 py-3 text-left transition hover:border-amber-500/40 portal-border">
+                                <span class="flex items-center gap-2.5 min-w-0">
+                                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                                        style="background:var(--ds-indigo-soft);color:var(--ds-indigo);">
+                                        <isax-anim name="video-play" size="15"></isax-anim>
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="block truncate text-xs font-bold portal-ink">Cursos &amp; Aulas</span>
+                                        <span class="block truncate text-[11px] portal-muted">Playlists e SQL</span>
+                                    </span>
+                                </span>
+                                <isax-anim name="arrow-right" size="14"></isax-anim>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -454,9 +465,9 @@
                         </span>
                         <span class="ds-mono text-[11px] portal-muted">projects/node-api</span>
                     </div>
-                    <h3 class="ds-display text-xl font-bold portal-ink">Node.js API + SQLite + Voz</h3>
+                    <h3 class="ds-display text-xl font-bold portal-ink">Node.js API + SQLite</h3>
                     <p class="mt-2 text-sm leading-relaxed portal-secondary">
-                        Backend REST em camadas com endpoints <code class="ds-mono text-xs">/api/users</code>, <code class="ds-mono text-xs">/api/tasks</code> e <code class="ds-mono text-xs">/api/assistant/tts</code> (Gemini Kore).
+                        Backend REST em camadas do curso com endpoints <code class="ds-mono text-xs">/api/users</code> e <code class="ds-mono text-xs">/api/tasks</code> persistidos em SQLite, além de integração nativa com Gemini Live na Vercel.
                     </p>
                     <div class="mt-auto pt-6">
                         <button type="button" data-open-voice-guide class="ux-btn ux-btn-ghost w-full rounded-xl px-4 py-2.5 text-xs">

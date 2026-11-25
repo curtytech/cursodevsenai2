@@ -595,6 +595,89 @@ async function transcribeAudio({ audioBase64, mimeType = 'audio/webm' }) {
   throw err;
 }
 
+async function createLiveEphemeralToken({ voice } = {}) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    const err = new Error('GEMINI_API_KEY não configurada no servidor.');
+    err.statusCode = 503;
+    throw err;
+  }
+
+  const allowed = new Set(['Kore', 'Aoede', 'Puck', 'Zephyr', 'Fenrir', 'Charon']);
+  const reqVoice = String(voice || process.env.GEMINI_TTS_VOICE || 'Kore').trim();
+  const selectedVoice = allowed.has(reqVoice) ? reqVoice : 'Kore';
+  const candidateModels = Array.from(
+    new Set([
+      process.env.GEMINI_LIVE_MODEL || 'gemini-3.1-flash-live-preview',
+      'gemini-2.5-flash-native-audio-latest'
+    ])
+  );
+
+  const now = Date.now();
+  const expireTime = new Date(now + 30 * 60 * 1000).toISOString();
+  const newSessionExpireTime = new Date(now + 2 * 60 * 1000).toISOString();
+
+  let lastError = 'Falha ao gerar token efêmero do Google Gemini Live.';
+  for (const model of candidateModels) {
+    const res = await fetch('https://generativelanguage.googleapis.com/v1alpha/auth_tokens', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey
+      },
+      body: JSON.stringify({
+        uses: 1,
+        expireTime,
+        newSessionExpireTime,
+        bidiGenerateContentSetup: {
+          model: `models/${model}`,
+          generationConfig: {
+            responseModalities: ['AUDIO'],
+            speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: { voiceName: selectedVoice }
+              }
+            }
+          },
+          realtimeInputConfig: {
+            automaticActivityDetection: {
+              disabled: false,
+              startOfSpeechSensitivity: 'START_SENSITIVITY_HIGH',
+              endOfSpeechSensitivity: 'END_SENSITIVITY_HIGH',
+              prefixPaddingMs: 120,
+              silenceDurationMs: 550
+            },
+            activityHandling: 'START_OF_ACTIVITY_INTERRUPTS'
+          },
+          systemInstruction: {
+            parts: [{ text: PROJECT_SYSTEM_CONTEXT }]
+          },
+          inputAudioTranscription: {},
+          outputAudioTranscription: {}
+        }
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.name) {
+        return {
+          token: data.name,
+          wsUrl: `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained?access_token=${encodeURIComponent(data.name)}`,
+          model,
+          voice: selectedVoice,
+          expireTime
+        };
+      }
+    } else {
+      lastError = `Erro ${res.status} ao gerar token (${model})`;
+    }
+  }
+
+  const err = new Error(lastError);
+  err.statusCode = 502;
+  throw err;
+}
+
 function getStatus() {
   const configured = Boolean(process.env.GEMINI_API_KEY);
   return {
@@ -625,6 +708,7 @@ function resetSession(sessionId) {
 module.exports = {
   PROJECT_SYSTEM_CONTEXT,
   askAssistant,
+  createLiveEphemeralToken,
   synthesizeSpeech,
   transcribeAudio,
   getStatus,
