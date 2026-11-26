@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QA Lab 02 // Validação de Campos & Máscaras</title>
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons via CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            cyber: {
+              bg: '#050e0a',
+              card: '#0b1d15',
+              border: '#163a2a',
+              emerald: '#10b981',
+              emeraldLight: '#34d399',
+              cyan: '#06b6d4',
+              lime: '#a3e635',
+              text: '#f0fdf4',
+              muted: '#94a3b8'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #050e0a;
+      color: #f0fdf4;
+      background-image:
+        radial-gradient(circle at 12% 18%, rgba(16, 185, 129, 0.09) 0%, transparent 45%),
+        radial-gradient(circle at 88% 82%, rgba(6, 182, 212, 0.08) 0%, transparent 45%),
+        linear-gradient(to right, rgba(13, 38, 27, 0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(13, 38, 27, 0.35) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #050e0a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #163a2a;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #10b981;
+    }
+
+    .glass-card {
+      background: rgba(11, 29, 21, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid #163a2a;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-black">
+
+  <!-- Toast Container (Substitui alert() / confirm()) -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-md pointer-events-none"></div>
+
+  <!-- Modal de Autenticação do Gabarito (Senha: qa2026) -->
+  <div id="password-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="glass-card rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl border border-cyan-500/40">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 text-cyan-400">
+          <i data-lucide="key-round" class="w-5 h-5"></i>
+          <h3 class="font-bold text-sm">Desbloquear Gabarito Técnico</h3>
+        </div>
+        <button onclick="closePasswordModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-300 leading-relaxed">
+        Insira a chave de acesso da disciplina para visualizar a Causa Raiz, Técnicas de Teste e Patches de Correção em JavaScript.
+      </p>
+      <div class="space-y-2">
+        <label class="block text-[11px] font-mono text-slate-400">Chave de Acesso (Padrão: <span class="text-emerald-400">qa2026</span>)</label>
+        <input type="password" id="gabarito-password-input" onkeydown="if(event.key==='Enter') verifyGabaritoPassword()" placeholder="Digite a senha..." class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-cyan-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none">
+        <p id="password-error-msg" class="hidden text-[11px] text-rose-400 font-mono">Senha incorreta. Tente "qa2026".</p>
+      </div>
+      <div class="flex gap-2 pt-1">
+        <button onclick="verifyGabaritoPassword()" class="flex-1 py-2 px-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs transition">
+          Confirmar Acesso
+        </button>
+        <button onclick="unlockGabaritoDirectly()" class="py-2 px-3 rounded-xl bg-[#050e0a] hover:bg-[#10291e] border border-[#163a2a] text-slate-300 text-xs transition" title="Atalho rápido para demonstração">
+          Revelar Direto
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cabeçalho Superior -->
+  <header class="sticky top-0 z-40 glass-card border-b border-[#163a2a] px-4 py-3 sm:px-6">
+    <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-mono font-bold text-base sm:text-lg tracking-tight text-emerald-50">
+              QA Lab 02 <span class="text-emerald-400">//</span> Validação de Campos & Máscaras
+            </h1>
+            <span class="hidden md:inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+              KYC-SANDBOX
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">Testes de Caixa-Preta • Particionamento de Equivalência, Valor Limite, Regex & Sanitização</p>
+        </div>
+      </div>
+
+      <!-- Barra de Progresso e Controles -->
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Progresso de Bugs -->
+        <div class="flex items-center gap-3 bg-[#050e0a] border border-[#163a2a] px-3.5 py-2 rounded-xl">
+          <div class="flex flex-col">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-mono">Defeitos Documentados</span>
+            <div class="flex items-center gap-2">
+              <span id="bugs-found-count" class="font-mono font-bold text-emerald-400 text-sm">0 / 7</span>
+              <div class="w-24 h-1.5 bg-[#163a2a] rounded-full overflow-hidden">
+                <div id="bugs-progress-bar" class="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 transition-all duration-500" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exportar Relatório -->
+        <div class="flex items-center gap-1.5">
+          <button onclick="exportReport('json')" title="Exportar relatório de bugs em JSON" class="px-3 py-2 rounded-xl bg-[#050e0a] hover:bg-emerald-950/50 border border-[#163a2a] hover:border-emerald-500/50 text-emerald-400 transition flex items-center gap-1.5 text-xs font-mono">
+            <i data-lucide="file-json" class="w-3.5 h-3.5"></i>
+            <span>JSON</span>
+          </button>
+          <button onclick="exportReport('txt')" title="Exportar relatório de bugs em TXT" class="px-3 py-2 rounded-xl bg-[#050e0a] hover:bg-cyan-950/50 border border-[#163a2a] hover:border-cyan-500/50 text-cyan-400 transition flex items-center gap-1.5 text-xs font-mono">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+            <span>TXT</span>
+          </button>
+        </div>
+
+        <!-- Resetar Formulário KYC -->
+        <button onclick="resetKycForm()" class="p-2.5 rounded-xl bg-[#050e0a] hover:bg-emerald-950/50 border border-[#163a2a] hover:border-emerald-500/50 text-slate-300 hover:text-emerald-400 transition flex items-center gap-1.5 text-xs font-mono">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Limpar KYC</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Workspace Principal: 2 Colunas -->
+  <main class="flex-1 max-w-[1600px] w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+    <!-- =====================================================================
+         COLUNA ESQUERDA (6 COLUNAS): SISTEMA ALVO - CADASTRO CORPORATIVO FINTECH (KYC)
+         Contém 7 defeitos reais de validação de campos, máscaras e tipagem.
+    ====================================================================== -->
+    <section class="lg:col-span-6 flex flex-col gap-5">
+      <div class="glass-card rounded-2xl overflow-hidden shadow-2xl">
+        <!-- Barra de Browser Simulada -->
+        <div class="bg-[#07140e] border-b border-[#163a2a] px-4 py-2.5 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-1.5">
+            <span class="w-3 h-3 rounded-full bg-rose-500/80"></span>
+            <span class="w-3 h-3 rounded-full bg-amber-500/80"></span>
+            <span class="w-3 h-3 rounded-full bg-emerald-500/80"></span>
+          </div>
+          <div class="flex-1 max-w-md bg-[#050e0a] border border-[#163a2a] rounded-lg px-3 py-1 flex items-center gap-2 text-xs font-mono text-slate-400">
+            <i data-lucide="lock" class="w-3 h-3 text-emerald-400"></i>
+            <span class="truncate">https://kyc-homolog.nexbank.com.br/onboarding</span>
+          </div>
+          <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">
+            SUT • FINTECH KYC
+          </span>
+        </div>
+
+        <!-- Cabeçalho do Sistema Alvo -->
+        <div class="p-5 sm:p-6 border-b border-[#163a2a] bg-gradient-to-r from-[#0b1d15] to-[#081711] flex items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-400 text-black">NEXBANK KYC</span>
+              <h2 class="text-lg font-bold text-white">Cadastro Corporativo & Compliance</h2>
+            </div>
+            <p class="text-xs text-slate-400 mt-1">Preencha os dados cadastrais do titular para abertura de conta PJ/Corporativa.</p>
+          </div>
+          <div class="text-right hidden sm:block">
+            <span class="text-[10px] font-mono text-slate-400 block">SUBMISSÕES NA SESSÃO</span>
+            <span id="submission-counter" class="font-mono font-bold text-lg text-emerald-400">0</span>
+          </div>
+        </div>
+
+        <!-- Formulário KYC (Contendo os 7 Bugs Intencionais) -->
+        <form id="kyc-form" onsubmit="handleKycSubmit(event)" novalidate class="p-5 sm:p-6 space-y-4">
+
+          <!-- Campo 1: Nome Completo (BUG 2: Aceita espaços em branco sem .trim()) -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label for="kyc-name" class="text-xs font-medium text-slate-200">Nome Completo do Titular *</label>
+              <span class="text-[10px] font-mono text-slate-500">RN02 • Mín. 3 caracteres válidos</span>
+            </div>
+            <input type="text" id="kyc-name" placeholder="Ex: Mariana Costa Oliveira" class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-xs text-white outline-none transition">
+            <p id="err-name" class="hidden text-[11px] text-rose-400 mt-1 font-mono"></p>
+          </div>
+
+          <!-- Grid: CPF + Data de Nascimento -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Campo 2: CPF (BUG 1: Aceita 111.111.111-11 e não valida dígitos verificadores) -->
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label for="kyc-cpf" class="text-xs font-medium text-slate-200">CPF *</label>
+                <span class="text-[10px] font-mono text-slate-500">RN01 • Dígitos Verificadores</span>
+              </div>
+              <input type="text" id="kyc-cpf" maxlength="14" oninput="maskCpf(this)" placeholder="000.000.000-00" class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white outline-none transition">
+              <p id="err-cpf" class="hidden text-[11px] text-rose-400 mt-1 font-mono"></p>
+            </div>
+
+            <!-- Campo 3: Data de Nascimento (BUG 3: Comparação incorreta de strings aceita data futura e < 18 anos) -->
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label for="kyc-dob" class="text-xs font-medium text-slate-200">Data de Nascimento *</label>
+                <span class="text-[10px] font-mono text-slate-500">RN03 • Idade ≥ 18 anos</span>
+              </div>
+              <input type="date" id="kyc-dob" class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white outline-none transition">
+              <p id="err-dob" class="hidden text-[11px] text-rose-400 mt-1 font-mono"></p>
+            </div>
+          </div>
+
+          <!-- Campo 4: E-mail Corporativo (BUG 4: Regex restritiva rejeita hífen e subdomínios como .com.br) -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label for="kyc-email" class="text-xs font-medium text-slate-200">E-mail Corporativo *</label>
+              <span class="text-[10px] font-mono text-slate-500">RN04 • RFC 5322 / Subdomínios</span>
+            </div>
+            <input type="text" id="kyc-email" placeholder="Ex: ana@ti-empresa.com.br" class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white outline-none transition">
+            <p id="err-email" class="hidden text-[11px] text-rose-400 mt-1 font-mono"></p>
+          </div>
+
+          <!-- Grid: Renda Mensal + CEP -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Campo 5: Renda Mensal (BUG 5: Aceita valores negativos/zero e gera NaN ao colar texto) -->
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label for="kyc-income" class="text-xs font-medium text-slate-200">Renda Mensal (R$) *</label>
+                <span class="text-[10px] font-mono text-slate-500">RN05 • Valor > R$ 0,00</span>
+              </div>
+              <input type="text" id="kyc-income" placeholder="Ex: 4500.00" class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white outline-none transition">
+              <p id="err-income" class="hidden text-[11px] text-rose-400 mt-1 font-mono"></p>
+            </div>
+
+            <!-- Campo 6: CEP (BUG 6: Não limpa hífen antes de checar .length === 8, rejeitando CEP mascarado!) -->
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label for="kyc-cep" class="text-xs font-medium text-slate-200">CEP Residencial *</label>
+                <span class="text-[10px] font-mono text-slate-500">RN06 • 8 dígitos (00000-000)</span>
+              </div>
+              <input type="text" id="kyc-cep" maxlength="9" oninput="maskCep(this)" placeholder="24020-000" class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white outline-none transition">
+              <p id="err-cep" class="hidden text-[11px] text-rose-400 mt-1 font-mono"></p>
+            </div>
+          </div>
+
+          <!-- Banner de Resumo de Resposta do Backend Simulado -->
+          <div id="kyc-response-banner" class="hidden p-3.5 rounded-xl border text-xs font-mono leading-relaxed"></div>
+
+          <!-- Botão Salvar Cadastro (BUG 7: Não desabilita durante processamento assíncrono -> duplo clique) -->
+          <div class="pt-2">
+            <button type="submit" id="btn-save-kyc" class="w-full py-3.5 px-5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-sm shadow-[0_0_20px_rgba(16,185,129,0.25)] transition flex items-center justify-center gap-2">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>Salvar Cadastro</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Card Rápido de Sugestões de Massa de Dados para Testar -->
+      <div class="glass-card rounded-2xl p-4 border border-[#163a2a]">
+        <h3 class="text-xs font-mono uppercase tracking-wider text-cyan-400 flex items-center gap-1.5 mb-2.5">
+          <i data-lucide="flask-conical" class="w-4 h-4"></i>
+          Sugestões de Massa de Dados para Explorar (Payloads de Teste)
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono">
+          <div class="p-2 rounded-lg bg-[#050e0a] border border-[#163a2a] text-slate-300">
+            <span class="text-emerald-400 block">CPF Inválido Repetido:</span>
+            111.111.111-11
+          </div>
+          <div class="p-2 rounded-lg bg-[#050e0a] border border-[#163a2a] text-slate-300">
+            <span class="text-emerald-400 block">E-mail Corporativo Válido:</span>
+            ana@ti-empresa.com.br
+          </div>
+          <div class="p-2 rounded-lg bg-[#050e0a] border border-[#163a2a] text-slate-300">
+            <span class="text-emerald-400 block">Data Futura / Menor Idade:</span>
+            2030-05-10 ou 2012-01-01
+          </div>
+          <div class="p-2 rounded-lg bg-[#050e0a] border border-[#163a2a] text-slate-300">
+            <span class="text-emerald-400 block">Renda Inválida / Tipagem:</span>
+            -500 ou "cinco mil"
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         COLUNA DIREITA (6 COLUNAS): ESTAÇÃO DE QA
+         Abas:
+         1. Requisitos / Regras de Negócio
+         2. Formulário de Bug Report
+         3. Console de Logs em Tempo Real
+         4. Modo Gabarito (Senha: qa2026)
+    ====================================================================== -->
+    <aside class="lg:col-span-6 glass-card rounded-2xl overflow-hidden shadow-2xl flex flex-col sticky top-20 max-h-[calc(100vh-6.5rem)]">
+      
+      <!-- Abas Superiores -->
+      <div class="grid grid-cols-4 bg-[#07140e] border-b border-[#163a2a] p-1.5 gap-1">
+        <button onclick="switchQaTab('specs')" id="tab-btn-specs" class="py-2 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 transition">
+          <i data-lucide="book-open-check" class="w-3.5 h-3.5"></i>
+          <span>Requisitos</span>
+        </button>
+
+        <button onclick="switchQaTab('report')" id="tab-btn-report" class="py-2 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200 border border-transparent transition">
+          <i data-lucide="bug" class="w-3.5 h-3.5"></i>
+          <span>Bug Report</span>
+        </button>
+
+        <button onclick="switchQaTab('console')" id="tab-btn-console" class="py-2 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200 border border-transparent transition">
+          <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
+          <span>Console</span>
+          <span id="console-badge" class="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-[#163a2a] text-slate-300">1</span>
+        </button>
+
+        <button onclick="handleGabaritoTabClick()" id="tab-btn-solutions" class="py-2 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200 border border-transparent transition">
+          <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
+          <span>Gabarito</span>
+          <span id="gabarito-lock-icon"><i data-lucide="lock" class="w-3 h-3 text-amber-400"></i></span>
+        </button>
+      </div>
+
+      <!-- Conteúdo das Abas -->
+      <div class="p-5 overflow-y-auto flex-1 space-y-4">
+
+        <!-- ===============================================================
+             ABA 1: REQUISITOS / REGRAS DE NEGÓCIO
+        ================================================================ -->
+        <div id="tab-content-specs" class="space-y-3.5">
+          <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-200">
+            <strong class="font-mono text-emerald-400 block mb-1">ROTEIRO DE EXECUÇÃO:</strong>
+            Teste cada campo do formulário KYC ao lado aplicando técnicas de <strong>Particionamento de Equivalência</strong>, <strong>Valor Limite</strong> e <strong>Testes de Estado</strong>. Registre os 7 defeitos na aba <em>Bug Report</em>.
+          </div>
+
+          <div id="specs-container" class="space-y-3">
+            <!-- Preenchido via JS -->
+          </div>
+        </div>
+
+        <!-- ===============================================================
+             ABA 2: FORMULÁRIO DE BUG REPORT
+        ================================================================ -->
+        <div id="tab-content-report" class="hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="file-plus-2" class="w-4 h-4 text-emerald-400"></i>
+              Registrar Defeito Encontrado
+            </h3>
+            <span class="text-[11px] font-mono text-slate-400">Padrão ISO/IEC 29119</span>
+          </div>
+
+          <form onsubmit="submitBugReport(event)" class="space-y-3 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-300 font-medium mb-1">Defeito / Campo Afetado *</label>
+                <select id="rep-bug-id" required class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3 py-2 text-white outline-none">
+                  <option value="">-- Selecione o defeito --</option>
+                  <option value="BUG1">BUG-01: Campo CPF (Dígitos repetidos / verificadores)</option>
+                  <option value="BUG2">BUG-02: Campo Nome Completo (Aceita espaços em branco)</option>
+                  <option value="BUG3">BUG-03: Campo Data de Nascimento (Data futura / < 18 anos)</option>
+                  <option value="BUG4">BUG-04: Campo E-mail (Bloqueia hífen / subdomínio)</option>
+                  <option value="BUG5">BUG-05: Campo Renda Mensal (Negativo / Zero / NaN)</option>
+                  <option value="BUG6">BUG-06: Campo CEP (Rejeita máscara 24020-000)</option>
+                  <option value="BUG7">BUG-07: Botão Salvar (Permite duplo clique / duplicidade)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-slate-300 font-medium mb-1">Severidade *</label>
+                <select id="rep-severity" required class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3 py-2 text-white outline-none">
+                  <option value="Crítica (Critical)">Crítica (Critical)</option>
+                  <option value="Bloqueante (Blocker)">Bloqueante (Blocker)</option>
+                  <option value="Maior (Major)">Maior (Major)</option>
+                  <option value="Menor (Minor)">Menor (Minor)</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-slate-300 font-medium mb-1">Passos para Reproduzir (Steps to Reproduce) *</label>
+              <textarea id="rep-steps" rows="2" required placeholder="1. Acessar formulário KYC&#10;2. Inserir valor '111.111.111-11' no campo CPF&#10;3. Clicar em Salvar Cadastro" class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3 py-2 font-mono text-[11px] text-white outline-none"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-300 font-medium mb-1">Resultado Esperado *</label>
+                <textarea id="rep-expected" rows="2" required placeholder="O sistema deveria bloquear o cadastro e alertar CPF inválido." class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3 py-2 text-white outline-none"></textarea>
+              </div>
+              <div>
+                <label class="block text-slate-300 font-medium mb-1">Resultado Obtido *</label>
+                <textarea id="rep-actual" rows="2" required placeholder="O sistema aceitou o CPF repetido e enviou os dados." class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3 py-2 text-white outline-none"></textarea>
+              </div>
+            </div>
+
+            <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition flex items-center justify-center gap-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              <span>Salvar Bug Report no Relatório</span>
+            </button>
+          </form>
+
+          <!-- Lista de Reports Registrados -->
+          <div class="border-t border-[#163a2a] pt-3">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="text-xs font-mono uppercase text-slate-400">Relatórios Registrados (<span id="reports-total-count">0</span>)</h4>
+              <button onclick="exportReport('json')" class="text-[11px] font-mono text-cyan-400 hover:underline">Baixar JSON</button>
+            </div>
+            <div id="reports-list" class="space-y-2.5 text-xs">
+              <p class="text-slate-500 italic">Nenhum bug reportado ainda. Execute os testes no formulário KYC.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===============================================================
+             ABA 3: CONSOLE DE LOGS EM TEMPO REAL
+        ================================================================ -->
+        <div id="tab-content-console" class="hidden space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono text-cyan-400 flex items-center gap-1.5">
+              <i data-lucide="activity" class="w-4 h-4"></i>
+              Telemetry & Runtime Inspector
+            </span>
+            <button onclick="clearConsoleLogs()" class="px-2.5 py-1 rounded-lg bg-[#050e0a] border border-[#163a2a] hover:border-rose-500/40 text-[11px] font-mono text-slate-400 hover:text-rose-400 transition">
+              Limpar Console
+            </button>
+          </div>
+          <div id="console-output" class="bg-[#030906] border border-[#163a2a] rounded-xl p-3.5 font-mono text-[11px] space-y-2 min-h-[340px] max-h-[460px] overflow-y-auto">
+            <!-- Logs injetados via JS -->
+          </div>
+        </div>
+
+        <!-- ===============================================================
+             ABA 4: MODO GABARITO (BLOQUEÁVEL COM SENHA 'qa2026')
+        ================================================================ -->
+        <div id="tab-content-solutions" class="hidden space-y-4">
+          <div class="flex items-center justify-between p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-xs">
+            <div class="flex items-center gap-2 text-cyan-300">
+              <i data-lucide="unlock" class="w-4 h-4 text-cyan-400"></i>
+              <span><strong>Modo Gabarito Ativo:</strong> Análise de Causa Raiz & Patches JS</span>
+            </div>
+            <button onclick="lockGabarito()" class="px-2.5 py-1 rounded-lg bg-[#050e0a] border border-[#163a2a] text-[11px] font-mono text-slate-300 hover:text-amber-400 transition">
+              Bloquear
+            </button>
+          </div>
+
+          <div id="solutions-list" class="space-y-4">
+            <!-- Renderizado via JS -->
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- =======================================================================
+       SCRIPT PRINCIPAL: REGRAS, VALIDAÇÕES COM BUGS, CONSOLE & RELATÓRIOS
+  ======================================================================== -->
+  <script>
+    lucide.createIcons();
+
+    // =========================================================================
+    // 1. BASE DE DADOS DOS 7 DEFEITOS DE VALIDAÇÃO DE CAMPOS E MÁSCARAS
+    // =========================================================================
+    const KYC_BUGS = [
+      {
+        id: 'BUG1',
+        rn: 'RN01 • Validação Algorítmica de CPF',
+        field: 'CPF',
+        title: 'Aceitação de CPF com dígitos repetidos e dígitos verificadores inválidos',
+        spec: 'O campo CPF deve aceitar 11 dígitos numéricos (com ou sem máscara), rejeitar sequências repetidas (ex: 111.111.111-11, 000.000.000-00) e validar os dois dígitos verificadores (Módulo 11).',
+        technique: 'Particionamento de Equivalência (Classes Inválidas Algorítmicas)',
+        cause: 'A validação verifica apenas se existem 11 dígitos numéricos após remover a máscara, omitindo o bloqueio de dígitos repetidos e o cálculo dos dígitos verificadores.',
+        badCode: `// ❌ Código com Defeito (Verifica apenas tamanho)\nconst cleanCpf = cpf.replace(/\\D/g, '');\nif (cleanCpf.length !== 11) {\n  return 'CPF deve ter 11 dígitos';\n}`,
+        goodCode: `// ✅ Código Corrigido (Bloqueia repetidos + Módulo 11)\nfunction isValidCPF(cpf) {\n  const c = cpf.replace(/\\D/g, '');\n  if (c.length !== 11 || /^(\\d)\\1{10}$/.test(c)) return false;\n  let sum = 0, rest;\n  for (let i = 1; i <= 9; i++) sum += parseInt(c[i-1]) * (11 - i);\n  rest = (sum * 10) % 11; if (rest === 10 || rest === 11) rest = 0;\n  if (rest !== parseInt(c[9])) return false;\n  sum = 0;\n  for (let i = 1; i <= 10; i++) sum += parseInt(c[i-1]) * (12 - i);\n  rest = (sum * 10) % 11; if (rest === 10 || rest === 11) rest = 0;\n  return rest === parseInt(c[10]);\n}`
+      },
+      {
+        id: 'BUG2',
+        rn: 'RN02 • Sanitização de Espaços em Branco',
+        field: 'Nome Completo',
+        title: 'Campo Nome Completo aceita strings compostas apenas por espaços ("     ")',
+        spec: 'O Nome Completo é obrigatório e deve possuir ao menos 3 caracteres alfabéticos reais após remover espaços nas extremidades.',
+        technique: 'Sanitização de Entrada & Particionamento de Equivalência',
+        cause: 'A validação avalia `name.length < 3` diretamente na string bruta sem aplicar `.trim()`, permitindo que 5 espaços em branco passem como nome válido.',
+        badCode: `// ❌ Código com Defeito (Sem .trim())\nif (!name || name.length < 3) {\n  return 'Informe o nome completo';\n}`,
+        goodCode: `// ✅ Código Corrigido (Com .trim() e validação de letras)\nconst sanitizedName = name.trim();\nif (sanitizedName.length < 3 || !/^[A-Za-zÀ-ÿ\\s]+$/.test(sanitizedName)) {\n  return 'Informe um nome válido (mínimo 3 letras)';\n}`
+      },
+      {
+        id: 'BUG3',
+        rn: 'RN03 • Maioridade e Limite Temporal',
+        field: 'Data de Nascimento',
+        title: 'Aceitação de datas futuras (ex: 2030) e titulares menores de 18 anos',
+        spec: 'O titular deve ter idade igual ou superior a 18 anos na data atual, sendo estritamente proibidas datas futuras.',
+        technique: 'Análise de Valor Limite (Boundary Value Analysis)',
+        cause: 'Comparação lexicográfica incorreta entre string de data (`dob > "1900-01-01"`) em vez de converter para objeto `Date` e calcular a idade real em anos.',
+        badCode: `// ❌ Código com Defeito (Comparação ingênua de string)\nif (!dob || dob < '1900-01-01') {\n  return 'Data inválida';\n}`,
+        goodCode: `// ✅ Código Corrigido (Cálculo real de idade com Date)\nconst birth = new Date(dob + 'T00:00:00');\nconst today = new Date();\nif (birth > today) return 'Data futura não permitida';\nlet age = today.getFullYear() - birth.getFullYear();\nconst m = today.getMonth() - birth.getMonth();\nif (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;\nif (age < 18) return 'Titular deve ter no mínimo 18 anos';`
+      },
+      {
+        id: 'BUG4',
+        rn: 'RN04 • Expressão Regular de E-mail Corporativo',
+        field: 'E-mail Corporativo',
+        title: 'Regex restritiva rejeita e-mails válidos com hífen ou subdomínios (.com.br)',
+        spec: 'Deve aceitar qualquer endereço de e-mail válido conforme padrão corporativo, incluindo hífens no domínio e múltiplos níveis de TLD (ex: ana@ti-empresa.com.br).',
+        technique: 'Regex & Particionamento de Equivalência (Falso Negativo)',
+        cause: 'A expressão regular `/^[a-z0-9]+@[a-z]+\\.[a-z]{2,3}$/` não permite hífens (`-`), pontos no usuário, letras maiúsculas nem domínios compostos como `.com.br`.',
+        badCode: `// ❌ Código com Defeito (Falso negativo em domínios reais)\nconst badRegex = /^[a-z0-9]+@[a-z]+\\.[a-z]{2,3}$/;\nif (!badRegex.test(email)) return 'E-mail inválido';`,
+        goodCode: `// ✅ Código Corrigido (Suporta hífen, pontos e subdomínios)\nconst goodRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/;\nif (!goodRegex.test(email.trim())) return 'E-mail corporativo inválido';`
+      },
+      {
+        id: 'BUG5',
+        rn: 'RN05 • Tipagem Numérica e Domínio Positivo',
+        field: 'Renda Mensal',
+        title: 'Aceitação de valores negativos/zero (-500) e propagação de NaN ao colar texto',
+        spec: 'A Renda Mensal deve ser um número estritamente maior que zero (R$ > 0,00), rejeitando textos não numéricos e valores negativos.',
+        technique: 'Análise de Valor Limite (0 e -0.01) & Tipagem',
+        cause: 'Uso de `parseFloat(income)` sem verificar `isNaN(val)` ou `val <= 0`. Em JavaScript, `NaN <= 0` avalia como `false`, deixando textos passarem sem erro!',
+        badCode: `// ❌ Código com Defeito (NaN escapa da condição!)\nconst val = parseFloat(income);\nif (income === '') return 'Campo obrigatório';\n// Se val for -500 ou NaN, passa direto!`,
+        goodCode: `// ✅ Código Corrigido (Valida NaN e limite > 0)\nconst normalized = income.replace(',', '.').trim();\nconst val = Number(normalized);\nif (!normalized || Number.isNaN(val) || val <= 0) {\n  return 'Informe uma renda mensal válida maior que R$ 0,00';\n}`
+      },
+      {
+        id: 'BUG6',
+        rn: 'RN06 • Ordem de Execução entre Máscara e Validação',
+        field: 'CEP Residencial',
+        title: 'Validação de tamanho antes de limpar a máscara rejeita CEPs válidos ("24020-000")',
+        spec: 'O campo CEP aplica máscara `00000-000` automaticamente e deve validar a presença de exatamente 8 dígitos numéricos.',
+        technique: 'Teste de Integração de Componente (Máscara × Validador)',
+        cause: 'A máscara insere um hífen (totalizando 9 caracteres), mas a validação checa `cep.length !== 8` na string com hífen sem sanitizar antes.',
+        badCode: `// ❌ Código com Defeito (Mede string com hífen = 9 chars)\nif (cep.length !== 8) {\n  return 'CEP inválido: deve conter exatamente 8 dígitos';\n}`,
+        goodCode: `// ✅ Código Corrigido (Sanitiza antes de medir)\nconst cleanCep = cep.replace(/\\D/g, '');\nif (cleanCep.length !== 8) {\n  return 'CEP inválido: informe os 8 dígitos';\n}`
+      },
+      {
+        id: 'BUG7',
+        rn: 'RN07 • Idempotência e Controle de Concorrência na UI',
+        field: 'Botão Salvar Cadastro',
+        title: 'Botão permanece ativo durante o envio, permitindo duplo clique e cadastro duplicado',
+        spec: 'Ao clicar em "Salvar Cadastro", o botão deve entrar imediatamente em estado `disabled` com indicador de carregamento até a resposta do servidor, impedindo envios duplicados.',
+        technique: 'Teste de Concorrência / Duplo Clique (Idempotência)',
+        cause: 'Ausência de flag de controle (`isSubmitting`) ou `btn.disabled = true` no início do handler assíncrono `handleKycSubmit`.',
+        badCode: `// ❌ Código com Defeito (Permite N cliques em 1.5s)\nfunction handleKycSubmit(e) {\n  e.preventDefault();\n  setTimeout(() => saveToDatabase(), 1500);\n}`,
+        goodCode: `// ✅ Código Corrigido (Trava botão até concluir)\nlet isSubmitting = false;\nfunction handleKycSubmit(e) {\n  e.preventDefault();\n  if (isSubmitting) return;\n  isSubmitting = true;\n  btnSave.disabled = true;\n  setTimeout(() => {\n    saveToDatabase();\n    isSubmitting = false;\n    btnSave.disabled = false;\n  }, 1500);\n}`
+      }
+    ];
+
+    // =========================================================================
+    // 2. ESTADO DA APLICAÇÃO
+    // =========================================================================
+    let foundBugs = new Set();
+    let bugReports = [];
+    let consoleLogs = [];
+    let submissionCount = 0;
+    let isGabaritoUnlocked = false;
+
+    function initLab() {
+      renderSpecs();
+      renderSolutions();
+      addConsoleLog('INFO', 'Ambiente KYC-SANDBOX inicializado. Pronto para execução de testes.');
+    }
+
+    // =========================================================================
+    // 3. MÁSCARAS E LÓGICA DO SISTEMA ALVO (COM OS 7 BUGS)
+    // =========================================================================
+    function maskCpf(input) {
+      let v = input.value.replace(/\D/g, '').slice(0, 11);
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      input.value = v;
+    }
+
+    function maskCep(input) {
+      let v = input.value.replace(/\D/g, '').slice(0, 8);
+      v = v.replace(/^(\d{5})(\d)/, '$1-$2');
+      input.value = v;
+    }
+
+    function setFieldError(fieldId, message) {
+      const el = document.getElementById(`err-${fieldId}`);
+      if (message) {
+        el.textContent = message;
+        el.classList.remove('hidden');
+      } else {
+        el.classList.add('hidden');
+      }
+    }
+
+    function handleKycSubmit(event) {
+      event.preventDefault();
+
+      const name = document.getElementById('kyc-name').value;
+      const cpf = document.getElementById('kyc-cpf').value;
+      const dob = document.getElementById('kyc-dob').value;
+      const email = document.getElementById('kyc-email').value;
+      const income = document.getElementById('kyc-income').value;
+      const cep = document.getElementById('kyc-cep').value;
+      const banner = document.getElementById('kyc-response-banner');
+
+      let hasError = false;
+      banner.classList.add('hidden');
+
+      addConsoleLog('INFO', `Iniciando validação de payload: { name: "${name}", cpf: "${cpf}", dob: "${dob}", email: "${email}", income: "${income}", cep: "${cep}" }`);
+
+      // BUG 2 INTENCIONAL: Não usa .trim(), então "     " tem length 5 e passa!
+      if (!name || name.length < 3) {
+        setFieldError('name', 'Nome obrigatório (mínimo 3 caracteres).');
+        hasError = true;
+      } else {
+        setFieldError('name', '');
+        if (name.trim().length === 0) {
+          addConsoleLog('WARN', '[ANOMALIA DETECTADA - BUG2] Campo Nome composto apenas por espaços passou na validação!');
+        }
+      }
+
+      // BUG 1 INTENCIONAL: Checa apenas 11 dígitos, aceitando "111.111.111-11" e dígitos inválidos!
+      const cleanCpf = cpf.replace(/\D/g, '');
+      if (cleanCpf.length !== 11) {
+        setFieldError('cpf', 'CPF deve conter 11 dígitos numéricos.');
+        hasError = true;
+      } else {
+        setFieldError('cpf', '');
+        if (/^(\d)\1{10}$/.test(cleanCpf)) {
+          addConsoleLog('WARN', `[ANOMALIA DETECTADA - BUG1] CPF com dígitos repetidos (${cpf}) foi aceito sem validar Módulo 11!`);
+        }
+      }
+
+      // BUG 3 INTENCIONAL: Comparação ingênua de string aceita data futura e idade < 18!
+      if (!dob || dob < '1900-01-01') {
+        setFieldError('dob', 'Informe uma data de nascimento.');
+        hasError = true;
+      } else {
+        setFieldError('dob', '');
+        const birthYear = parseInt(dob.split('-')[0]);
+        if (birthYear > 2008) {
+          addConsoleLog('WARN', `[ANOMALIA DETECTADA - BUG3] Data de nascimento (${dob}) indica menor de 18 anos ou data futura, mas foi aceita!`);
+        }
+      }
+
+      // BUG 4 INTENCIONAL: Regex restritiva rejeita hífen e subdomínios como .com.br!
+      const badEmailRegex = /^[a-z0-9]+@[a-z]+\.[a-z]{2,3}$/;
+      if (!badEmailRegex.test(email)) {
+        setFieldError('email', 'Formato de e-mail inválido.');
+        hasError = true;
+        if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+          addConsoleLog('ERROR', `[FALSO NEGATIVO - BUG4] E-mail corporativo válido "${email}" foi bloqueado pela Regex restritiva!`);
+        }
+      } else {
+        setFieldError('email', '');
+      }
+
+      // BUG 5 INTENCIONAL: parseFloat sem checar <= 0 ou isNaN!
+      const parsedIncome = parseFloat(income);
+      if (income === '') {
+        setFieldError('income', 'Renda mensal é obrigatória.');
+        hasError = true;
+      } else {
+        setFieldError('income', '');
+        if (Number.isNaN(parsedIncome) || parsedIncome <= 0) {
+          addConsoleLog('WARN', `[ANOMALIA DE TIPAGEM - BUG5] Renda inválida ("${income}" -> ${parsedIncome}) passou na validação!`);
+        }
+      }
+
+      // BUG 6 INTENCIONAL: Mede cep.length antes de remover o hífen (9 chars != 8)!
+      if (cep.length !== 8) {
+        setFieldError('cep', `CEP inválido: esperados 8 caracteres, encontrados ${cep.length}.`);
+        hasError = true;
+        if (cep.replace(/\D/g, '').length === 8) {
+          addConsoleLog('ERROR', `[FALHA DE MÁSCARA - BUG6] CEP "${cep}" tem 8 dígitos válidos, mas falhou porque o hífen não foi removido antes da validação!`);
+        }
+      } else {
+        setFieldError('cep', '');
+      }
+
+      if (hasError) {
+        addConsoleLog('ERROR', 'Submissão interrompida por erros de validação no formulário.');
+        return;
+      }
+
+      // BUG 7 INTENCIONAL: Não desabilita o botão durante os 1200ms de envio assíncrono!
+      addConsoleLog('INFO', 'Enviando payload KYC para API /v1/onboarding (latência simulada: 1200ms)...');
+
+      setTimeout(() => {
+        submissionCount++;
+        document.getElementById('submission-counter').textContent = submissionCount;
+
+        banner.classList.remove('hidden');
+        banner.className = 'p-3.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-200 text-xs font-mono leading-relaxed';
+        banner.innerHTML = `
+          <strong>[HTTP 201 Created] Registro #${submissionCount} gravado!</strong><br/>
+          Titular: ${escapeHtml(name)} | CPF: ${escapeHtml(cpf)} | Renda: ${parsedIncome} | CEP: ${escapeHtml(cep)}
+        `;
+
+        if (submissionCount > 1) {
+          addConsoleLog('WARN', `[DUPLICIDADE - BUG7] Múltiplas submissões detectadas (#${submissionCount})! Botão não foi bloqueado durante o envio.`);
+        } else {
+          addConsoleLog('SUCCESS', `Cadastro #${submissionCount} persistido no banco de homologação.`);
+        }
+
+        showToast(`Cadastro #${submissionCount} salvo no ambiente de homologação!`, 'success');
+      }, 1200);
+    }
+
+    // =========================================================================
+    // 4. ESTAÇÃO DE QA: REQUISITOS, BUG REPORT, CONSOLE, GABARITO E EXPORTAÇÃO
+    // =========================================================================
+    function renderSpecs() {
+      const container = document.getElementById('specs-container');
+      container.innerHTML = KYC_BUGS.map(b => `
+        <div class="p-3.5 rounded-xl bg-[#050e0a] border border-[#163a2a] hover:border-emerald-500/30 transition space-y-1.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[11px] font-mono font-bold text-emerald-400">${b.rn}</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#0b1d15] text-cyan-400 border border-[#163a2a]">${b.field}</span>
+          </div>
+          <p class="text-xs text-slate-200 leading-relaxed">${b.spec}</p>
+        </div>
+      `).join('');
+    }
+
+    function renderSolutions() {
+      const container = document.getElementById('solutions-list');
+      container.innerHTML = KYC_BUGS.map((b, idx) => `
+        <div class="p-4 rounded-xl bg-[#050e0a] border border-[#163a2a] space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              ${b.id} • ${b.field}
+            </span>
+            <span class="text-[10px] font-mono text-cyan-400">${b.technique}</span>
+          </div>
+          <h4 class="text-xs font-bold text-white">${idx + 1}. ${b.title}</h4>
+          <p class="text-xs text-slate-300 leading-relaxed"><strong class="text-rose-400">Causa Raiz:</strong> ${b.cause}</p>
+          <div class="space-y-2 font-mono text-[11px]">
+            <div class="p-2.5 rounded-lg bg-rose-950/20 border border-rose-500/30 text-rose-200 overflow-x-auto">
+              <pre>${escapeHtml(b.badCode)}</pre>
+            </div>
+            <div class="p-2.5 rounded-lg bg-emerald-950/20 border border-emerald-500/30 text-emerald-200 overflow-x-auto">
+              <pre>${escapeHtml(b.goodCode)}</pre>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function switchQaTab(tabName) {
+      ['specs', 'report', 'console', 'solutions'].forEach(t => {
+        document.getElementById(`tab-content-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`tab-btn-${t}`);
+        btn.className = 'py-2 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200 border border-transparent transition';
+      });
+
+      document.getElementById(`tab-content-${tabName}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      activeBtn.className = 'py-2 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 transition';
+    }
+
+    // Controle de Senha do Gabarito ('qa2026')
+    function handleGabaritoTabClick() {
+      if (isGabaritoUnlocked) {
+        switchQaTab('solutions');
+      } else {
+        const modal = document.getElementById('password-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.getElementById('gabarito-password-input').focus();
+      }
+    }
+
+    function closePasswordModal() {
+      const modal = document.getElementById('password-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.getElementById('password-error-msg').classList.add('hidden');
+    }
+
+    function verifyGabaritoPassword() {
+      const pwd = document.getElementById('gabarito-password-input').value.trim();
+      if (pwd === 'qa2026') {
+        unlockGabaritoDirectly();
+      } else {
+        document.getElementById('password-error-msg').classList.remove('hidden');
+      }
+    }
+
+    function unlockGabaritoDirectly() {
+      isGabaritoUnlocked = true;
+      closePasswordModal();
+      document.getElementById('gabarito-lock-icon').innerHTML = `<i data-lucide="unlock" class="w-3 h-3 text-cyan-400"></i>`;
+      lucide.createIcons();
+      switchQaTab('solutions');
+      addConsoleLog('INFO', 'Modo Gabarito desbloqueado pelo usuário.');
+      showToast('Gabarito Técnico desbloqueado!', 'info');
+    }
+
+    function lockGabarito() {
+      isGabaritoUnlocked = false;
+      document.getElementById('gabarito-password-input').value = '';
+      document.getElementById('gabarito-lock-icon').innerHTML = `<i data-lucide="lock" class="w-3 h-3 text-amber-400"></i>`;
+      lucide.createIcons();
+      switchQaTab('specs');
+      showToast('Gabarito bloqueado novamente.', 'info');
+    }
+
+    // Submissão do Bug Report pelo Aluno
+    function submitBugReport(event) {
+      event.preventDefault();
+      const bugId = document.getElementById('rep-bug-id').value;
+      const severity = document.getElementById('rep-severity').value;
+      const steps = document.getElementById('rep-steps').value.trim();
+      const expected = document.getElementById('rep-expected').value.trim();
+      const actual = document.getElementById('rep-actual').value.trim();
+
+      if (!bugId) return;
+
+      const meta = KYC_BUGS.find(b => b.id === bugId);
+      const isNew = !foundBugs.has(bugId);
+
+      foundBugs.add(bugId);
+      updateProgress();
+
+      const reportObj = {
+        bugId,
+        rule: meta.rn,
+        field: meta.field,
+        title: meta.title,
+        severity,
+        steps,
+        expectedResult: expected,
+        actualResult: actual,
+        timestamp: new Date().toISOString()
+      };
+
+      bugReports.unshift(reportObj);
+      renderBugReportsList();
+      event.target.reset();
+
+      addConsoleLog('SUCCESS', `Bug Report registrado: [${bugId}] ${meta.field} (${severity})`);
+      showToast(
+        isNew ? `Defeito ${bugId} identificado e documentado (${foundBugs.size}/7)!` : `Novo registro adicionado para ${bugId}.`,
+        'success'
+      );
+    }
+
+    function updateProgress() {
+      const count = foundBugs.size;
+      const total = KYC_BUGS.length;
+      document.getElementById('bugs-found-count').textContent = `${count} / ${total}`;
+      document.getElementById('bugs-progress-bar').style.width = `${(count / total) * 100}%`;
+    }
+
+    function renderBugReportsList() {
+      document.getElementById('reports-total-count').textContent = bugReports.length;
+      const container = document.getElementById('reports-list');
+      container.innerHTML = bugReports.map(r => `
+        <div class="p-3 rounded-xl bg-[#050e0a] border border-emerald-500/30 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="font-mono font-bold text-emerald-400">${r.bugId} • ${r.field}</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30">${r.severity}</span>
+          </div>
+          <p class="font-semibold text-slate-200">${r.title}</p>
+          <div class="text-[11px] text-slate-400 space-y-0.5">
+            <p><strong class="text-cyan-400">Esperado:</strong> ${escapeHtml(r.expectedResult)}</p>
+            <p><strong class="text-amber-400">Obtido:</strong> ${escapeHtml(r.actualResult)}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Console de Logs em Tempo Real
+    function addConsoleLog(level, message) {
+      const time = new Date().toLocaleTimeString('pt-BR');
+      consoleLogs.push({ time, level, message });
+      document.getElementById('console-badge').textContent = consoleLogs.length;
+
+      const colorMap = {
+        INFO: 'text-cyan-400',
+        WARN: 'text-amber-400',
+        ERROR: 'text-rose-400',
+        SUCCESS: 'text-emerald-400'
+      };
+
+      const container = document.getElementById('console-output');
+      const line = document.createElement('div');
+      line.className = 'border-b border-[#163a2a]/50 pb-1.5 leading-relaxed';
+      line.innerHTML = `
+        <span class="text-slate-500">[${time}]</span>
+        <span class="font-bold ${colorMap[level] || 'text-slate-300'}">[${level}]</span>
+        <span class="text-slate-200">${escapeHtml(message)}</span>
+      `;
+      container.appendChild(line);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function clearConsoleLogs() {
+      consoleLogs = [];
+      document.getElementById('console-badge').textContent = '0';
+      document.getElementById('console-output').innerHTML = '<div class="text-slate-500 italic">Console limpo.</div>';
+    }
+
+    // Exportar Relatório em JSON ou TXT
+    function exportReport(format) {
+      if (bugReports.length === 0) {
+        showToast('Registre pelo menos 1 Bug Report antes de exportar o relatório.', 'error');
+        return;
+      }
+
+      let content = '';
+      let mime = 'text/plain;charset=utf-8';
+      let filename = `relatorio_qa_lab02_${new Date().toISOString().slice(0, 10)}.${format}`;
+
+      if (format === 'json') {
+        mime = 'application/json;charset=utf-8';
+        content = JSON.stringify({
+          lab: 'QA Lab 02 - Validação de Campos & Máscaras',
+          totalBugsFound: foundBugs.size,
+          totalAvailableBugs: KYC_BUGS.length,
+          exportedAt: new Date().toISOString(),
+          reports: bugReports
+        }, null, 2);
+      } else {
+        content = `====================================================================\n`;
+        content += `RELATÓRIO DE EXECUÇÃO DE TESTES - QA LAB 02 (VALIDAÇÃO & MÁSCARAS)\n`;
+        content += `Data: ${new Date().toLocaleString('pt-BR')} | Progresso: ${foundBugs.size}/${KYC_BUGS.length} falhas\n`;
+        content += `====================================================================\n\n`;
+        bugReports.forEach((r, idx) => {
+          content += `[#${idx + 1}] ${r.bugId} - ${r.title}\n`;
+          content += `Campo: ${r.field} | Regra: ${r.rule} | Severidade: ${r.severity}\n`;
+          content += `Passos:\n${r.steps}\n`;
+          content += `Resultado Esperado: ${r.expectedResult}\n`;
+          content += `Resultado Obtido: ${r.actualResult}\n`;
+          content += `--------------------------------------------------------------------\n\n`;
+        });
+      }
+
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast(`Relatório exportado com sucesso (${filename})!`, 'success');
+    }
+
+    function resetKycForm() {
+      document.getElementById('kyc-form').reset();
+      ['name', 'cpf', 'dob', 'email', 'income', 'cep'].forEach(id => setFieldError(id, ''));
+      document.getElementById('kyc-response-banner').classList.add('hidden');
+      submissionCount = 0;
+      document.getElementById('submission-counter').textContent = '0';
+      addConsoleLog('INFO', 'Formulário KYC e contador de submissões resetados.');
+      showToast('Formulário KYC limpo!', 'info');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const colors = {
+        success: 'bg-[#0b1d15] border-emerald-500 text-emerald-200',
+        error: 'bg-[#1f0d12] border-rose-500 text-rose-200',
+        info: 'bg-[#0b1d15] border-cyan-500 text-cyan-200'
+      };
+      toast.className = `pointer-events-auto p-3.5 rounded-xl border shadow-xl text-xs font-medium flex items-center gap-2.5 transition-all duration-300 ${colors[type] || colors.info}`;
+      toast.innerHTML = `
+        <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'alert-triangle' : 'terminal'}" class="w-4 h-4 shrink-0"></i>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+      lucide.createIcons();
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    window.onload = initLab;
+  </script>
+</body>
+</html>

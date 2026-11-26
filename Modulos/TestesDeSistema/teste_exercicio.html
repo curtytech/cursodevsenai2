@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QA Lab // Laboratório Prático de Testes de Sistema</title>
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons via CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            cyber: {
+              bg: '#050e0a',
+              card: '#0b1d15',
+              border: '#163a2a',
+              emerald: '#10b981',
+              emeraldLight: '#34d399',
+              cyan: '#06b6d4',
+              lime: '#a3e635',
+              text: '#f0fdf4',
+              muted: '#94a3b8'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #050e0a;
+      color: #f0fdf4;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(16, 185, 129, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.07) 0%, transparent 45%),
+        linear-gradient(to right, rgba(13, 38, 27, 0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(13, 38, 27, 0.35) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+    }
+
+    /* Scrollbar customizada */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #050e0a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #163a2a;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #10b981;
+    }
+
+    .glass-card {
+      background: rgba(11, 29, 21, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid #163a2a;
+    }
+
+    /* Bug 4: Classe proposital que causa sobreposição/corte no botão finalizar quando ativada */
+    .bug-ui-overlap {
+      margin-top: -22px !important;
+      opacity: 0.55;
+      pointer-events: none;
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-black">
+
+  <!-- Toast / Notificação Flutuante (Substitui alert()) -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-md pointer-events-none"></div>
+
+  <!-- Cabeçalho Tecnológico -->
+  <header class="sticky top-0 z-40 glass-card border-b border-[#163a2a] px-4 py-3 sm:px-6">
+    <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-4">
+      <!-- Logo & Título -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+          <i data-lucide="bug" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-mono font-bold text-base sm:text-lg tracking-tight text-emerald-50">
+              QA Lab <span class="text-emerald-400">//</span> Sandbox de Testes
+            </h1>
+            <span class="hidden md:inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+              v2.4-BUGGY-ENV
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">Disciplina: Testes de Sistema • Engenharia de Software & QA</p>
+        </div>
+      </div>
+
+      <!-- Controles de Progresso e Modo Professor -->
+      <div class="flex items-center gap-3 sm:gap-5">
+        <!-- Contador de Bugs -->
+        <div class="flex items-center gap-2.5 bg-[#050e0a] border border-[#163a2a] px-3.5 py-2 rounded-xl">
+          <div class="flex flex-col">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-mono">Falhas Identificadas</span>
+            <div class="flex items-center gap-2">
+              <span id="bugs-found-count" class="font-mono font-bold text-emerald-400 text-base">0 / 8</span>
+              <div class="w-20 h-1.5 bg-[#163a2a] rounded-full overflow-hidden">
+                <div id="bugs-progress-bar" class="h-full bg-gradient-to-r from-emerald-500 to-cyan-400 transition-all duration-500" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botão Resetar Ambiente Alvo -->
+        <button onclick="resetTargetSystem()" title="Restaurar estado inicial do sistema alvo" class="p-2.5 rounded-xl bg-[#050e0a] hover:bg-emerald-950/50 border border-[#163a2a] hover:border-emerald-500/50 text-slate-300 hover:text-emerald-400 transition flex items-center gap-1.5 text-xs font-mono">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Resetar App</span>
+        </button>
+
+        <!-- Toggle Modo Professor / Gabarito -->
+        <label class="flex items-center gap-2.5 cursor-pointer bg-[#050e0a] border border-[#163a2a] hover:border-cyan-500/40 px-3.5 py-2 rounded-xl transition select-none">
+          <div class="relative">
+            <input type="checkbox" id="professor-mode-toggle" class="sr-only" onchange="toggleProfessorMode(this.checked)">
+            <div id="toggle-bg" class="w-10 h-5 bg-[#163a2a] rounded-full transition-colors duration-300"></div>
+            <div id="toggle-dot" class="absolute left-0.5 top-0.5 w-4 h-4 bg-slate-400 rounded-full transition-transform duration-300"></div>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-xs font-semibold text-cyan-400 flex items-center gap-1">
+              <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
+              Modo Gabarito
+            </span>
+            <span class="text-[10px] text-slate-400 hidden sm:inline">Ver Causa Raiz & Código</span>
+          </div>
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal: 2 Colunas -->
+  <main class="flex-1 max-w-[1600px] w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+    <!-- =====================================================================
+         ÁREA 1 (ESQUERDA - 7 COLUNAS): SISTEMA ALVO ("TechEdu Store & Matrículas")
+         Contém os 8 defeitos intencionais para o aluno testar e explorar.
+    ====================================================================== -->
+    <section class="lg:col-span-7 flex flex-col gap-5">
+      <!-- Barra de Navegação Simulada do Browser do Sistema Alvo -->
+      <div class="glass-card rounded-2xl overflow-hidden shadow-2xl">
+        <div class="bg-[#07140e] border-b border-[#163a2a] px-4 py-2.5 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-1.5">
+            <span class="w-3 h-3 rounded-full bg-rose-500/80"></span>
+            <span class="w-3 h-3 rounded-full bg-amber-500/80"></span>
+            <span class="w-3 h-3 rounded-full bg-emerald-500/80"></span>
+          </div>
+          <div class="flex-1 max-w-md bg-[#050e0a] border border-[#163a2a] rounded-lg px-3 py-1 flex items-center gap-2 text-xs font-mono text-slate-400">
+            <i data-lucide="lock" class="w-3 h-3 text-emerald-400"></i>
+            <span class="truncate">https://homologacao.techedu.edu.br/matricula</span>
+          </div>
+          <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">
+            SISTEMA ALVO (SUT)
+          </span>
+        </div>
+
+        <!-- Cabeçalho Interno do Portal TechEdu -->
+        <div class="p-5 sm:p-6 border-b border-[#163a2a] bg-gradient-to-r from-[#0b1d15] to-[#081711] flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500 text-black">TECHEDU</span>
+              <h2 class="text-lg font-bold text-white">Portal de Matrículas & Trilhas Dev</h2>
+            </div>
+            <p class="text-xs text-slate-400 mt-1">Selecione seus cursos, aplique benefícios estudantis e finalize sua inscrição.</p>
+          </div>
+
+          <!-- Badge do Carrinho (BUG 7: Contador não decrementa ao remover item) -->
+          <div class="flex items-center gap-3">
+            <button onclick="consultarHistoricoNotas()" id="btn-historico" class="px-3 py-2 rounded-xl bg-[#050e0a] hover:bg-[#10291e] border border-[#163a2a] text-xs font-medium text-cyan-400 flex items-center gap-1.5 transition">
+              <i data-lucide="file-clock" class="w-4 h-4"></i>
+              <span>Consultar Histórico de Notas</span>
+            </button>
+
+            <div class="relative bg-[#050e0a] border border-[#163a2a] px-3 py-2 rounded-xl flex items-center gap-2">
+              <i data-lucide="shopping-cart" class="w-4 h-4 text-emerald-400"></i>
+              <span class="text-xs font-medium">Cursos:</span>
+              <span id="cart-badge-count" class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">2</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerta de Resultado da Consulta de Histórico (BUG 6) -->
+        <div id="historico-feedback" class="hidden mx-5 mt-5 p-3.5 rounded-xl border text-xs font-mono"></div>
+
+        <!-- Corpo do Sistema Alvo -->
+        <div class="p-5 sm:p-6 space-y-6">
+
+          <!-- BLOCO A: Catálogo & Carrinho de Cursos (BUG 7) -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-xs font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                <i data-lucide="layers" class="w-4 h-4"></i>
+                1. Cursos Disponíveis & Carrinho Ativo
+              </h3>
+              <span class="text-[11px] text-slate-400">Taxa administrativa fixa: R$ 20,00</span>
+            </div>
+
+            <!-- Botões para adicionar cursos -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-4">
+              <button onclick="addCourse('Engenharia de Testes & QA', 100)" class="p-3 rounded-xl bg-[#050e0a] hover:bg-emerald-950/30 border border-[#163a2a] hover:border-emerald-500/40 text-left transition group">
+                <div class="flex justify-between items-start">
+                  <span class="text-xs font-semibold text-slate-200 group-hover:text-emerald-300">Engenharia de QA</span>
+                  <span class="text-xs font-mono text-emerald-400">R$ 100</span>
+                </div>
+                <span class="text-[11px] text-slate-500 mt-1 block">+ Adicionar ao carrinho</span>
+              </button>
+
+              <button onclick="addCourse('Automação com Playwright', 150)" class="p-3 rounded-xl bg-[#050e0a] hover:bg-emerald-950/30 border border-[#163a2a] hover:border-emerald-500/40 text-left transition group">
+                <div class="flex justify-between items-start">
+                  <span class="text-xs font-semibold text-slate-200 group-hover:text-emerald-300">Playwright E2E</span>
+                  <span class="text-xs font-mono text-emerald-400">R$ 150</span>
+                </div>
+                <span class="text-[11px] text-slate-500 mt-1 block">+ Adicionar ao carrinho</span>
+              </button>
+
+              <button onclick="addCourse('Segurança & DevSecOps', 200)" class="p-3 rounded-xl bg-[#050e0a] hover:bg-emerald-950/30 border border-[#163a2a] hover:border-emerald-500/40 text-left transition group">
+                <div class="flex justify-between items-start">
+                  <span class="text-xs font-semibold text-slate-200 group-hover:text-emerald-300">DevSecOps Básico</span>
+                  <span class="text-xs font-mono text-emerald-400">R$ 200</span>
+                </div>
+                <span class="text-[11px] text-slate-500 mt-1 block">+ Adicionar ao carrinho</span>
+              </button>
+            </div>
+
+            <!-- Lista de Itens no Carrinho -->
+            <div id="cart-items-list" class="space-y-2 bg-[#050e0a]/80 border border-[#163a2a] rounded-xl p-3">
+              <!-- Renderizado via JS -->
+            </div>
+          </div>
+
+          <!-- BLOCO B: Dados do Aluno & Validações (BUG 1 e BUG 3) -->
+          <div class="border-t border-[#163a2a] pt-5">
+            <h3 class="text-xs font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1.5 mb-3">
+              <i data-lucide="user-check" class="w-4 h-4"></i>
+              2. Identificação do Estudante & Elegibilidade
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">Nome Completo *</label>
+                <input type="text" id="student-name" placeholder="Ex: Ana Silva" class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition">
+              </div>
+
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">E-mail Institucional *</label>
+                <input type="text" id="student-email" placeholder="ana@dominio.com" class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition">
+              </div>
+
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">CPF (Somente números) *</label>
+                <input type="text" id="student-cpf" placeholder="11 dígitos" class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-white font-mono outline-none transition">
+              </div>
+            </div>
+
+            <!-- Faixa de Idade para Desconto Jovem Tech (BUG 1: Valor Limite) -->
+            <div class="mt-3 p-3.5 rounded-xl bg-[#050e0a] border border-[#163a2a] flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-slate-200">Idade do Aluno (Programa Jovem Tech)</label>
+                  <span class="text-[11px] text-slate-400">Regra RN01: Alunos de 16 a 25 anos (inclusive) ganham 20% OFF.</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="number" id="student-age" value="20" min="10" max="99" onchange="recalculateCheckout()" onkeyup="recalculateCheckout()" class="w-20 bg-[#0b1d15] border border-[#163a2a] focus:border-emerald-500 rounded-lg px-2.5 py-1.5 text-xs font-mono text-center text-white outline-none">
+                <span id="age-discount-badge" class="px-2.5 py-1 rounded-lg text-[11px] font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                  Desconto 20% Ativo
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- BLOCO C: Pagamento, Cupom & Parcelamento (BUG 2 e BUG 8) -->
+          <div class="border-t border-[#163a2a] pt-5">
+            <h3 class="text-xs font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1.5 mb-3">
+              <i data-lucide="credit-card" class="w-4 h-4"></i>
+              3. Condições de Pagamento & Cupom Promocional
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <!-- Forma de Pagamento -->
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">Forma de Pagamento</label>
+                <select id="payment-method" onchange="recalculateCheckout()" class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-white outline-none">
+                  <option value="credit">Cartão de Crédito</option>
+                  <option value="pix">PIX (15% de desconto à vista)</option>
+                </select>
+              </div>
+
+              <!-- Cupom Promocional -->
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">Cupom Promocional</label>
+                <div class="flex gap-1.5">
+                  <input type="text" id="coupon-code" placeholder="Ex: DEV20" class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono uppercase text-white outline-none">
+                  <button onclick="applyCoupon()" class="px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold transition">
+                    Aplicar
+                  </button>
+                </div>
+              </div>
+
+              <!-- Parcelamento -->
+              <div>
+                <label class="block text-xs text-slate-300 mb-1">Parcelamento</label>
+                <select id="installments" onchange="recalculateCheckout()" class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-white outline-none">
+                  <option value="1">1x à vista (sem acréscimo)</option>
+                  <option value="3">3x com taxa administrativa</option>
+                  <option value="6">6x com taxa administrativa</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- BLOCO D: Observações do Pedido (BUG 5: XSS / Injeção de HTML) -->
+          <div class="border-t border-[#163a2a] pt-5">
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                <i data-lucide="message-square-code" class="w-4 h-4"></i>
+                4. Observações para a Secretaria (Pré-visualização)
+              </label>
+              <span class="text-[11px] text-slate-400">Suporta texto simples</span>
+            </div>
+            <input type="text" id="order-notes-input" oninput="updateNotesPreview(this.value)" placeholder="Digite uma observação (ex: Solicito emissão de nota fiscal)..." class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-white outline-none mb-2">
+            
+            <div class="p-3 rounded-xl bg-[#050e0a] border border-[#163a2a] text-xs">
+              <span class="text-[10px] font-mono uppercase text-slate-500 block mb-1">Pré-visualização do comprovante:</span>
+              <!-- BUG 5: innerHTML usado diretamente sem sanitização -->
+              <div id="order-notes-preview" class="text-slate-300 italic">Nenhuma observação inserida.</div>
+            </div>
+          </div>
+
+          <!-- BLOCO E: Resumo Financeiro & Botão Finalizar (BUG 4 e BUG 8) -->
+          <div class="border-t border-[#163a2a] pt-5">
+            <div class="bg-[#050e0a] border border-[#163a2a] rounded-2xl p-4 space-y-2 text-xs">
+              <div class="flex justify-between text-slate-400">
+                <span>Subtotal dos Cursos:</span>
+                <span id="summary-subtotal" class="font-mono text-slate-200">R$ 250,00</span>
+              </div>
+              <div class="flex justify-between text-slate-400">
+                <span>Taxa de Matrícula:</span>
+                <span id="summary-fee" class="font-mono text-slate-200">R$ 20,00</span>
+              </div>
+              <div class="flex justify-between text-emerald-400">
+                <span>Descontos Aplicados (Idade / PIX / Cupom):</span>
+                <span id="summary-discounts" class="font-mono">- R$ 50,00</span>
+              </div>
+              <div class="flex justify-between text-slate-400 border-t border-[#163a2a] pt-2">
+                <span>Condição de Parcelamento:</span>
+                <span id="summary-installments" class="font-mono text-cyan-400">1x de R$ 220,00</span>
+              </div>
+              <div class="flex justify-between items-center text-sm font-bold text-white pt-1">
+                <span>TOTAL FINAL A PAGAR:</span>
+                <span id="summary-total" class="font-mono text-lg text-emerald-400">R$ 220,00</span>
+              </div>
+            </div>
+
+            <!-- Mensagem de erro de validação do formulário -->
+            <div id="checkout-error-box" class="hidden mt-3 p-3 rounded-xl bg-rose-500/10 border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
+              <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+              <span id="checkout-error-text"></span>
+            </div>
+
+            <!-- BUG 4: Ao ocorrer erro de validação, o botão ganha a classe 'bug-ui-overlap' e fica travado/cortado -->
+            <div id="checkout-action-wrapper" class="mt-4 relative">
+              <button id="btn-finish-checkout" onclick="submitCheckout()" class="w-full py-3.5 px-5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-sm shadow-[0_0_20px_rgba(16,185,129,0.3)] transition flex items-center justify-center gap-2">
+                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                <span>Finalizar Matrícula</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         ÁREA 2 (DIREITA - 5 COLUNAS): PAINEL DO ANALISTA DE QA
+         Aba 1: Especificação & Requisitos (RN01 a RN08)
+         Aba 2: Registrar Bug (Bug Report + Validação Inteligente)
+         Aba 3: Gabarito & Como Resolver (Modo Professor)
+    ====================================================================== -->
+    <aside class="lg:col-span-5 glass-card rounded-2xl overflow-hidden shadow-2xl flex flex-col sticky top-20 max-h-[calc(100vh-6.5rem)]">
+      
+      <!-- Navegação de Abas do Analista -->
+      <div class="grid grid-cols-3 bg-[#07140e] border-b border-[#163a2a] p-1.5 gap-1">
+        <button onclick="switchQaTab('specs')" id="tab-btn-specs" class="qa-tab-btn py-2 px-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 transition">
+          <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+          <span>Requisitos</span>
+        </button>
+
+        <button onclick="switchQaTab('report')" id="tab-btn-report" class="qa-tab-btn py-2 px-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200 border border-transparent transition">
+          <i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i>
+          <span>Reportar Bug</span>
+        </button>
+
+        <button onclick="switchQaTab('solutions')" id="tab-btn-solutions" class="qa-tab-btn py-2 px-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200 border border-transparent transition">
+          <i data-lucide="code-2" class="w-3.5 h-3.5"></i>
+          <span>Gabarito</span>
+          <span id="lock-icon-badge"><i data-lucide="lock" class="w-3 h-3 text-amber-400"></i></span>
+        </button>
+      </div>
+
+      <!-- Conteúdo Rolável das Abas -->
+      <div class="p-5 overflow-y-auto flex-1 space-y-4">
+
+        <!-- ===============================================================
+             ABA 1: ESPECIFICAÇÃO & REQUISITOS (DOCUMENTAÇÃO BASE)
+        ================================================================ -->
+        <div id="tab-content-specs" class="space-y-4">
+          <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-200">
+            <strong class="font-mono text-emerald-400 block mb-1">MISSÃO DO ANALISTA DE QA:</strong>
+            Compare o comportamento do <strong>Sistema Alvo</strong> à esquerda com as <strong>Regras de Negócio (RN)</strong> e <strong>Critérios de Aceite</strong> abaixo. Ao encontrar uma divergência, registre-a na aba <em>Reportar Bug</em>.
+          </div>
+
+          <div class="space-y-3" id="requirements-list">
+            <!-- Injetado via JS para manter organização -->
+          </div>
+        </div>
+
+        <!-- ===============================================================
+             ABA 2: REGISTRAR BUG (BUG REPORT PROFISSIONAL)
+        ================================================================ -->
+        <div id="tab-content-report" class="hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="bug-play" class="w-4 h-4 text-emerald-400"></i>
+              Novo Relatório de Defeito (IEEE 829)
+            </h3>
+            <span class="text-[11px] font-mono text-slate-400">Ambiente: Homologação</span>
+          </div>
+
+          <form onsubmit="submitBugReport(event)" class="space-y-3.5 text-xs">
+            <div>
+              <label class="block text-slate-300 font-medium mb-1">1. Módulo / Funcionalidade Afetada *</label>
+              <select id="report-bug-target" required class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3 py-2.5 text-white outline-none">
+                <option value="">-- Selecione onde o erro ocorreu --</option>
+                <option value="BUG1">Desconto por Idade (Programa Jovem Tech)</option>
+                <option value="BUG2">Cálculo de Cupom DEV20 + Pagamento PIX</option>
+                <option value="BUG3">Validação de Cadastro (Nome, E-mail ou CPF)</option>
+                <option value="BUG4">Botão "Finalizar Matrícula" após erro de validação</option>
+                <option value="BUG5">Campo "Observações para Secretaria" (Pré-visualização)</option>
+                <option value="BUG6">Botão "Consultar Histórico de Notas"</option>
+                <option value="BUG7">Carrinho de Cursos (Remoção de item / Contador)</option>
+                <option value="BUG8">Cálculo de Parcelamento (3x ou 6x) no Total Final</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-slate-300 font-medium mb-1">2. Técnica de Teste Empregada *</label>
+              <select id="report-technique" required class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3 py-2.5 text-white outline-none">
+                <option value="Análise de Valor Limite">Caixa-Preta: Análise de Valor Limite</option>
+                <option value="Tabela de Decisão">Caixa-Preta: Tabela de Decisão</option>
+                <option value="Particionamento de Equivalência">Caixa-Preta: Particionamento de Equivalência</option>
+                <option value="Teste de Regressão / Estado">Teste Funcional: Regressão & Gestão de Estado</option>
+                <option value="Teste de Usabilidade / UI">Teste Não Funcional: Usabilidade & Interface (UI)</option>
+                <option value="Teste de Segurança (XSS)">Teste Não Funcional: Segurança & Sanitização (XSS)</option>
+                <option value="Teste de Desempenho / Timeout">Teste Não Funcional: Desempenho & Resiliência</option>
+                <option value="Teste Exploratório">Baseado em Experiência: Teste Exploratório</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-slate-300 font-medium mb-1">3. Severidade (Impacto Técnico) *</label>
+                <select id="report-severity" required class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3 py-2 text-white outline-none">
+                  <option value="Bloqueante">Bloqueante (Blocker)</option>
+                  <option value="Crítica">Crítica (Critical)</option>
+                  <option value="Maior">Maior (Major)</option>
+                  <option value="Menor">Menor (Minor)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-300 font-medium mb-1">4. Prioridade (Urgência Negócio) *</label>
+                <select id="report-priority" required class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3 py-2 text-white outline-none">
+                  <option value="Alta">Alta (P1)</option>
+                  <option value="Média">Média (P2)</option>
+                  <option value="Baixa">Baixa (P3)</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-slate-300 font-medium mb-1">5. Resultado Esperado vs. Resultado Obtido *</label>
+              <textarea id="report-description" rows="3" required placeholder="Descreva os passos reproduzidos, o que deveria acontecer segundo a RN e o que o sistema fez de errado..." class="w-full bg-[#050e0a] border border-[#163a2a] focus:border-emerald-500 rounded-xl px-3 py-2 text-white outline-none"></textarea>
+            </div>
+
+            <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs transition flex items-center justify-center gap-2">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i>
+              <span>Registrar Evidência no Sistema de QA</span>
+            </button>
+          </form>
+
+          <!-- Lista de Bugs já registrados pelo aluno -->
+          <div class="border-t border-[#163a2a] pt-4">
+            <h4 class="text-xs font-mono uppercase text-slate-400 mb-2">Log de Defeitos Registrados (<span id="logged-count">0</span>)</h4>
+            <div id="logged-bugs-list" class="space-y-2 text-xs">
+              <p class="text-slate-500 italic">Nenhum defeito reportado ainda. Explore o sistema ao lado!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===============================================================
+             ABA 3: GABARITO & GUIA DE RESOLUÇÃO TÉCNICA (MODO PROFESSOR)
+        ================================================================ -->
+        <div id="tab-content-solutions" class="hidden space-y-4">
+          <!-- Tela de Bloqueio quando Modo Professor está desligado -->
+          <div id="solutions-locked-view" class="p-6 rounded-2xl bg-[#050e0a] border border-[#163a2a] text-center space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto">
+              <i data-lucide="shield-alert" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-sm font-bold text-white">Gabarito Técnico Bloqueado</h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Para estimular a investigação prática, as causas raízes e correções de código ficam ocultas durante a execução dos testes.
+            </p>
+            <button onclick="document.getElementById('professor-mode-toggle').click()" class="px-4 py-2 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400 border border-cyan-500/40 text-xs font-semibold transition">
+              Ativar Modo Gabarito (Professor)
+            </button>
+          </div>
+
+          <!-- Lista Completa de Soluções (Visível apenas quando toggle ativo) -->
+          <div id="solutions-unlocked-view" class="hidden space-y-4">
+            <div class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-xs text-cyan-200 flex items-start gap-2.5">
+              <i data-lucide="info" class="w-4 h-4 text-cyan-400 shrink-0 mt-0.5"></i>
+              <div>
+                <strong>Guia de Engenharia & Correção:</strong> Abaixo estão os 8 defeitos implantados no código-fonte desta página, a técnica de teste recomendada e o patch de correção.
+              </div>
+            </div>
+
+            <div id="solutions-cards-container" class="space-y-4">
+              <!-- Renderizado via JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- =======================================================================
+       SCRIPT PRINCIPAL: DADOS PEDAGÓGICOS + LÓGICA DO SISTEMA ALVO (COM BUGS)
+  ======================================================================== -->
+  <script>
+    // Inicializar ícones Lucide
+    lucide.createIcons();
+
+    // =========================================================================
+    // 1. BASE DE CONHECIMENTO: REQUISITOS E GABARITO DOS 8 BUGS
+    // =========================================================================
+    const BUG_DATABASE = [
+      {
+        id: 'BUG1',
+        rn: 'RN01 - Desconto Jovem Tech',
+        title: 'Exclusão indevida no limite superior de idade (25 anos)',
+        spec: 'Estudantes com idade entre 16 e 25 anos (inclusive) têm direito a 20% de desconto sobre o subtotal dos cursos.',
+        criteria: 'Ao informar idade = 16 ou idade = 25, o badge deve exibir "Desconto 20% Ativo" e abater 20% no resumo.',
+        testType: 'Teste Funcional (Caixa-Preta)',
+        technique: 'Análise de Valor Limite (Boundary Value Analysis)',
+        cause: 'Erro de operador relacional na condição de fronteira: usou-se `age < 25` em vez de `age <= 25`, excluindo justamente o valor limite superior (25 anos).',
+        badCode: `// ❌ Código com Defeito (Exclui 25 anos)\nif (age >= 16 && age < 25) {\n  ageDiscount = subtotal * 0.20;\n}`,
+        goodCode: `// ✅ Código Corrigido (Inclui fronteiras 16 e 25)\nif (age >= 16 && age <= 25) {\n  ageDiscount = subtotal * 0.20;\n}`,
+        observation: 'Sempre teste os valores exatos nas bordas (15, 16, 25, 26). É onde ocorre a maioria dos erros de lógica ("off-by-one").'
+      },
+      {
+        id: 'BUG2',
+        rn: 'RN02 - Política de Descontos Não Cumulativos',
+        title: 'Acúmulo indevido entre Cupom DEV20 e Pagamento PIX',
+        spec: 'O cupom promocional "DEV20" (20% OFF) NÃO é cumulativo com o desconto de pagamento via PIX (15% OFF). Deve prevalecer apenas o maior desconto.',
+        criteria: 'Se PIX e DEV20 estiverem ativos simultaneamente, o sistema deve aplicar apenas 20% (ou bloquear o cupom) e jamais somar 35% ou gerar valor negativo.',
+        testType: 'Teste Funcional (Regras de Negócio)',
+        technique: 'Tabela de Decisão (Decision Table Testing)',
+        cause: 'As condicionais de desconto foram escritas de forma independente (`if` sequenciais) sem exclusão mútua (`else if` ou `Math.max`).',
+        badCode: `// ❌ Código com Defeito (Soma descontos)\nif (payment === 'pix') discount += subtotal * 0.15;\nif (coupon === 'DEV20') discount += subtotal * 0.20;`,
+        goodCode: `// ✅ Código Corrigido (Aplica apenas o maior)\nlet pixDisc = payment === 'pix' ? subtotal * 0.15 : 0;\nlet cupDisc = coupon === 'DEV20' ? subtotal * 0.20 : 0;\ndiscount += Math.max(pixDisc, cupDisc);`,
+        observation: 'Tabelas de decisão mapeiam combinações de regras (PIX=V/F × Cupom=V/F) evitando prejuízos financeiros por regras conflitantes.'
+      },
+      {
+        id: 'BUG3',
+        rn: 'RN03 - Integridade Cadastral do Aluno',
+        title: 'Aceitação de E-mail inválido, CPF com letras ou campos em branco',
+        spec: 'Nome obrigatório (mín. 3 letras reais), E-mail válido (contendo @ e domínio) e CPF contendo exatamente 11 dígitos numéricos.',
+        criteria: 'O sistema deve impedir a matrícula e exibir alerta claro caso o usuário digite apenas espaços, e-mail sem "@" ou CPF com letras/tamanho diferente de 11.',
+        testType: 'Teste Funcional (Validação de Entrada)',
+        technique: 'Particionamento de Equivalência (Classes Inválidas)',
+        cause: 'Ausência de `.trim()` e expressões regulares (Regex) para validar formato de e-mail e dígitos numéricos do CPF.',
+        badCode: `// ❌ Código com Defeito (Validação superficial)\nif (name === '' || email === '' || cpf === '') {\n  showError('Preencha os campos');\n}`,
+        goodCode: `// ✅ Código Corrigido (Regex + Trim)\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\nconst cpfClean = cpf.replace(/\\D/g, '');\nif (name.trim().length < 3 || !emailRegex.test(email) || cpfClean.length !== 11) {\n  showError('Dados cadastrais inválidos!');\n}`,
+        observation: 'Divida entradas em classes válidas e inválidas (ex: CPF com 10, 11 e 12 dígitos; strings com espaços) para garantir sanitização de dados.'
+      },
+      {
+        id: 'BUG4',
+        rn: 'RN04 - Resiliência e Recuperação de Interface',
+        title: 'Botão "Finalizar Matrícula" trava e sobrepõe após erro de validação',
+        spec: 'Após exibir uma mensagem de erro de validação, o usuário deve conseguir corrigir os dados e clicar novamente em "Finalizar Matrícula" normalmente.',
+        criteria: 'O botão principal deve permanecer visível, alinhado e clicável após qualquer tentativa falha de submissão.',
+        testType: 'Teste Não Funcional (Usabilidade / UI)',
+        technique: 'Teste Exploratório & Fluxo de Exceção',
+        cause: 'Ao disparar o erro de validação, uma classe CSS defeituosa (`bug-ui-overlap`) é adicionada ao botão e nunca removida, deslocando-o e bloqueando eventos de clique (`pointer-events: none`).',
+        badCode: `// ❌ Código com Defeito (Trava UI no erro)\nfunction showError(msg) {\n  btnFinish.classList.add('bug-ui-overlap');\n}`,
+        goodCode: `// ✅ Código Corrigido (Mantém UI interativa)\nfunction showError(msg) {\n  errorBox.classList.remove('hidden');\n  btnFinish.disabled = false;\n}`,
+        observation: 'Testes não devem validar apenas o "caminho feliz". Simular erros do usuário revela travamentos graves de estado na interface.'
+      },
+      {
+        id: 'BUG5',
+        rn: 'RN05 - Segurança na Entrada de Texto (Anti-XSS)',
+        title: 'Injeção de HTML/Script (Cross-Site Scripting) nas Observações',
+        spec: 'O campo "Observações para a Secretaria" deve aceitar apenas texto plano, neutralizando qualquer tag HTML ou script malicioso na pré-visualização.',
+        criteria: 'Ao digitar `<b>Texto</b>` ou `<img src=x onerror=...>`, o sistema deve exibir os caracteres literalmente como texto, sem renderizar tags HTML.',
+        testType: 'Teste Não Funcional (Segurança)',
+        technique: 'Injeção de Payload XSS (OWASP Top 10)',
+        cause: 'Uso inseguro da propriedade `.innerHTML` para renderizar diretamente a entrada fornecida pelo usuário no DOM.',
+        badCode: `// ❌ Código com Defeito (Vulnerável a XSS)\npreviewEl.innerHTML = userInput;`,
+        goodCode: `// ✅ Código Corrigido (Escapa entidades HTML)\npreviewEl.textContent = userInput;`,
+        observation: 'Nunca confie em inputs do usuário. Substituir `innerHTML` por `textContent` previne execução arbitrária de scripts no navegador.'
+      },
+      {
+        id: 'BUG6',
+        rn: 'RN06 - Desempenho e Feedback de Requisição',
+        title: 'Travamento silencioso (6s) e erro 504 no Histórico de Notas',
+        spec: 'Consultas ao histórico acadêmico devem responder em até 2 segundos, exibir indicador visual de carregamento (spinner) e tratar falhas com retry.',
+        criteria: 'Ao clicar em "Consultar Histórico de Notas", o usuário deve ver feedback imediato e receber os dados sem timeout na primeira tentativa.',
+        testType: 'Teste Não Funcional (Desempenho & Confiabilidade)',
+        technique: 'Teste de Tempo de Resposta & Tolerância a Falhas',
+        cause: 'Simulação de requisição lenta sem estado de loading (`disabled` / spinner) e falha forçada (HTTP 504 Gateway Timeout) na primeira chamada.',
+        badCode: `// ❌ Código com Defeito (Sem loading + falha 1ª vez)\nsetTimeout(() => {\n  if (attempts === 1) return show504Error();\n}, 6000);`,
+        goodCode: `// ✅ Código Corrigido (Loading imediato + Retry)\nsetLoading(true);\nfetchWithRetry('/api/grades', { timeout: 2000, retries: 2 })\n  .finally(() => setLoading(false));`,
+        observation: 'Sem feedback visual de loading, o usuário acha que o sistema travou e clica múltiplas vezes, sobrecarregando o servidor.'
+      },
+      {
+        id: 'BUG7',
+        rn: 'RN07 - Sincronização de Estado do Carrinho',
+        title: 'Badge contador de cursos não decrementa ao remover item',
+        spec: 'O contador superior de cursos no carrinho deve refletir em tempo real a quantidade exata de itens adicionados ou removidos.',
+        criteria: 'Ao remover 1 curso de uma lista com 2 cursos, o badge superior deve atualizar imediatamente de "2" para "1".',
+        testType: 'Teste Funcional (Regressão & Estado)',
+        technique: 'Teste de Ciclo CRUD (Create, Read, Update, Delete)',
+        cause: 'A função `removeCourse()` atualiza o array e o valor financeiro, mas esquece de atualizar o elemento DOM `#cart-badge-count`.',
+        badCode: `// ❌ Código com Defeito (Esquece atualizar badge)\nfunction removeCourse(index) {\n  cart.splice(index, 1);\n  renderCart();\n  // Faltou atualizar cartBadge.textContent!\n}`,
+        goodCode: `// ✅ Código Corrigido (Fonte única de verdade)\nfunction removeCourse(index) {\n  cart.splice(index, 1);\n  cartBadge.textContent = cart.length;\n  renderCart();\n}`,
+        observation: 'Testes de regressão garantem que operações de exclusão sincronizem todos os componentes dependentes na tela.'
+      },
+      {
+        id: 'BUG8',
+        rn: 'RN08 - Precisão Financeira no Parcelamento',
+        title: 'Concatenação de String ("100" + 5) no cálculo de parcelas',
+        spec: 'Ao escolher parcelamento em 3x ou 6x, cobra-se uma taxa fixa de R$ 5,00 sobre o total numérico, dividindo o montante com arredondamento de 2 casas decimais.',
+        criteria: 'Para um total de R$ 220,00 em 3x, o total deve ser R$ 225,00 (3x de R$ 75,00), jamais concatenando dígitos.',
+        testType: 'Teste Funcional (Cálculo & Tipagem)',
+        technique: 'Análise de Tipos de Dados & Precisão Numérica',
+        cause: 'O valor base foi convertido para string com `.toFixed(2)` antes de somar a taxa (`"220.00" + 5`), resultando na string `"220.005"` em vez de soma matemática.',
+        badCode: `// ❌ Código com Defeito (Concatenação String + Number)\nlet baseStr = total.toFixed(2);\nlet finalWithFee = baseStr + 5; // "220.005"!`,
+        goodCode: `// ✅ Código Corrigido (Operação numérica antes de formatar)\nlet finalWithFee = Number(total) + 5;\nlet formatted = finalWithFee.toFixed(2); // "225.00"`,
+        observation: 'Em JavaScript, o operador `+` sobrecarrega soma e concatenação. Sempre realize cálculos com `Number` e formate apenas na exibição.'
+      }
+    ];
+
+    // =========================================================================
+    // 2. ESTADO DA APLICAÇÃO E RENDERIZAÇÃO DAS ABAS DE QA
+    // =========================================================================
+    let foundBugs = new Set();
+    let loggedReports = [];
+    let cart = [
+      { id: 1, name: 'Engenharia de Testes & QA', price: 100 },
+      { id: 2, name: 'Automação com Playwright', price: 150 }
+    ];
+    let activeCoupon = '';
+    let gradeAttempts = 0;
+
+    function initApp() {
+      renderRequirements();
+      renderSolutions();
+      renderCart();
+      recalculateCheckout();
+    }
+
+    // Renderizar Aba 1: Requisitos
+    function renderRequirements() {
+      const container = document.getElementById('requirements-list');
+      container.innerHTML = BUG_DATABASE.map(item => `
+        <div class="p-3.5 rounded-xl bg-[#050e0a] border border-[#163a2a] hover:border-emerald-500/30 transition space-y-1.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[11px] font-mono font-bold text-emerald-400">${item.rn}</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#0b1d15] text-slate-400 border border-[#163a2a]">${item.technique}</span>
+          </div>
+          <p class="text-xs text-slate-200 leading-relaxed">${item.spec}</p>
+          <div class="pt-1.5 border-t border-[#163a2a]/70 text-[11px] text-cyan-300/90 flex items-start gap-1.5">
+            <i data-lucide="check-square" class="w-3.5 h-3.5 shrink-0 mt-0.5 text-cyan-400"></i>
+            <span><strong>Critério de Aceite:</strong> ${item.criteria}</span>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    // Renderizar Aba 3: Gabarito & Como Resolver
+    function renderSolutions() {
+      const container = document.getElementById('solutions-cards-container');
+      container.innerHTML = BUG_DATABASE.map((item, idx) => `
+        <div class="p-4 rounded-xl bg-[#050e0a] border border-[#163a2a] space-y-3">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                ${item.id} • ${item.testType}
+              </span>
+              <h4 class="text-xs font-bold text-white mt-1.5">${idx + 1}. ${item.title}</h4>
+            </div>
+          </div>
+
+          <div class="text-xs space-y-1.5 text-slate-300">
+            <p><strong class="text-cyan-400">Técnica:</strong> ${item.technique}</p>
+            <p><strong class="text-rose-400">Causa Raiz:</strong> ${item.cause}</p>
+          </div>
+
+          <div class="space-y-2 font-mono text-[11px]">
+            <div class="p-2.5 rounded-lg bg-rose-950/20 border border-rose-500/30 text-rose-200 overflow-x-auto">
+              <pre>${escapeHtml(item.badCode)}</pre>
+            </div>
+            <div class="p-2.5 rounded-lg bg-emerald-950/20 border border-emerald-500/30 text-emerald-200 overflow-x-auto">
+              <pre>${escapeHtml(item.goodCode)}</pre>
+            </div>
+          </div>
+
+          <div class="p-2.5 rounded-lg bg-[#0b1d15] border border-[#163a2a] text-[11px] text-slate-300 flex items-start gap-2">
+            <i data-lucide="lightbulb" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
+            <span><strong>Dica do Professor:</strong> ${item.observation}</span>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    // =========================================================================
+    // 3. LÓGICA DO SISTEMA ALVO (CONTENDO OS 8 BUGS INTENCIONAIS)
+    // =========================================================================
+
+    function addCourse(name, price) {
+      cart.push({ id: Date.now(), name, price });
+      // Atualiza contador ao adicionar
+      document.getElementById('cart-badge-count').textContent = cart.length;
+      renderCart();
+      recalculateCheckout();
+      showToast(`Curso "${name}" adicionado ao carrinho.`, 'info');
+    }
+
+    function removeCourse(index) {
+      cart.splice(index, 1);
+      // BUG 7 INTENCIONAL: Atualiza a lista e o subtotal, mas NÃO decrementa o badge superior!
+      renderCart();
+      recalculateCheckout();
+    }
+
+    function renderCart() {
+      const listEl = document.getElementById('cart-items-list');
+      if (cart.length === 0) {
+        listEl.innerHTML = `<p class="text-xs text-slate-500 text-center py-2">Nenhum curso selecionado.</p>`;
+        return;
+      }
+      listEl.innerHTML = cart.map((item, idx) => `
+        <div class="flex items-center justify-between bg-[#0b1d15] border border-[#163a2a] px-3 py-2 rounded-lg text-xs">
+          <span class="text-slate-200 font-medium">${item.name}</span>
+          <div class="flex items-center gap-3">
+            <span class="font-mono text-emerald-400">R$ ${item.price.toFixed(2)}</span>
+            <button onclick="removeCourse(${idx})" title="Remover curso" class="text-slate-400 hover:text-rose-400 transition">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function applyCoupon() {
+      const code = document.getElementById('coupon-code').value.trim().toUpperCase();
+      if (code === 'DEV20') {
+        activeCoupon = 'DEV20';
+        showToast('Cupom DEV20 (20% OFF) aplicado!', 'success');
+      } else {
+        activeCoupon = '';
+        showToast('Cupom inválido ou expirado.', 'error');
+      }
+      recalculateCheckout();
+    }
+
+    function recalculateCheckout() {
+      const subtotal = cart.reduce((acc, item) => acc + item.price, 0);
+      const fee = subtotal > 0 ? 20 : 0;
+      const age = parseInt(document.getElementById('student-age').value) || 0;
+      const payment = document.getElementById('payment-method').value;
+      const installments = parseInt(document.getElementById('installments').value) || 1;
+
+      const ageBadge = document.getElementById('age-discount-badge');
+      let discount = 0;
+
+      // BUG 1 INTENCIONAL: Operador `< 25` exclui alunos com exatamente 25 anos!
+      if (age >= 16 && age < 25) {
+        discount += subtotal * 0.20;
+        ageBadge.textContent = 'Desconto 20% Ativo';
+        ageBadge.className = 'px-2.5 py-1 rounded-lg text-[11px] font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
+      } else {
+        ageBadge.textContent = 'Sem desconto idade';
+        ageBadge.className = 'px-2.5 py-1 rounded-lg text-[11px] font-mono bg-slate-800 text-slate-400 border border-slate-700';
+      }
+
+      // BUG 2 INTENCIONAL: Soma PIX (15%) + DEV20 (20%) cumulativamente sem bloquear!
+      if (payment === 'pix') {
+        discount += subtotal * 0.15;
+      }
+      if (activeCoupon === 'DEV20') {
+        discount += subtotal * 0.20;
+      }
+
+      const baseTotal = Math.max(0, subtotal + fee - discount);
+
+      // BUG 8 INTENCIONAL: Concatenação de String ("220.00" + 5 -> "220.005") ao parcelar!
+      let finalTotalDisplay = '';
+      let installmentText = '';
+
+      if (installments > 1 && baseTotal > 0) {
+        const buggyTotal = baseTotal.toFixed(2) + 5; // Concatenação proposital!
+        const perInstallment = (baseTotal + 5) / installments;
+        finalTotalDisplay = `R$ ${buggyTotal.replace('.', ',')}`;
+        installmentText = `${installments}x de R$ ${perInstallment.toFixed(2).replace('.', ',')} (c/ taxa)`;
+      } else {
+        finalTotalDisplay = `R$ ${baseTotal.toFixed(2).replace('.', ',')}`;
+        installmentText = `1x de R$ ${baseTotal.toFixed(2).replace('.', ',')}`;
+      }
+
+      document.getElementById('summary-subtotal').textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+      document.getElementById('summary-fee').textContent = `R$ ${fee.toFixed(2).replace('.', ',')}`;
+      document.getElementById('summary-discounts').textContent = `- R$ ${discount.toFixed(2).replace('.', ',')}`;
+      document.getElementById('summary-installments').textContent = installmentText;
+      document.getElementById('summary-total').textContent = finalTotalDisplay;
+    }
+
+    // BUG 5 INTENCIONAL: XSS / Renderização insegura via innerHTML
+    function updateNotesPreview(val) {
+      const preview = document.getElementById('order-notes-preview');
+      if (!val) {
+        preview.textContent = 'Nenhuma observação inserida.';
+        return;
+      }
+      // Vulnerabilidade XSS controlada: renderiza tags HTML diretamente
+      preview.innerHTML = val;
+    }
+
+    // BUG 6 INTENCIONAL: Delay de 5s sem spinner e erro 504 na primeira tentativa
+    function consultarHistoricoNotas() {
+      const box = document.getElementById('historico-feedback');
+      gradeAttempts++;
+
+      // Não exibe spinner de loading (falha de UX/Feedback)
+      setTimeout(() => {
+        box.classList.remove('hidden');
+        if (gradeAttempts === 1) {
+          box.className = 'mx-5 mt-5 p-3.5 rounded-xl border border-rose-500/40 bg-rose-500/10 text-rose-300 text-xs font-mono';
+          box.innerHTML = '<strong>[HTTP 504 Gateway Timeout]</strong> O servidor acadêmico demorou mais de 5000ms para responder. Tente novamente.';
+        } else {
+          box.className = 'mx-5 mt-5 p-3.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 text-xs font-mono';
+          box.innerHTML = '<strong>[HTTP 200 OK]</strong> Histórico carregado: Lógica de Programação (9.5) • Banco de Dados (8.8).';
+        }
+      }, 5000);
+    }
+
+    // BUG 3 e BUG 4 INTENCIONAIS: Validação fraca + Botão que quebra UI ao dar erro
+    function submitCheckout() {
+      const name = document.getElementById('student-name').value;
+      const email = document.getElementById('student-email').value;
+      const cpf = document.getElementById('student-cpf').value;
+      const errBox = document.getElementById('checkout-error-box');
+      const errText = document.getElementById('checkout-error-text');
+      const btnFinish = document.getElementById('btn-finish-checkout');
+
+      // BUG 3 INTENCIONAL: Aceita espaços em branco, e-mail sem @ e CPF com letras!
+      if (name === '' || email === '' || cpf === '') {
+        errText.textContent = 'Erro de Validação: Todos os campos marcados com * são obrigatórios.';
+        errBox.classList.remove('hidden');
+        
+        // BUG 4 INTENCIONAL: Quebra o layout e bloqueia o botão permanentemente após o erro!
+        btnFinish.classList.add('bug-ui-overlap');
+        return;
+      }
+
+      errBox.classList.add('hidden');
+      showToast('Matrícula processada no ambiente de homologação!', 'success');
+    }
+
+    // =========================================================================
+    // 4. CONTROLE DO PAINEL DE QA, REPORT DE BUGS E MODO PROFESSOR
+    // =========================================================================
+
+    function switchQaTab(tabName) {
+      ['specs', 'report', 'solutions'].forEach(t => {
+        document.getElementById(`tab-content-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`tab-btn-${t}`);
+        btn.className = 'qa-tab-btn py-2 px-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200 border border-transparent transition';
+      });
+
+      document.getElementById(`tab-content-${tabName}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      activeBtn.className = 'qa-tab-btn py-2 px-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 transition';
+    }
+
+    function toggleProfessorMode(isEnabled) {
+      const toggleBg = document.getElementById('toggle-bg');
+      const toggleDot = document.getElementById('toggle-dot');
+      const lockedView = document.getElementById('solutions-locked-view');
+      const unlockedView = document.getElementById('solutions-unlocked-view');
+      const lockBadge = document.getElementById('lock-icon-badge');
+
+      if (isEnabled) {
+        toggleBg.classList.replace('bg-[#163a2a]', 'bg-cyan-500');
+        toggleDot.classList.add('translate-x-5', 'bg-black');
+        toggleDot.classList.remove('bg-slate-400');
+        lockedView.classList.add('hidden');
+        unlockedView.classList.remove('hidden');
+        lockBadge.innerHTML = `<i data-lucide="unlock" class="w-3 h-3 text-cyan-400"></i>`;
+        switchQaTab('solutions');
+        showToast('Modo Gabarito ativado! Causas raízes e soluções liberadas.', 'info');
+      } else {
+        toggleBg.classList.replace('bg-cyan-500', 'bg-[#163a2a]');
+        toggleDot.classList.remove('translate-x-5', 'bg-black');
+        toggleDot.classList.add('bg-slate-400');
+        lockedView.classList.remove('hidden');
+        unlockedView.classList.add('hidden');
+        lockBadge.innerHTML = `<i data-lucide="lock" class="w-3 h-3 text-amber-400"></i>`;
+      }
+      lucide.createIcons();
+    }
+
+    function submitBugReport(event) {
+      event.preventDefault();
+      const targetId = document.getElementById('report-bug-target').value;
+      const technique = document.getElementById('report-technique').value;
+      const severity = document.getElementById('report-severity').value;
+      const priority = document.getElementById('report-priority').value;
+      const desc = document.getElementById('report-description').value;
+
+      if (!targetId) return;
+
+      const bugInfo = BUG_DATABASE.find(b => b.id === targetId);
+      const isNewDiscovery = !foundBugs.has(targetId);
+
+      foundBugs.add(targetId);
+      updateProgress();
+
+      loggedReports.unshift({
+        id: targetId,
+        title: bugInfo.title,
+        technique,
+        severity,
+        priority,
+        desc,
+        time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      });
+
+      renderLoggedReports();
+      event.target.reset();
+
+      if (isNewDiscovery) {
+        showToast(`Parabéns! Você identificou e documentou o defeito ${targetId} (${bugInfo.rn})!`, 'success');
+      } else {
+        showToast(`Evidência adicional registrada para ${targetId}.`, 'info');
+      }
+    }
+
+    function updateProgress() {
+      const count = foundBugs.size;
+      const total = BUG_DATABASE.length;
+      document.getElementById('bugs-found-count').textContent = `${count} / ${total}`;
+      document.getElementById('bugs-progress-bar').style.width = `${(count / total) * 100}%`;
+    }
+
+    function renderLoggedReports() {
+      document.getElementById('logged-count').textContent = loggedReports.length;
+      const container = document.getElementById('logged-bugs-list');
+      container.innerHTML = loggedReports.map(rep => `
+        <div class="p-3 rounded-xl bg-[#050e0a] border border-emerald-500/30 space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="font-mono font-bold text-emerald-400">${rep.id} • ${rep.severity} / ${rep.priority}</span>
+            <span class="text-[10px] font-mono text-slate-500">${rep.time}</span>
+          </div>
+          <p class="font-semibold text-slate-200">${rep.title}</p>
+          <p class="text-[11px] text-cyan-400">Técnica: ${rep.technique}</p>
+          <p class="text-[11px] text-slate-400 italic">"${escapeHtml(rep.desc)}"</p>
+        </div>
+      `).join('');
+    }
+
+    function resetTargetSystem() {
+      cart = [
+        { id: 1, name: 'Engenharia de Testes & QA', price: 100 },
+        { id: 2, name: 'Automação com Playwright', price: 150 }
+      ];
+      activeCoupon = '';
+      gradeAttempts = 0;
+      document.getElementById('cart-badge-count').textContent = '2';
+      document.getElementById('student-name').value = '';
+      document.getElementById('student-email').value = '';
+      document.getElementById('student-cpf').value = '';
+      document.getElementById('student-age').value = '20';
+      document.getElementById('payment-method').value = 'credit';
+      document.getElementById('coupon-code').value = '';
+      document.getElementById('installments').value = '1';
+      document.getElementById('order-notes-input').value = '';
+      document.getElementById('order-notes-preview').textContent = 'Nenhuma observação inserida.';
+      document.getElementById('checkout-error-box').classList.add('hidden');
+      document.getElementById('historico-feedback').classList.add('hidden');
+      document.getElementById('btn-finish-checkout').classList.remove('bug-ui-overlap');
+
+      renderCart();
+      recalculateCheckout();
+      showToast('Sistema Alvo restaurado ao estado inicial!', 'info');
+    }
+
+    // Utilitário de Toast (Substitui alert())
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      const colors = {
+        success: 'bg-[#0b1d15] border-emerald-500 text-emerald-200',
+        error: 'bg-[#1f0d12] border-rose-500 text-rose-200',
+        info: 'bg-[#0b1d15] border-cyan-500 text-cyan-200'
+      };
+
+      toast.className = `pointer-events-auto p-3.5 rounded-xl border shadow-xl text-xs font-medium flex items-center gap-2.5 transition-all duration-300 ${colors[type] || colors.info}`;
+      toast.innerHTML = `
+        <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'alert-triangle' : 'terminal'}" class="w-4 h-4 shrink-0"></i>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    window.onload = initApp;
+  </script>
+</body>
+</html>
