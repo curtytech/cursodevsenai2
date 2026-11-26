@@ -1,444 +1,860 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Curso dev senai 2</title>
+    <title>Curso DEV SENAI — Central de Estudos & Projetos</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="assets/ui/motion.css">
+    <link rel="stylesheet" href="assets/ui/animate-ui.css">
+    <link rel="stylesheet" href="assets/ui/iconsax-animated.css">
+    <link rel="stylesheet" href="assets/ui/project-assistant.css">
+    <script src="assets/ui/iconsax-animated.js" defer></script>
+    <script src="assets/ui/theme-and-motion.js"></script>
+    <script src="assets/ui/animate-ui.js" defer></script>
+    <script src="assets/ui/project-assistant.js" defer></script>
+    <style>
+        .portal-muted { color: var(--ds-ink-muted); }
+        .portal-secondary { color: var(--ds-ink-secondary); }
+        .portal-ink { color: var(--ds-ink); }
+        .portal-border { border-color: var(--ds-border); }
+        .portal-subtle { background: var(--ds-bg-subtle); }
+        .card-icon-badge {
+            width: 2.85rem;
+            height: 2.85rem;
+            border-radius: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--ds-border);
+            transition: transform 360ms var(--ease-fluid), border-color 300ms var(--ease-standard);
+        }
+        .ux-card:hover .card-icon-badge {
+            transform: scale(1.06);
+        }
+        .mobile-drawer {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            pointer-events: none;
+            transform: translateY(-6px);
+            transition:
+                max-height 420ms var(--ease-fluid),
+                opacity 340ms var(--ease-standard),
+                transform 420ms var(--ease-fluid);
+        }
+        .mobile-drawer.is-open {
+            max-height: 480px;
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+        .hero-band {
+            border-bottom: 1px solid var(--ds-border);
+            background: linear-gradient(180deg, rgba(16, 24, 38, 0.42) 0%, transparent 100%);
+        }
+        :root[data-theme="light"] .hero-band {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, transparent 100%);
+        }
+    </style>
 </head>
 
-<body class="min-h-screen scroll-smooth bg-slate-950 px-4 py-8 font-['Inter',sans-serif] text-white antialiased">
-    <header class="mx-auto w-full max-w-6xl">
-        <nav class="relative mx-auto flex w-full items-center rounded-full border border-slate-700 bg-slate-900/65 px-6 py-4 text-sm backdrop-blur-xl md:w-auto md:max-w-fit"
+<body class="ds-body min-h-screen antialiased" data-assistant-auto-open="true" data-root-prefix="" data-animate-bg="gravity">
+    <!-- Header Sticky Full-Width -->
+    <header class="sticky top-0 z-40 w-full px-4 pt-3 sm:px-8 lg:px-12">
+        <nav class="ux-glass relative mx-auto flex w-full max-w-[1600px] items-center justify-between gap-4 rounded-2xl px-4 py-3 sm:px-6"
             aria-label="Navegação principal">
-            <a href="#"
-                class="flex shrink-0 items-center rounded-full transition duration-200 hover:scale-110 hover:bg-slate-800/70 active:scale-90 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                aria-label="Página Inicial">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true">
-                    <circle cx="4.706" cy="16" r="4.706" fill="#D9D9D9" />
-                    <circle cx="16.001" cy="4.706" r="4.706" fill="#D9D9D9" />
-                    <circle cx="16.001" cy="27.294" r="4.706" fill="#D9D9D9" />
-                    <circle cx="27.294" cy="16" r="4.706" fill="#D9D9D9" />
-                </svg>
+            <a href="#topo" class="group flex shrink-0 items-center gap-3 rounded-xl focus:outline-none">
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl border"
+                    style="background:var(--ds-accent-soft);border-color:var(--ds-accent-border);color:var(--ds-accent);">
+                    <isax-anim name="layers" size="20"></isax-anim>
+                </span>
+                <span class="flex flex-col leading-tight">
+                    <span class="ds-display text-sm font-extrabold tracking-tight portal-ink">DEV SENAI</span>
+                    <span class="text-[11px] font-medium portal-muted">Portal Full-Stack da Turma</span>
+                </span>
             </a>
 
-            <div class="ml-7 hidden items-center gap-2 md:flex">
-                <a href="#projetos"
-                    class="group inline-flex h-10 items-center whitespace-nowrap px-3 text-white transition duration-200 ease-out hover:text-indigo-300 active:scale-[0.98] active:text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">
-                    <span class="relative block h-6 overflow-hidden">
-                        <span
-                            class="block transition-transform duration-300 group-hover:-translate-y-full">Projetos</span>
-                        <span
-                            class="absolute left-0 top-full block text-indigo-300 transition-transform duration-300 group-hover:-translate-y-full"
-                            aria-hidden="true">Projetos</span>
-                    </span>
-                </a>
-                <a href="#"
-                    class="group inline-flex h-10 items-center whitespace-nowrap px-3 text-white transition duration-200 ease-out hover:text-indigo-300 active:scale-[0.98] active:text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">
-                    <span class="relative block h-6 overflow-hidden">
-                        <span
-                            class="block transition-transform duration-300 group-hover:-translate-y-full">Historias</span>
-                        <span
-                            class="absolute left-0 top-full block text-indigo-300 transition-transform duration-300 group-hover:-translate-y-full"
-                            aria-hidden="true">Historias</span>
-                    </span>
-                </a>
-                <a href="#"
-                    class="group inline-flex h-10 items-center whitespace-nowrap px-3 text-white transition duration-200 ease-out hover:text-indigo-300 active:scale-[0.98] active:text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">
-                    <span class="relative block h-6 overflow-hidden">
-                        <span
-                            class="block transition-transform duration-300 group-hover:-translate-y-full">Preços</span>
-                        <span
-                            class="absolute left-0 top-full block text-indigo-300 transition-transform duration-300 group-hover:-translate-y-full"
-                            aria-hidden="true">Preços</span>
-                    </span>
-                </a>
-                <a href="#"
-                    class="group inline-flex h-10 items-center whitespace-nowrap px-3 text-white transition duration-200 ease-out hover:text-indigo-300 active:scale-[0.98] active:text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">
-                    <span class="relative block h-6 overflow-hidden">
-                        <span
-                            class="block transition-transform duration-300 group-hover:-translate-y-full">Documentação</span>
-                        <span
-                            class="absolute left-0 top-full block text-indigo-300 transition-transform duration-300 group-hover:-translate-y-full"
-                            aria-hidden="true">Documentação</span>
-                    </span>
-                </a>
+            <div class="hidden items-center gap-1 md:flex">
+                <a href="#trilhas" class="ux-nav-link rounded-lg px-3.5 py-2 text-sm font-medium">Trilhas</a>
+                <a href="#projetos-praticos" class="ux-nav-link rounded-lg px-3.5 py-2 text-sm font-medium">Projetos</a>
+                <a href="#materiais" class="ux-nav-link rounded-lg px-3.5 py-2 text-sm font-medium">Materiais</a>
+                <a href="cursos/index.html" class="ux-nav-link rounded-lg px-3.5 py-2 text-sm font-medium">Cursos</a>
+                <a href="trabalhos/trabalhos.html" class="ux-nav-link rounded-lg px-3.5 py-2 text-sm font-medium">Trabalhos</a>
             </div>
 
-            <div class="ml-14 hidden items-center gap-4 md:flex">
-                <button type="button"
-                    class="rounded-full border border-slate-600 px-4 py-2 font-medium transition duration-200 hover:border-indigo-400 hover:bg-indigo-500/15 hover:text-indigo-300 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                    Contatos
+            <div class="hidden items-center gap-2.5 md:flex">
+                <button type="button" data-theme-toggle
+                    class="ux-btn ux-btn-ghost rounded-xl px-3 py-2 text-xs"
+                    aria-label="Alternar tema">
+                    <isax-anim name="sun" size="16"></isax-anim>
+                    <span data-theme-label>Claro</span>
                 </button>
-                <button type="button"
-                    class="rounded-full bg-white px-4 py-2 font-medium text-black shadow-[0_0_30px_7px_rgba(255,255,255,0.5)] transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-100 hover:shadow-[0_0_30px_14px_rgba(129,140,248,0.55)] active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                    Comece Agora
+                <button type="button" data-open-voice-guide data-magnetic
+                    class="ux-btn ux-btn-primary rounded-xl px-4 py-2 text-xs">
+                    <isax-anim name="microphone" size="16"></isax-anim>
+                    <span>Falar com o Guia</span>
                 </button>
             </div>
 
-            <button id="menuToggle" type="button"
-                class="ml-auto rounded p-1 text-slate-400 transition duration-200 hover:bg-slate-800 hover:text-white active:scale-90 focus:outline-none focus:ring-2 focus:ring-indigo-400 md:hidden"
-                aria-label="Alternar menu" aria-controls="mobileMenu" aria-expanded="false">
-                <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-            </button>
+            <div class="flex items-center gap-2 md:hidden">
+                <button type="button" data-theme-toggle
+                    class="ux-btn ux-btn-ghost h-9 w-9 rounded-xl"
+                    aria-label="Alternar tema">
+                    <isax-anim name="sun" size="17"></isax-anim>
+                </button>
+                <button id="menuToggle" type="button"
+                    class="ux-btn ux-btn-ghost h-9 w-9 rounded-xl"
+                    aria-label="Abrir menu" aria-controls="mobileMenu" aria-expanded="false">
+                    <isax-anim id="menuToggleIcon" name="menu" size="18"></isax-anim>
+                </button>
+            </div>
 
+            <!-- Menu Mobile funcional -->
             <div id="mobileMenu"
-                class="absolute left-0 top-[calc(100%+1rem)] hidden w-full flex-col items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/95 p-6 shadow-2xl backdrop-blur-xl md:!hidden">
-                <a href="#projetos"
-                    class="w-full rounded-lg px-4 py-2 text-center text-base transition duration-200 ease-out hover:bg-indigo-500/15 hover:text-indigo-400 active:scale-[0.98] active:text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">Projetos</a>
-                <a href="#"
-                    class="w-full rounded-lg px-4 py-2 text-center text-base transition duration-200 ease-out hover:bg-indigo-500/15 hover:text-indigo-400 active:scale-[0.98] active:text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">Historias</a>
-                <a href="#"
-                    class="w-full rounded-lg px-4 py-2 text-center text-base transition duration-200 ease-out hover:bg-indigo-500/15 hover:text-indigo-400 active:scale-[0.98] active:text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">Preços</a>
-                <a href="#"
-                    class="w-full rounded-lg px-4 py-2 text-center text-base transition duration-200 ease-out hover:bg-indigo-500/15 hover:text-indigo-400 active:scale-[0.98] active:text-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">Documentação</a>
-                <button type="button"
-                    class="w-4/5 max-w-xs rounded-full border border-slate-600 px-4 py-2 font-medium transition duration-200 hover:border-indigo-400 hover:bg-indigo-500/15 hover:text-indigo-300 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                    Contatos
-                </button>
-                <button type="button"
-                    class="w-4/5 max-w-xs rounded-full bg-white px-4 py-2 font-medium text-black transition duration-200 hover:bg-indigo-100 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-                    Comece Agora
-                </button>
+                class="mobile-drawer ux-surface absolute left-0 right-0 top-[calc(100%+0.65rem)] z-50 rounded-2xl p-4 md:hidden">
+                <div class="flex flex-col gap-1.5">
+                    <a href="#trilhas" class="mobile-nav-link flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium portal-ink">
+                        <span>Trilhas &amp; Plataformas</span>
+                        <isax-anim name="arrow-right" size="15"></isax-anim>
+                    </a>
+                    <a href="#projetos-praticos" class="mobile-nav-link flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium portal-ink">
+                        <span>Projetos Práticos</span>
+                        <isax-anim name="arrow-right" size="15"></isax-anim>
+                    </a>
+                    <a href="#materiais" class="mobile-nav-link flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium portal-ink">
+                        <span>Slides &amp; Manuais</span>
+                        <isax-anim name="arrow-right" size="15"></isax-anim>
+                    </a>
+                    <a href="cursos/index.html" class="mobile-nav-link flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium portal-ink">
+                        <span>Plataforma de Cursos</span>
+                        <isax-anim name="video-play" size="15"></isax-anim>
+                    </a>
+                    <a href="trabalhos/trabalhos.html" class="mobile-nav-link flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium portal-ink">
+                        <span>Trabalhos da Turma</span>
+                        <isax-anim name="folder-open" size="15"></isax-anim>
+                    </a>
+                    <div class="mt-2 border-t pt-3 portal-border">
+                        <button type="button" data-open-voice-guide
+                            class="mobile-nav-link ux-btn ux-btn-primary w-full rounded-xl px-4 py-2.5 text-xs">
+                            <isax-anim name="microphone" size="16"></isax-anim>
+                            <span>Falar com o Guia de Voz</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </nav>
     </header>
 
-    <main id="projetos" class="mx-auto flex w-full max-w-6xl scroll-mt-8 flex-col gap-8 py-12">
-        <header class="text-center">
-            <h1 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                Projetos e materiais
-            </h1>
-            <p class="mx-auto mt-3 max-w-2xl text-slate-400">
-                Explore os conteúdos e recursos disponíveis para seus estudos.
-            </p>
-        </header>
+    <!-- HERO FULL-BLEED EDGE-TO-EDGE -->
+    <section id="topo" class="hero-band relative z-10 w-full px-4 pb-12 pt-10 sm:px-8 sm:pt-14 lg:px-12">
+        <div class="mx-auto w-full max-w-[1600px]">
+            <div class="grid gap-8 lg:grid-cols-12 lg:items-center">
+                <!-- Coluna Principal Editorial (7 colunas) -->
+                <div class="space-y-6 lg:col-span-7">
+                    <span class="aui-shimmer inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold tracking-wide"
+                        style="background:var(--ds-accent-soft);border-color:var(--ds-accent-border);color:var(--ds-accent);">
+                        <isax-anim name="award" size="15" trigger="ambient"></isax-anim>
+                        <span>Desenvolvimento de Sistemas • SENAI DevTarde</span>
+                    </span>
 
-        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:auto-rows-[minmax(190px,auto)]">
+                    <h1 data-split-text class="ds-display text-4xl font-extrabold leading-[1.08] portal-ink sm:text-5xl xl:text-6xl">
+                        Central completa de estudos, projetos e código real.
+                    </h1>
 
-            <!-- CARD 1: Alunos DevTarde -->
-            <section class="sm:col-span-2" aria-label="Alunos DevTarde">
-                <article
-                    class="flex h-full min-h-64 w-full flex-col rounded-3xl border border-cyan-400/40 bg-cyan-950/30 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-cyan-300/80 hover:shadow-2xl hover:shadow-cyan-950/40 active:scale-[0.98] lg:min-h-0 lg:p-8">
-                    <div class="mb-3 flex items-center justify-between gap-3">
-                        <span
-                            class="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-200">Turma
-                            DevTarde</span>
-                        <span aria-hidden="true" class="text-2xl">✦</span>
-                    </div>
-                    <h2 class="text-xl font-semibold text-white">Alunos DevTarde</h2>
-                    <p class="mt-3 text-slate-300">Gerencie matrículas e visualize os currículos profissionais dos
-                        alunos da turma.</p>
-                    <button id="openStudentsApp" type="button"
-                        class="mt-auto inline-flex w-fit items-center rounded-lg bg-cyan-500 px-5 py-3 font-semibold text-slate-950 shadow-lg shadow-cyan-950/40 transition duration-200 hover:-translate-y-0.5 hover:bg-cyan-300 active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-cyan-300 focus:ring-offset-2 focus:ring-offset-slate-950">
-                        Acessar Alunos DevTarde
-                        <span class="ml-2" aria-hidden="true">&rarr;</span>
-                    </button>
-                </article>
-            </section>
-
-            <!-- CARD 2: Módulo de Cursos & Vídeos -->
-            <section class="sm:col-span-2" aria-label="Cursos e Videoaulas">
-                <article
-                    class="flex h-full min-h-64 w-full flex-col rounded-3xl border border-cyan-400/40 bg-cyan-950/30 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-cyan-300/80 hover:shadow-2xl hover:shadow-cyan-950/40 active:scale-[0.98] lg:min-h-0 lg:p-8">
-                    <div class="mb-3 flex items-center justify-between gap-3">
-                        <span
-                            class="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-200">VideoAulas</span>
-                        <span aria-hidden="true" class="text-2xl">✦</span>
-                    </div>
-                    <h2 class="text-xl font-semibold text-white">Plataforma de Cursos & Videoaulas</h2>
-                    <p class="mt-3 text-slate-300">Acesse videoaulas, playlists de conteúdo e materiais práticos em
-                        vídeo da turma.</p>
-                    <a href="cursos/index.html"
-                        class="mt-auto inline-flex w-fit items-center rounded-lg bg-cyan-500 px-5 py-3 font-semibold text-slate-950 shadow-lg shadow-cyan-950/40 transition duration-200 hover:-translate-y-0.5 hover:bg-cyan-300 active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-cyan-300 focus:ring-offset-2 focus:ring-offset-slate-950">
-                        Acessar Cursos
-                        <span class="ml-2" aria-hidden="true">&rarr;</span>
-                    </a>
-                </article>
-            </section>
-
-            <!-- CARD 3: Apresentação HTML & CSS -->
-            <section class="lg:col-span-2" aria-label="Apresentação HTML & CSS">
-                <article
-                    class="flex h-full min-h-48 w-full flex-col rounded-3xl border border-slate-700 bg-slate-900/65 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-indigo-500/70 hover:shadow-2xl hover:shadow-indigo-950/40 active:scale-[0.98]">
-                    <h2 class="text-xl font-semibold text-white">Apresentação HTML & CSS</h2>
-                    <p class="mt-3 text-slate-300">Uma apresentação simples usando HTML e CSS.</p>
-                    <a href="apresentacao_html_e_css.html"
-                        class="mt-auto inline-flex w-fit items-center rounded-lg bg-indigo-600 px-5 py-3 font-semibold text-white shadow-lg shadow-indigo-950/40 transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-500 hover:shadow-indigo-500/30 active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-950">
-                        Abrir apresentação
-                        <span class="ml-2" aria-hidden="true">&rarr;</span>
-                    </a>
-                </article>
-            </section>
-
-            <!-- CARD: Central de Trabalhos -->
-            <section class="lg:col-span-2" aria-label="Trabalhos da turma">
-                <article
-                    class="flex h-full min-h-48 w-full flex-col rounded-3xl border border-purple-500/40 bg-purple-950/20 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-purple-400/80 hover:shadow-2xl hover:shadow-purple-950/40 active:scale-[0.98]">
-                    <div class="mb-2">
-                        <span
-                            class="rounded-full border border-purple-400/30 bg-purple-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-purple-300">Apresentações
-                            • Turma</span>
-                    </div>
-                    <h2 class="text-xl font-semibold text-white">Trabalhos da Turma</h2>
-                    <p class="mt-2 text-slate-300">Acesse os módulos e visualize os slides enviados pelos alunos.</p>
-                    <a href="trabalhos/trabalhos.html"
-                        class="mt-auto inline-flex w-fit items-center rounded-lg bg-purple-600 px-5 py-3 font-semibold text-white shadow-lg shadow-purple-950/40 transition duration-200 hover:-translate-y-0.5 hover:bg-purple-500 active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-slate-950">
-                        Abrir trabalhos
-                        <span class="ml-2" aria-hidden="true">&rarr;</span>
-                    </a>
-                </article>
-            </section>
-
-            <!-- CARD 4: Node.js, Express & APIs REST (Novo Card dos Slides) -->
-            <section class="lg:col-span-2" aria-label="Node.js e Express">
-                <article
-                    class="flex h-full min-h-48 w-full flex-col rounded-3xl border border-emerald-500/40 bg-emerald-950/20 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-emerald-400/80 hover:shadow-2xl hover:shadow-emerald-950/40 active:scale-[0.98]">
-                    <div class="mb-2 flex items-center justify-between">
-                        <span
-                            class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-300">Slides
-                            • Backend</span>
-                        <span aria-hidden="true" class="text-emerald-400 font-mono text-sm">⬡</span>
-                    </div>
-                    <h2 class="text-xl font-semibold text-white">Node.js, Express & APIs REST</h2>
-                    <p class="mt-2 text-slate-300">Arquitetura em camadas (Routes, Controllers, Services e Models) para
-                        APIs profissionais.</p>
-                    <a href="documents/nodejs-slide.html"
-                        class="mt-auto inline-flex w-fit items-center rounded-lg bg-emerald-600 px-5 py-3 font-semibold text-white shadow-lg shadow-emerald-950/40 transition duration-200 hover:-translate-y-0.5 hover:bg-emerald-500 hover:shadow-emerald-500/30 active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-950">
-                        Abrir slides
-                        <span class="ml-2" aria-hidden="true">&rarr;</span>
-                    </a>
-                </article>
-            </section>
-
-            
-
-            <!-- CARD 5: Gemini de Estudos para TailwindCSS -->
-            <section class="lg:col-span-2" aria-label="Guia TailwindCSS">
-                <article
-                    class="flex h-full min-h-48 w-full flex-col rounded-3xl border border-slate-700 bg-slate-900/65 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-indigo-500/70 hover:shadow-2xl hover:shadow-indigo-950/40 active:scale-[0.98]">
-                    <h2 class="text-xl font-semibold text-white">Gemini de Estudos para TailwindCSS</h2>
-                    <p class="mt-3 text-slate-300">Um guia completo para estudar TailwindCSS com o auxílio do Gemini.
+                    <p class="max-w-2xl text-base leading-relaxed portal-secondary sm:text-lg">
+                        Explore todo o ecossistema da turma em
+                        <span data-rotate-words="Full-Stack|SQLite &amp; SQL|Vue 3 Reativo|APIs REST|Firebase NoSQL"></span>
+                        com videoaulas, portfólios, aplicações práticas e uma assistente de voz exclusiva do projeto.
                     </p>
-                    <a href="https://gemini.google.com/gem/15aX5w44xaDjJ_NTG2vYmwCuRTESC9N2x?usp=sharing"
-                        target="_blank" rel="noopener noreferrer"
-                        class="mt-auto inline-flex w-fit items-center rounded-lg bg-indigo-600 px-5 py-3 font-semibold text-white shadow-lg shadow-indigo-950/40 transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-500 hover:shadow-indigo-500/30 active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-950">
-                        Abrir guia
-                        <span class="ml-2" aria-hidden="true">&rarr;</span>
-                    </a>
-                </article>
-            </section>
 
-            <!-- CARD: Manual Firebase & Firestore -->
-            <section class="lg:col-span-2" aria-label="Manual Firebase e Firestore">
-                <article
-                    class="flex h-full min-h-48 w-full flex-col rounded-3xl border border-amber-500/40 bg-amber-950/20 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-amber-400/80 hover:shadow-2xl hover:shadow-amber-950/40 active:scale-[0.98]">
-                    <div class="mb-2 flex items-center justify-between">
-                        <span
-                            class="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-amber-300">Manual
-                            • Banco NoSQL</span>
-                        <span aria-hidden="true" class="text-amber-400 font-mono text-sm">🔥</span>
+                    <div class="flex flex-wrap items-center gap-3 pt-1">
+                        <button type="button" data-open-voice-guide data-magnetic
+                            class="ux-btn ux-btn-primary rounded-2xl px-6 py-3.5 text-sm">
+                            <isax-anim name="microphone" size="18"></isax-anim>
+                            <span>Conversar por Voz com o Guia</span>
+                        </button>
+                        <a href="#projetos-praticos" data-magnetic
+                            class="ux-btn ux-btn-ghost rounded-2xl px-6 py-3.5 text-sm">
+                            <isax-anim name="terminal" size="18"></isax-anim>
+                            <span>Abrir Projetos Práticos</span>
+                            <isax-anim name="arrow-right" size="16"></isax-anim>
+                        </a>
                     </div>
-                    <h2 class="text-xl font-semibold text-white">Firebase & Firestore</h2>
-                    <p class="mt-2 text-slate-300">Manual interativo sobre Firebase, Firestore, coleções, documentos e consultas em tempo real.</p>
-                    <a href="documents/manual-firebase-firestore.html"
-                        class="mt-auto inline-flex w-fit items-center rounded-lg bg-amber-600 px-5 py-3 font-semibold text-white shadow-lg shadow-amber-950/40 transition duration-200 hover:-translate-y-0.5 hover:bg-amber-500 hover:shadow-amber-500/30 active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-slate-950">
-                        Abrir manual
-                        <span class="ml-2" aria-hidden="true">&rarr;</span>
-                    </a>
-                </article>
-            </section>
-
-            <!-- CARD: Módulo Banco de Dados -->
-            <section class="lg:col-span-2" aria-label="Módulo Banco de Dados">
-                <article
-                    class="flex h-full min-h-48 w-full flex-col rounded-3xl border border-emerald-500/40 bg-emerald-950/20 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-emerald-400/80 hover:shadow-2xl hover:shadow-emerald-950/40 active:scale-[0.98]">
-                    <div class="mb-2 flex items-center justify-between">
-                        <span
-                            class="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-300">Módulo
-                            • SQL</span>
-                        <span aria-hidden="true" class="text-emerald-400 font-mono text-sm">⛁</span>
-                    </div>
-                    <h2 class="text-xl font-semibold text-white">Banco de Dados</h2>
-                    <p class="mt-2 text-slate-300">Acesse as 5 aulas sobre modelagem, SGBD, SQL, segurança e Big Data.</p>
-                    <a href="Modulos/BancoDeDados/repositorio.html"
-                        class="mt-auto inline-flex w-fit items-center rounded-lg bg-emerald-600 px-5 py-3 font-semibold text-white shadow-lg shadow-emerald-950/40 transition duration-200 hover:-translate-y-0.5 hover:bg-emerald-500 hover:shadow-emerald-500/30 active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-950">
-                        Acessar módulo
-                        <span class="ml-2" aria-hidden="true">&rarr;</span>
-                    </a>
-                </article>
-            </section>
-
-            <!-- CARD 6: Nosso GitHub (Movido para baixo) -->
-            <section aria-label="GitHub">
-                <article
-                    class="flex h-full min-h-48 w-full flex-col rounded-3xl border border-slate-700 bg-slate-900/65 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-indigo-500/70 hover:shadow-2xl hover:shadow-indigo-950/40 active:scale-[0.98]">
-                    <h2 class="text-xl font-semibold text-white">Nosso GitHub</h2>
-                    <p class="mt-3 text-slate-300">Repositório com os códigos do curso e tudo que você precisa para
-                        começar a desenvolver.</p>
-                    <a href="https://github.com/curtytech/cursodevsenai2" target="_blank" rel="noopener noreferrer"
-                        class="mt-auto inline-flex w-fit items-center rounded-lg bg-indigo-600 px-5 py-3 font-semibold text-white shadow-lg shadow-indigo-950/40 transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-500 hover:shadow-indigo-500/30 active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-950">
-                        Abrir GitHub
-                        <span class="ml-2" aria-hidden="true">&rarr;</span>
-                    </a>
-                </article>
-            </section>
-
-            <!-- CARD 7: Manual de Git e GitHub (Movido para baixo) -->
-            <section aria-label="Manual Git">
-                <article
-                    class="flex h-full min-h-48 w-full flex-col rounded-3xl border border-slate-700 bg-slate-900/65 p-6 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:border-indigo-500/70 hover:shadow-2xl hover:shadow-indigo-950/40 active:scale-[0.98]">
-                    <h2 class="text-xl font-semibold text-white">Manual de Git e GitHub</h2>
-                    <p class="mt-3 text-slate-300">Um manual completo sobre Git e GitHub.</p>
-                    <a href="https://andersonfariaas.github.io/manual-Git-e-GitHub/" target="_blank"
-                        rel="noopener noreferrer"
-                        class="mt-auto inline-flex w-fit items-center rounded-lg bg-indigo-600 px-5 py-3 font-semibold text-white shadow-lg shadow-indigo-950/40 transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-500 hover:shadow-indigo-500/30 active:translate-y-0 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-950">
-                        Abrir manual
-                        <span class="ml-2" aria-hidden="true">&rarr;</span>
-                    </a>
-                </article>
-            </section>
-
-        </div>
-    </main>
-
-    <section id="studentsApp" class="fixed inset-0 z-40 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm"
-        aria-labelledby="studentsTitle" role="dialog" aria-modal="true">
-        <div
-            class="mx-auto my-6 w-full max-w-6xl rounded-3xl border border-slate-700 bg-slate-900/95 p-5 shadow-2xl shadow-cyan-950/30 sm:my-10 sm:p-8">
-            <div class="flex flex-col gap-5 border-b border-slate-700 pb-6 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                    <div class="mb-3 flex flex-wrap items-center gap-2">
-                        <span
-                            class="rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-200">DevTarde</span>
-                        <span id="storageStatus"
-                            class="rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 text-xs font-semibold text-amber-200">Local
-                            Sync</span>
-                    </div>
-                    <h2 id="studentsTitle" class="text-2xl font-bold text-white sm:text-3xl">Gestão de alunos e
-                        currículos</h2>
-                    <p class="mt-2 text-sm text-slate-400">Cadastre talentos, organize especialidades e compartilhe
-                        currículos.</p>
                 </div>
-                <div class="flex gap-3">
-                    <button id="closeStudentsApp" type="button"
-                        class="rounded-lg border border-slate-600 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-slate-400 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-300">Fechar</button>
-                    <button id="newStudentButton" type="button"
-                        class="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300">+
-                        Novo aluno</button>
+
+                <!-- Coluna Direita: Painel Interativo de Métricas + Acesso Rápido (5 colunas) -->
+                <div class="lg:col-span-5" data-reveal data-reveal-delay="100">
+                    <div class="ux-surface rounded-3xl p-6 sm:p-7" data-spotlight-card="flat">
+                        <div class="flex items-center justify-between border-b pb-4 portal-border">
+                            <div class="flex items-center gap-2.5">
+                                <span class="flex h-8 w-8 items-center justify-center rounded-xl"
+                                    style="background:var(--ds-emerald-soft);color:var(--ds-emerald);">
+                                    <isax-anim name="microphone" size="17"></isax-anim>
+                                </span>
+                                <div>
+                                    <p class="ds-display text-sm font-bold portal-ink">Guia do Curso • Ao Vivo</p>
+                                    <p class="text-[11px] portal-muted">Conversa natural por voz com Google Gemini Live</p>
+                                </div>
+                            </div>
+                            <span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold"
+                                style="background:var(--ds-emerald-soft);border-color:rgba(16,185,129,0.3);color:var(--ds-emerald);">
+                                <isax-anim name="volume-high" size="13" trigger="ambient"></isax-anim>
+                                <span>Gemini Live</span>
+                            </span>
+                        </div>
+
+                        <!-- Métricas com Counting Numbers -->
+                        <div class="mt-5 grid grid-cols-3 gap-3">
+                            <div class="portal-subtle rounded-2xl border p-3.5 text-center portal-border">
+                                <span data-count-to="5" class="ds-display block text-2xl font-extrabold portal-ink">0</span>
+                                <span class="text-[11px] font-medium portal-muted">Aulas SQL</span>
+                            </div>
+                            <div class="portal-subtle rounded-2xl border p-3.5 text-center portal-border">
+                                <span data-count-to="13" class="ds-display block text-2xl font-extrabold" style="color:var(--ds-accent);">0</span>
+                                <span class="text-[11px] font-medium portal-muted">Módulos</span>
+                            </div>
+                            <div class="portal-subtle rounded-2xl border p-3.5 text-center portal-border">
+                                <span data-count-to="46" data-count-suffix="+" class="ds-display block text-2xl font-extrabold" style="color:var(--ds-emerald);">0</span>
+                                <span class="text-[11px] font-medium portal-muted">Ícones Anim.</span>
+                            </div>
+                        </div>
+
+                        <!-- Atalhos rápidos interativos do portal -->
+                        <div class="mt-5 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                            <button type="button" data-open-voice-guide data-magnetic
+                                class="portal-subtle flex items-center justify-between gap-2.5 rounded-xl border px-3.5 py-3 text-left transition hover:border-amber-500/40 portal-border">
+                                <span class="flex items-center gap-2.5 min-w-0">
+                                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                                        style="background:var(--ds-accent-soft);color:var(--ds-accent);">
+                                        <isax-anim name="microphone" size="15"></isax-anim>
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="block truncate text-xs font-bold portal-ink">Conversar ao Vivo</span>
+                                        <span class="block truncate text-[11px] portal-muted">Voz natural pt-BR</span>
+                                    </span>
+                                </span>
+                                <isax-anim name="arrow-right" size="14"></isax-anim>
+                            </button>
+
+                            <a href="cursos/index.html"
+                                class="portal-subtle flex items-center justify-between gap-2.5 rounded-xl border px-3.5 py-3 text-left transition hover:border-amber-500/40 portal-border">
+                                <span class="flex items-center gap-2.5 min-w-0">
+                                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                                        style="background:var(--ds-indigo-soft);color:var(--ds-indigo);">
+                                        <isax-anim name="video-play" size="15"></isax-anim>
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="block truncate text-xs font-bold portal-ink">Cursos &amp; Aulas</span>
+                                        <span class="block truncate text-[11px] portal-muted">Playlists e SQL</span>
+                                    </span>
+                                </span>
+                                <isax-anim name="arrow-right" size="14"></isax-anim>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div id="studentFeedback" class="mt-5 hidden rounded-lg border px-4 py-3 text-sm" role="status"></div>
+            <!-- Barra de Busca + Sliding Pill Tabs (Animate UI Motion Highlight) -->
+            <div class="ux-surface mt-10 flex flex-col gap-3 rounded-2xl p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4" data-reveal data-reveal-delay="140">
+                <div class="relative flex-1 max-w-xl">
+                    <span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 portal-muted">
+                        <isax-anim name="search" size="18"></isax-anim>
+                    </span>
+                    <input id="portalSearchInput" type="search" autocomplete="off"
+                        placeholder="Filtrar módulos, aulas, projetos, APIs ou tecnologias..."
+                        class="ux-input w-full rounded-xl py-2.5 pl-10 pr-4 text-sm">
+                </div>
+
+                <div data-sliding-tabs class="inline-flex flex-wrap items-center gap-1 rounded-xl p-1 portal-subtle border portal-border" role="tablist" aria-label="Filtrar por categoria">
+                    <button type="button" role="tab" data-filter="all"
+                        class="portal-filter-btn is-tab-active ux-btn rounded-xl border border-transparent px-4 py-2 text-xs">
+                        Todos
+                    </button>
+                    <button type="button" role="tab" data-filter="trilhas"
+                        class="portal-filter-btn ux-btn rounded-xl border border-transparent px-4 py-2 text-xs portal-secondary">
+                        Plataforma
+                    </button>
+                    <button type="button" role="tab" data-filter="projetos"
+                        class="portal-filter-btn ux-btn rounded-xl border border-transparent px-4 py-2 text-xs portal-secondary">
+                        Projetos
+                    </button>
+                    <button type="button" role="tab" data-filter="materiais"
+                        class="portal-filter-btn ux-btn rounded-xl border border-transparent px-4 py-2 text-xs portal-secondary">
+                        Materiais
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="relative z-10 mx-auto flex w-full max-w-[1600px] flex-col gap-16 px-4 pb-24 pt-12 sm:px-8 lg:px-12">
+
+        <!-- SEÇÃO 1: Trilhas & Plataformas (Bento 12 Colunas) -->
+        <section id="trilhas" class="scroll-mt-28 space-y-6" data-section-group="trilhas">
+            <div class="flex flex-wrap items-end justify-between gap-2" data-reveal>
+                <div>
+                    <p class="ds-mono text-xs font-semibold uppercase tracking-wider" style="color:var(--ds-accent);">01 • Plataforma Integrada</p>
+                    <h2 class="ds-display mt-1 text-2xl font-bold portal-ink sm:text-3xl">Trilhas &amp; Recursos da Turma</h2>
+                </div>
+                <span class="text-xs portal-muted">Ambientes ativos com persistência em nuvem e SQLite</span>
+            </div>
+
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-12">
+                <!-- CARD 1: Alunos DevTarde -->
+                <article data-spotlight-card class="portal-card ux-card flex flex-col rounded-3xl p-6 sm:p-8 xl:col-span-6"
+                    data-category="trilhas" data-keywords="alunos devtarde matriculas curriculos gestao turma" data-reveal data-reveal-delay="40">
+                    <div class="mb-4 flex items-center justify-between gap-3">
+                        <span class="card-icon-badge" style="background:var(--ds-accent-soft);border-color:var(--ds-accent-border);color:var(--ds-accent);">
+                            <isax-anim name="users" size="23"></isax-anim>
+                        </span>
+                        <span class="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wider"
+                            style="background:var(--ds-accent-soft);border-color:var(--ds-accent-border);color:var(--ds-accent);">
+                            Turma DevTarde
+                        </span>
+                    </div>
+                    <h3 class="ds-display text-xl font-bold portal-ink sm:text-2xl">Alunos DevTarde</h3>
+                    <p class="mt-2.5 text-sm leading-relaxed portal-secondary">
+                        Gerencie matrículas, contatos de WhatsApp e visualize os currículos e portfólios profissionais dos alunos com sincronização em nuvem e fallback local.
+                    </p>
+                    <div class="mt-auto pt-6">
+                        <button id="openStudentsApp" type="button" data-magnetic class="ux-btn ux-btn-primary rounded-xl px-5 py-2.5 text-xs">
+                            <span>Acessar Alunos DevTarde</span>
+                            <isax-anim name="arrow-right" size="16"></isax-anim>
+                        </button>
+                    </div>
+                </article>
+
+                <!-- CARD 2: Cursos & Videoaulas -->
+                <article data-spotlight-card class="portal-card ux-card flex flex-col rounded-3xl p-6 sm:p-8 xl:col-span-6"
+                    data-category="trilhas" data-keywords="cursos videoaulas youtube playlists aulas player" data-reveal data-reveal-delay="100">
+                    <div class="mb-4 flex items-center justify-between gap-3">
+                        <span class="card-icon-badge" style="background:var(--ds-indigo-soft);border-color:rgba(129,140,248,0.3);color:var(--ds-indigo);">
+                            <isax-anim name="video-play" size="23"></isax-anim>
+                        </span>
+                        <span class="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wider"
+                            style="background:var(--ds-indigo-soft);border-color:rgba(129,140,248,0.3);color:var(--ds-indigo);">
+                            Videoaulas
+                        </span>
+                    </div>
+                    <h3 class="ds-display text-xl font-bold portal-ink sm:text-2xl">Plataforma de Cursos &amp; Videoaulas</h3>
+                    <p class="mt-2.5 text-sm leading-relaxed portal-secondary">
+                        Assista às playlists de conteúdo da turma, navegue pelas aulas ordenadas no player e cadastre novos módulos conectados ao Cloudflare D1.
+                    </p>
+                    <div class="mt-auto pt-6">
+                        <a href="cursos/index.html" data-magnetic class="ux-btn ux-btn-primary rounded-xl px-5 py-2.5 text-xs">
+                            <span>Acessar Cursos</span>
+                            <isax-anim name="arrow-right" size="16"></isax-anim>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- CARD 3: Trabalhos da Turma -->
+                <article data-spotlight-card class="portal-card ux-card flex flex-col rounded-3xl p-6 sm:p-8 xl:col-span-6"
+                    data-category="trilhas" data-keywords="trabalhos turma portfolio apresentacoes upload r2 link pin" data-reveal data-reveal-delay="160">
+                    <div class="mb-4 flex items-center justify-between gap-3">
+                        <span class="card-icon-badge" style="background:var(--ds-amber-soft);border-color:rgba(245,158,11,0.3);color:var(--ds-amber);">
+                            <isax-anim name="folder-open" size="23"></isax-anim>
+                        </span>
+                        <span class="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wider"
+                            style="background:var(--ds-amber-soft);border-color:rgba(245,158,11,0.3);color:var(--ds-amber);">
+                            Portfólios
+                        </span>
+                    </div>
+                    <h3 class="ds-display text-xl font-bold portal-ink sm:text-2xl">Trabalhos da Turma</h3>
+                    <p class="mt-2.5 text-sm leading-relaxed portal-secondary">
+                        Explore as apresentações interativas publicadas pelos alunos ou publique seu projeto via upload de arquivos (R2) ou link HTTPS público.
+                    </p>
+                    <div class="mt-auto pt-6">
+                        <a href="trabalhos/trabalhos.html" class="ux-btn ux-btn-ghost rounded-xl px-5 py-2.5 text-xs">
+                            <span>Abrir Trabalhos</span>
+                            <isax-anim name="arrow-right" size="16"></isax-anim>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- CARD 4: Módulo Banco de Dados -->
+                <article data-spotlight-card class="portal-card ux-card flex flex-col rounded-3xl p-6 sm:p-8 xl:col-span-6"
+                    data-category="trilhas" data-keywords="banco de dados sql modelagem sgbd big data aulas" data-reveal data-reveal-delay="220">
+                    <div class="mb-4 flex items-center justify-between gap-3">
+                        <span class="card-icon-badge" style="background:var(--ds-emerald-soft);border-color:rgba(16,185,129,0.3);color:var(--ds-emerald);">
+                            <isax-anim name="database" size="23"></isax-anim>
+                        </span>
+                        <span class="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wider"
+                            style="background:var(--ds-emerald-soft);border-color:rgba(16,185,129,0.3);color:var(--ds-emerald);">
+                            Módulo • SQL
+                        </span>
+                    </div>
+                    <h3 class="ds-display text-xl font-bold portal-ink sm:text-2xl">Banco de Dados</h3>
+                    <p class="mt-2.5 text-sm leading-relaxed portal-secondary">
+                        Acesse as 5 aulas completas sobre fundamentos, arquitetura e modelagem, SGBDs, comandos SQL avançados, segurança e Big Data.
+                    </p>
+                    <div class="mt-auto pt-6">
+                        <a href="Modulos/BancoDeDados/repositorio.html" class="ux-btn ux-btn-ghost rounded-xl px-5 py-2.5 text-xs">
+                            <span>Acessar Módulo</span>
+                            <isax-anim name="arrow-right" size="16"></isax-anim>
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- SEÇÃO 2: Projetos Práticos (Full-Width 12 Colunas) -->
+        <section id="projetos-praticos" class="scroll-mt-28 space-y-6" data-section-group="projetos">
+            <div class="flex flex-wrap items-end justify-between gap-2" data-reveal>
+                <div>
+                    <p class="ds-mono text-xs font-semibold uppercase tracking-wider" style="color:var(--ds-emerald);">02 • Hands-on</p>
+                    <h2 class="ds-display mt-1 text-2xl font-bold portal-ink sm:text-3xl">Projetos Práticos em Código</h2>
+                </div>
+                <span class="text-xs portal-muted">Aplicações Vue 3 conectadas à API Node.js + SQLite</span>
+            </div>
+
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
+                <article data-spotlight-card class="portal-card ux-card flex flex-col rounded-3xl p-6 sm:p-7"
+                    data-category="projetos" data-keywords="front-vue vuejs lista tarefas tasks api sqlite crud" data-reveal data-reveal-delay="50">
+                    <div class="mb-4 flex items-center justify-between">
+                        <span class="card-icon-badge" style="background:var(--ds-emerald-soft);border-color:rgba(16,185,129,0.3);color:var(--ds-emerald);">
+                            <isax-anim name="tick-circle" size="22"></isax-anim>
+                        </span>
+                        <span class="ds-mono text-[11px] portal-muted">projects/front-vue</span>
+                    </div>
+                    <h3 class="ds-display text-xl font-bold portal-ink">Task List Vue 3 + SQLite</h3>
+                    <p class="mt-2 text-sm leading-relaxed portal-secondary">
+                        Workspace amplo de tarefas com anel de progresso circular, filtros com pílula deslizante, edição inline e persistência real no SQLite.
+                    </p>
+                    <div class="mt-auto pt-6">
+                        <a href="projects/front-vue/index.html" data-magnetic class="ux-btn ux-btn-primary w-full rounded-xl px-4 py-2.5 text-xs">
+                            <span>Abrir Workspace Vue</span>
+                            <isax-anim name="arrow-right" size="15"></isax-anim>
+                        </a>
+                    </div>
+                </article>
+
+                <article data-spotlight-card class="portal-card ux-card flex flex-col rounded-3xl p-6 sm:p-7"
+                    data-category="projetos" data-keywords="frontend vue modal sweetalert2 toast lista tarefas" data-reveal data-reveal-delay="110">
+                    <div class="mb-4 flex items-center justify-between">
+                        <span class="card-icon-badge" style="background:var(--ds-accent-soft);border-color:var(--ds-accent-border);color:var(--ds-accent);">
+                            <isax-anim name="sliders" size="22"></isax-anim>
+                        </span>
+                        <span class="ds-mono text-[11px] portal-muted">projects/frontend</span>
+                    </div>
+                    <h3 class="ds-display text-xl font-bold portal-ink">Task List Modal &amp; Alerts</h3>
+                    <p class="mt-2 text-sm leading-relaxed portal-secondary">
+                        Variação full-width com modal de confirmação de exclusão, alertas toast SweetAlert2, progresso visual e atalhos de teclado.
+                    </p>
+                    <div class="mt-auto pt-6">
+                        <a href="projects/frontend/index.html" class="ux-btn ux-btn-ghost w-full rounded-xl px-4 py-2.5 text-xs">
+                            <span>Abrir Variação</span>
+                            <isax-anim name="arrow-right" size="15"></isax-anim>
+                        </a>
+                    </div>
+                </article>
+
+                <article data-spotlight-card class="portal-card ux-card flex flex-col rounded-3xl p-6 sm:p-7"
+                    data-category="projetos" data-keywords="node-api backend express sqlite migrations rotas rest users tasks voz gemini" data-reveal data-reveal-delay="170">
+                    <div class="mb-4 flex items-center justify-between">
+                        <span class="card-icon-badge" style="background:var(--ds-indigo-soft);border-color:rgba(129,140,248,0.3);color:var(--ds-indigo);">
+                            <isax-anim name="terminal" size="22"></isax-anim>
+                        </span>
+                        <span class="ds-mono text-[11px] portal-muted">projects/node-api</span>
+                    </div>
+                    <h3 class="ds-display text-xl font-bold portal-ink">Node.js API + SQLite</h3>
+                    <p class="mt-2 text-sm leading-relaxed portal-secondary">
+                        Backend REST em camadas do curso com endpoints <code class="ds-mono text-xs">/api/users</code> e <code class="ds-mono text-xs">/api/tasks</code> persistidos em SQLite, além de integração nativa com Gemini Live na Vercel.
+                    </p>
+                    <div class="mt-auto pt-6">
+                        <button type="button" data-open-voice-guide class="ux-btn ux-btn-ghost w-full rounded-xl px-4 py-2.5 text-xs">
+                            <isax-anim name="microphone" size="15"></isax-anim>
+                            <span>Perguntar por Voz sobre a API</span>
+                        </button>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- SEÇÃO 3: Slides, Manuais & Referências (Grid Amplo 3/6 Colunas) -->
+        <section id="materiais" class="scroll-mt-28 space-y-6" data-section-group="materiais">
+            <div class="flex flex-wrap items-end justify-between gap-2" data-reveal>
+                <div>
+                    <p class="ds-mono text-xs font-semibold uppercase tracking-wider" style="color:var(--ds-amber);">03 • Documentação</p>
+                    <h2 class="ds-display mt-1 text-2xl font-bold portal-ink sm:text-3xl">Slides, Manuais &amp; Referências</h2>
+                </div>
+                <span class="text-xs portal-muted">Material de apoio das aulas teóricas e práticas</span>
+            </div>
+
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <article data-spotlight-card class="portal-card ux-card flex flex-col rounded-3xl p-6"
+                    data-category="materiais" data-keywords="node express api rest slides arquitetura backend" data-reveal data-reveal-delay="40">
+                    <div class="mb-3 flex items-center justify-between">
+                        <span class="card-icon-badge" style="background:var(--ds-emerald-soft);border-color:rgba(16,185,129,0.3);color:var(--ds-emerald);">
+                            <isax-anim name="code" size="20"></isax-anim>
+                        </span>
+                        <span class="text-[11px] font-semibold uppercase tracking-wider portal-muted">Slides • Backend</span>
+                    </div>
+                    <h3 class="ds-display text-lg font-bold portal-ink">Node.js, Express &amp; APIs REST</h3>
+                    <p class="mt-2 text-sm leading-relaxed portal-secondary">
+                        Arquitetura em camadas (Routes, Controllers, Services e Models) para APIs organizadas.
+                    </p>
+                    <div class="mt-auto pt-5">
+                        <a href="documents/nodejs-slide.html" class="ux-btn ux-btn-ghost rounded-xl px-4 py-2 text-xs">
+                            <span>Abrir Slides</span>
+                            <isax-anim name="arrow-right" size="15"></isax-anim>
+                        </a>
+                    </div>
+                </article>
+
+                <article data-spotlight-card class="portal-card ux-card flex flex-col rounded-3xl p-6"
+                    data-category="materiais" data-keywords="firebase firestore nosql manual banco colecoes documentos" data-reveal data-reveal-delay="90">
+                    <div class="mb-3 flex items-center justify-between">
+                        <span class="card-icon-badge" style="background:var(--ds-amber-soft);border-color:rgba(245,158,11,0.3);color:var(--ds-amber);">
+                            <isax-anim name="flame" size="20"></isax-anim>
+                        </span>
+                        <span class="text-[11px] font-semibold uppercase tracking-wider portal-muted">Manual • NoSQL</span>
+                    </div>
+                    <h3 class="ds-display text-lg font-bold portal-ink">Firebase &amp; Firestore</h3>
+                    <p class="mt-2 text-sm leading-relaxed portal-secondary">
+                        Manual interativo sobre Firebase, Firestore, coleções, documentos e consultas em tempo real.
+                    </p>
+                    <div class="mt-auto pt-5">
+                        <a href="documents/manual-firebase-firestore.html" class="ux-btn ux-btn-ghost rounded-xl px-4 py-2 text-xs">
+                            <span>Abrir Manual</span>
+                            <isax-anim name="arrow-right" size="15"></isax-anim>
+                        </a>
+                    </div>
+                </article>
+
+                <article data-spotlight-card class="portal-card ux-card flex flex-col rounded-3xl p-6"
+                    data-category="materiais" data-keywords="html css apresentacao fundamentos web" data-reveal data-reveal-delay="140">
+                    <div class="mb-3 flex items-center justify-between">
+                        <span class="card-icon-badge" style="background:var(--ds-indigo-soft);border-color:rgba(129,140,248,0.3);color:var(--ds-indigo);">
+                            <isax-anim name="file-text" size="20"></isax-anim>
+                        </span>
+                        <span class="text-[11px] font-semibold uppercase tracking-wider portal-muted">Fundamentos</span>
+                    </div>
+                    <h3 class="ds-display text-lg font-bold portal-ink">Apresentação HTML &amp; CSS</h3>
+                    <p class="mt-2 text-sm leading-relaxed portal-secondary">
+                        Conceitos essenciais de estruturação semântica e estilização moderna para a web.
+                    </p>
+                    <div class="mt-auto pt-5">
+                        <a href="apresentacao_html_e_css.html" class="ux-btn ux-btn-ghost rounded-xl px-4 py-2 text-xs">
+                            <span>Abrir Apresentação</span>
+                            <isax-anim name="arrow-right" size="15"></isax-anim>
+                        </a>
+                    </div>
+                </article>
+
+                <article data-spotlight-card class="portal-card ux-card flex flex-col rounded-3xl p-6"
+                    data-category="materiais" data-keywords="tailwindcss tailwind gemini guia estudos css" data-reveal data-reveal-delay="190">
+                    <div class="mb-3 flex items-center justify-between">
+                        <span class="card-icon-badge" style="background:var(--ds-accent-soft);border-color:var(--ds-accent-border);color:var(--ds-accent);">
+                            <isax-anim name="book" size="20"></isax-anim>
+                        </span>
+                        <span class="text-[11px] font-semibold uppercase tracking-wider portal-muted">Externo</span>
+                    </div>
+                    <h3 class="ds-display text-lg font-bold portal-ink">Guia de Estudos TailwindCSS</h3>
+                    <p class="mt-2 text-sm leading-relaxed portal-secondary">
+                        Material de apoio interativo para dominar utilitários, responsividade e layouts no TailwindCSS.
+                    </p>
+                    <div class="mt-auto pt-5">
+                        <a href="https://gemini.google.com/gem/15aX5w44xaDjJ_NTG2vYmwCuRTESC9N2x?usp=sharing"
+                            target="_blank" rel="noopener noreferrer"
+                            class="ux-btn ux-btn-ghost rounded-xl px-4 py-2 text-xs">
+                            <span>Abrir Guia</span>
+                            <isax-anim name="external-link" size="15"></isax-anim>
+                        </a>
+                    </div>
+                </article>
+
+                <article data-spotlight-card class="portal-card ux-card flex flex-col rounded-3xl p-6"
+                    data-category="materiais" data-keywords="github repositorio git codigo fonte curso" data-reveal data-reveal-delay="240">
+                    <div class="mb-3 flex items-center justify-between">
+                        <span class="card-icon-badge" style="background:var(--ds-bg-subtle);color:var(--ds-ink);">
+                            <isax-anim name="git-branch" size="20"></isax-anim>
+                        </span>
+                        <span class="text-[11px] font-semibold uppercase tracking-wider portal-muted">Repositório</span>
+                    </div>
+                    <h3 class="ds-display text-lg font-bold portal-ink">Nosso GitHub</h3>
+                    <p class="mt-2 text-sm leading-relaxed portal-secondary">
+                        Repositório oficial com todos os códigos, commits das aulas e exercícios da turma.
+                    </p>
+                    <div class="mt-auto pt-5">
+                        <a href="https://github.com/curtytech/cursodevsenai2" target="_blank" rel="noopener noreferrer"
+                            class="ux-btn ux-btn-ghost rounded-xl px-4 py-2 text-xs">
+                            <span>Abrir GitHub</span>
+                            <isax-anim name="external-link" size="15"></isax-anim>
+                        </a>
+                    </div>
+                </article>
+
+                <article data-spotlight-card class="portal-card ux-card flex flex-col rounded-3xl p-6"
+                    data-category="materiais" data-keywords="manual git github versionamento commits branches" data-reveal data-reveal-delay="290">
+                    <div class="mb-3 flex items-center justify-between">
+                        <span class="card-icon-badge" style="background:var(--ds-bg-subtle);color:var(--ds-ink);">
+                            <isax-anim name="book" size="20"></isax-anim>
+                        </span>
+                        <span class="text-[11px] font-semibold uppercase tracking-wider portal-muted">Versionamento</span>
+                    </div>
+                    <h3 class="ds-display text-lg font-bold portal-ink">Manual de Git e GitHub</h3>
+                    <p class="mt-2 text-sm leading-relaxed portal-secondary">
+                        Referência prática de comandos Git, branches, pull requests e boas práticas de versionamento.
+                    </p>
+                    <div class="mt-auto pt-5">
+                        <a href="https://andersonfariaas.github.io/manual-Git-e-GitHub/" target="_blank"
+                            rel="noopener noreferrer" class="ux-btn ux-btn-ghost rounded-xl px-4 py-2 text-xs">
+                            <span>Abrir Manual</span>
+                            <isax-anim name="external-link" size="15"></isax-anim>
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Estado vazio da busca -->
+        <div id="portalEmptySearch" class="ux-surface hidden rounded-3xl p-10 text-center">
+            <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl portal-subtle portal-muted">
+                <isax-anim name="search" size="22"></isax-anim>
+            </div>
+            <p class="ds-display text-base font-bold portal-ink">Nenhum recurso encontrado</p>
+            <p class="mt-1 text-sm portal-muted">Tente limpar o filtro ou pergunte por voz ao Guia do Curso.</p>
+        </div>
+
+        <footer class="flex flex-col items-center justify-between gap-3 border-t pt-8 text-xs sm:flex-row portal-border portal-muted">
+            <p>Curso de Desenvolvimento de Sistemas — SENAI • Turma DevTarde</p>
+            <button type="button" data-open-voice-guide class="ux-btn ux-btn-ghost rounded-xl px-3.5 py-1.5 text-xs">
+                <isax-anim name="microphone" size="14"></isax-anim>
+                <span>Precisa de ajuda? Fale com o Guia</span>
+            </button>
+        </footer>
+    </main>
+
+    <!-- MODAL PRINCIPAL: Gestão de Alunos DevTarde -->
+    <section id="studentsApp" class="ux-modal-animate fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-md"
+        aria-labelledby="studentsTitle" role="dialog" aria-modal="true">
+        <div class="ux-surface mx-auto my-6 w-full max-w-6xl rounded-3xl p-5 sm:my-10 sm:p-8">
+            <div class="flex flex-col gap-5 border-b pb-6 sm:flex-row sm:items-end sm:justify-between portal-border">
+                <div>
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <span class="rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider"
+                            style="background:var(--ds-accent-soft);border-color:var(--ds-accent-border);color:var(--ds-accent);">DevTarde</span>
+                        <span id="storageStatus"
+                            class="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-semibold text-amber-400">Local Sync</span>
+                    </div>
+                    <h2 id="studentsTitle" class="ds-display text-2xl font-bold portal-ink sm:text-3xl">Gestão de alunos e currículos</h2>
+                    <p class="mt-1.5 text-sm portal-muted">Cadastre talentos, organize especialidades e compartilhe currículos.</p>
+                </div>
+                <div class="flex gap-2.5">
+                    <button id="closeStudentsApp" type="button" class="ux-btn ux-btn-ghost rounded-xl px-4 py-2 text-xs">
+                        <isax-anim name="close" size="15"></isax-anim>
+                        <span>Fechar</span>
+                    </button>
+                    <button id="newStudentButton" type="button" class="ux-btn ux-btn-primary rounded-xl px-4 py-2 text-xs">
+                        <isax-anim name="user-add" size="16"></isax-anim>
+                        <span>Novo aluno</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="studentFeedback" class="mt-5 hidden rounded-xl border px-4 py-3 text-sm" role="status"></div>
             <div class="mt-6 grid gap-3 sm:grid-cols-3">
-                <label class="sm:col-span-2"><span class="mb-2 block text-sm font-medium text-slate-300">Buscar por
-                        matrícula, nome ou habilidade</span>
-                    <input id="studentSearch" type="search" placeholder="Ex.: NIT00000000 ou JavaScript"
-                        class="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white outline-none transition focus:border-cyan-300 focus:ring-2 focus:ring-cyan-300/30">
+                <label class="sm:col-span-2">
+                    <span class="mb-2 block text-xs font-semibold uppercase tracking-wider portal-muted">Buscar por matrícula, nome ou habilidade</span>
+                    <input id="studentSearch" type="search" placeholder="Ex.: NIT0000000 ou JavaScript"
+                        class="ux-input w-full rounded-xl px-4 py-3 text-sm">
                 </label>
-                <div class="rounded-xl border border-slate-700 bg-slate-950/40 p-4"><span
-                        class="block text-xs uppercase tracking-wider text-slate-500">Resultados</span><strong
-                        id="studentCount" class="mt-1 block text-2xl text-cyan-300">0</strong></div>
+                <div class="portal-subtle rounded-xl border p-4 portal-border">
+                    <span class="block text-xs uppercase tracking-wider portal-muted">Resultados</span>
+                    <strong id="studentCount" class="ds-display mt-1 block text-2xl font-extrabold" style="color:var(--ds-accent);">0</strong>
+                </div>
             </div>
             <div id="studentGrid" class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3"></div>
         </div>
     </section>
 
-    <div id="studentFormModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm"
+    <!-- MODAL FORMULÁRIO DE ALUNO -->
+    <div id="studentFormModal" class="ux-modal-animate fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-md"
         role="dialog" aria-modal="true" aria-labelledby="studentFormTitle">
-        <div class="mx-auto my-6 max-w-3xl rounded-3xl border border-slate-700 bg-slate-900 p-5 shadow-2xl sm:p-8">
-            <div class="flex items-start justify-between gap-4">
+        <div class="ux-surface mx-auto my-6 max-w-3xl rounded-3xl p-5 sm:p-8">
+            <div class="flex items-start justify-between gap-4 border-b pb-4 portal-border">
                 <div>
-                    <h2 id="studentFormTitle" class="text-2xl font-bold text-white">Novo aluno</h2>
-                    <p class="mt-1 text-sm text-slate-400">Os campos marcados com * são obrigatórios.</p>
+                    <h2 id="studentFormTitle" class="ds-display text-2xl font-bold portal-ink">Novo aluno</h2>
+                    <p class="mt-1 text-sm portal-muted">Os campos marcados com * são obrigatórios.</p>
                 </div>
                 <button type="button" data-close-modal="studentFormModal"
-                    class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white"
-                    aria-label="Fechar formulário">✕</button>
+                    class="ux-btn ux-btn-ghost h-9 w-9 rounded-xl" aria-label="Fechar formulário">
+                    <isax-anim name="close" size="16"></isax-anim>
+                </button>
             </div>
             <form id="studentForm" class="mt-6 space-y-5">
                 <div class="grid gap-4 sm:grid-cols-2">
-                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Matrícula *</span><input
-                            id="studentRegistration" required maxlength="10" pattern="[A-Z]{3}[0-9]{7}"
-                            class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 uppercase text-white outline-none focus:border-cyan-300"><small
-                            class="mt-1 block text-slate-500">Formato: NIT0312117</small></label>
-                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Nome completo *</span><input
-                            id="studentName" required
-                            class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-300"></label>
-                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Telefone / WhatsApp
-                            *</span><input id="studentPhone" required inputmode="tel" placeholder="(21) 99999-9999"
-                            class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-300"></label>
-                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Link do currículo ou portfólio
-                            *</span><input id="studentPortfolio" required type="url"
-                            placeholder="https://seusite.com/curriculo"
-                            class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-300"><small
-                            class="mt-1 block text-slate-500">Use um endereço público começando com
-                            https://</small></label>
-                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Foto por arquivo</span><input
-                            id="studentPhotoFile" type="file" accept="image/*"
-                            class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-300 file:mr-3 file:border-0 file:bg-cyan-500 file:px-3 file:py-2 file:font-semibold file:text-slate-950"><small
-                            class="mt-1 block text-slate-500">PNG, JPG ou WEBP até 2 MB.</small></label>
-                    <label><span class="mb-2 block text-sm font-medium text-slate-300">Foto por URL</span><input
-                            id="studentPhotoUrl" type="url" placeholder="https://site.com/foto.jpg"
-                            class="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-300"><small
-                            class="mt-1 block text-slate-500">Se informar os dois, a URL terá
-                            prioridade.</small></label>
+                    <label>
+                        <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider portal-secondary">Matrícula *</span>
+                        <input id="studentRegistration" required maxlength="10" pattern="[A-Z]{3}[0-9]{7}"
+                            class="ux-input w-full rounded-xl px-4 py-3 text-sm uppercase">
+                        <small class="mt-1 block text-xs portal-muted">Formato: NIT0312117</small>
+                    </label>
+                    <label>
+                        <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider portal-secondary">Nome completo *</span>
+                        <input id="studentName" required class="ux-input w-full rounded-xl px-4 py-3 text-sm">
+                    </label>
+                    <label>
+                        <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider portal-secondary">Telefone / WhatsApp *</span>
+                        <input id="studentPhone" required inputmode="tel" placeholder="(21) 99999-9999"
+                            class="ux-input w-full rounded-xl px-4 py-3 text-sm">
+                    </label>
+                    <label>
+                        <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider portal-secondary">Link do currículo ou portfólio *</span>
+                        <input id="studentPortfolio" required type="url" placeholder="https://seusite.com/curriculo"
+                            class="ux-input w-full rounded-xl px-4 py-3 text-sm">
+                        <small class="mt-1 block text-xs portal-muted">Use um endereço público começando com https://</small>
+                    </label>
+                    <label>
+                        <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider portal-secondary">Foto por arquivo</span>
+                        <input id="studentPhotoFile" type="file" accept="image/*"
+                            class="ux-input w-full rounded-xl px-3 py-2 text-xs file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500 file:px-3 file:py-1.5 file:font-semibold file:text-slate-950">
+                        <small class="mt-1 block text-xs portal-muted">PNG, JPG ou WEBP até 2 MB.</small>
+                    </label>
+                    <label>
+                        <span class="mb-1.5 block text-xs font-semibold uppercase tracking-wider portal-secondary">Foto por URL</span>
+                        <input id="studentPhotoUrl" type="url" placeholder="https://site.com/foto.jpg"
+                            class="ux-input w-full rounded-xl px-4 py-3 text-sm">
+                        <small class="mt-1 block text-xs portal-muted">Se informar os dois, a URL terá prioridade.</small>
+                    </label>
                 </div>
-                <div class="flex flex-wrap justify-end gap-3 border-t border-slate-700 pt-5"><button type="button"
-                        data-close-modal="studentFormModal"
-                        class="rounded-xl border border-slate-600 px-5 py-3 font-semibold text-slate-300 hover:bg-slate-800">Cancelar</button><button
-                        type="submit"
-                        class="rounded-xl bg-cyan-500 px-5 py-3 font-bold text-slate-950 hover:bg-cyan-300">Salvar
-                        aluno</button></div>
+                <div class="flex flex-wrap justify-end gap-3 border-t pt-5 portal-border">
+                    <button type="button" data-close-modal="studentFormModal"
+                        class="ux-btn ux-btn-ghost rounded-xl px-5 py-2.5 text-xs">Cancelar</button>
+                    <button type="submit" class="ux-btn ux-btn-primary rounded-xl px-5 py-2.5 text-xs">
+                        <isax-anim name="tick-circle" size="16"></isax-anim>
+                        <span>Salvar aluno</span>
+                    </button>
+                </div>
             </form>
         </div>
     </div>
 
-    <div id="studentViewModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm"
+    <!-- MODAL VISUALIZAÇÃO DE ALUNO -->
+    <div id="studentViewModal" class="ux-modal-animate fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-md"
         role="dialog" aria-modal="true" aria-labelledby="studentViewTitle">
-        <div class="mx-auto my-6 max-w-5xl rounded-3xl border border-slate-700 bg-slate-900 p-5 shadow-2xl sm:p-8">
+        <div class="ux-surface mx-auto my-6 max-w-5xl rounded-3xl p-5 sm:p-8">
             <div class="flex items-start justify-between gap-4">
                 <div class="flex items-center gap-4">
                     <div id="studentViewPhoto"
-                        class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-cyan-400/20 text-2xl font-bold text-cyan-200">
+                        class="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl text-2xl font-bold"
+                        style="background:var(--ds-accent-soft);color:var(--ds-accent);">
                     </div>
                     <div>
-                        <p id="studentViewRegistration" class="text-sm font-semibold text-cyan-300"></p>
-                        <h2 id="studentViewTitle" class="mt-1 text-2xl font-bold text-white"></h2>
-                        <p id="studentViewMeta" class="mt-2 text-sm text-slate-400"></p>
+                        <p id="studentViewRegistration" class="ds-mono text-xs font-semibold" style="color:var(--ds-accent);"></p>
+                        <h2 id="studentViewTitle" class="ds-display mt-0.5 text-2xl font-bold portal-ink"></h2>
+                        <p id="studentViewMeta" class="mt-1 text-sm portal-muted"></p>
                     </div>
-                </div><button type="button" data-close-modal="studentViewModal"
-                    class="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white"
-                    aria-label="Fechar aluno">✕</button>
+                </div>
+                <button type="button" data-close-modal="studentViewModal"
+                    class="ux-btn ux-btn-ghost h-9 w-9 rounded-xl" aria-label="Fechar aluno">
+                    <isax-anim name="close" size="16"></isax-anim>
+                </button>
             </div>
-            <div class="mt-5 flex flex-wrap gap-3"><a id="studentWhatsapp" target="_blank" rel="noopener noreferrer"
-                    class="rounded-xl bg-green-500 px-4 py-2 font-semibold text-slate-950 hover:bg-green-400">Abrir
-                    WhatsApp</a><a id="studentPortfolioOpen" target="_blank" rel="noopener noreferrer"
-                    class="rounded-xl bg-cyan-500 px-4 py-2 font-semibold text-slate-950 hover:bg-cyan-300">Abrir</a><button
-                    id="editStudentButton" type="button"
-                    class="rounded-xl border border-cyan-400/40 px-4 py-2 font-semibold text-cyan-200 hover:bg-cyan-400/10">Editar</button><button
-                    id="deleteStudentButton" type="button"
-                    class="rounded-xl border border-red-400/40 px-4 py-2 font-semibold text-red-300 hover:bg-red-400/10">Excluir</button>
+            <div class="mt-5 flex flex-wrap gap-2.5">
+                <a id="studentWhatsapp" target="_blank" rel="noopener noreferrer"
+                    class="ux-btn rounded-xl px-4 py-2 text-xs text-slate-950" style="background:var(--ds-emerald);">
+                    <isax-anim name="message" size="15"></isax-anim>
+                    <span>WhatsApp</span>
+                </a>
+                <a id="studentPortfolioOpen" target="_blank" rel="noopener noreferrer"
+                    class="ux-btn ux-btn-primary rounded-xl px-4 py-2 text-xs">
+                    <isax-anim name="external-link" size="15"></isax-anim>
+                    <span>Abrir Portfólio</span>
+                </a>
+                <button id="editStudentButton" type="button" class="ux-btn ux-btn-ghost rounded-xl px-4 py-2 text-xs">
+                    <isax-anim name="edit" size="15"></isax-anim>
+                    <span>Editar</span>
+                </button>
+                <button id="deleteStudentButton" type="button"
+                    class="ux-btn rounded-xl border px-4 py-2 text-xs"
+                    style="border-color:rgba(244,63,94,0.35);color:var(--ds-rose);background:var(--ds-rose-soft);">
+                    <isax-anim name="trash" size="15"></isax-anim>
+                    <span>Excluir</span>
+                </button>
             </div>
-            <div class="mt-6 overflow-hidden rounded-2xl border border-slate-700 bg-white shadow-xl"><iframe
-                    id="studentPortfolioPreview" class="h-[min(72vh,720px)] min-h-[420px] w-full resize-y"
+            <div class="mt-6 overflow-hidden rounded-2xl border bg-white shadow-xl portal-border">
+                <iframe id="studentPortfolioPreview" class="h-[min(70vh,680px)] min-h-[400px] w-full resize-y"
                     title="Preview do currículo ou portfólio" loading="lazy"
-                    referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-            <p class="mt-3 text-xs text-slate-500">O preview é carregado automaticamente. Se o site bloquear
-                incorporação, <a id="studentPortfolioFallback"
-                    class="hidden font-semibold text-cyan-300 underline hover:text-cyan-200" target="_blank"
-                    rel="noopener noreferrer">abra o endereço em uma nova guia</a>.</p>
+                    referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            </div>
+            <p class="mt-3 text-xs portal-muted">
+                Se o site bloquear incorporação em iframe,
+                <a id="studentPortfolioFallback" class="hidden font-semibold underline" style="color:var(--ds-accent);"
+                    target="_blank" rel="noopener noreferrer">abra o endereço em uma nova guia</a>.
+            </p>
         </div>
     </div>
 
+    <!-- Script 1: Menu Mobile + Busca e Filtro do Portal -->
+    <script>
+        (() => {
+            const menuToggle = document.getElementById('menuToggle');
+            const menuToggleIcon = document.getElementById('menuToggleIcon');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            function setMobileMenu(open) {
+                mobileMenu.classList.toggle('is-open', open);
+                menuToggle.setAttribute('aria-expanded', String(open));
+                if (menuToggleIcon) menuToggleIcon.setAttribute('name', open ? 'close' : 'menu');
+            }
+
+            menuToggle.addEventListener('click', () => setMobileMenu(!mobileMenu.classList.contains('is-open')));
+            document.querySelectorAll('.mobile-nav-link').forEach((link) => link.addEventListener('click', () => setMobileMenu(false)));
+            document.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Escape' && mobileMenu.classList.contains('is-open')) setMobileMenu(false);
+            });
+
+            const searchInput = document.getElementById('portalSearchInput');
+            const filterButtons = Array.from(document.querySelectorAll('.portal-filter-btn'));
+            const cards = Array.from(document.querySelectorAll('.portal-card'));
+            const sectionGroups = Array.from(document.querySelectorAll('[data-section-group]'));
+            const emptyState = document.getElementById('portalEmptySearch');
+            let activeFilter = 'all';
+
+            function applyPortalFilter() {
+                const q = searchInput.value.trim().toLowerCase();
+                let visibleCount = 0;
+
+                cards.forEach((card) => {
+                    const cat = card.getAttribute('data-category');
+                    const text = (card.textContent + ' ' + (card.getAttribute('data-keywords') || '')).toLowerCase();
+                    const matchesCat = activeFilter === 'all' || cat === activeFilter;
+                    const matchesQuery = !q || text.includes(q);
+                    const show = matchesCat && matchesQuery;
+                    card.classList.toggle('hidden', !show);
+                    if (show) visibleCount += 1;
+                });
+
+                sectionGroups.forEach((sec) => {
+                    const hasVisibleCard = sec.querySelector('.portal-card:not(.hidden)') !== null;
+                    sec.classList.toggle('hidden', !hasVisibleCard);
+                });
+
+                emptyState.classList.toggle('hidden', visibleCount > 0);
+            }
+
+            filterButtons.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    activeFilter = btn.getAttribute('data-filter') || 'all';
+                    applyPortalFilter();
+                });
+            });
+
+            searchInput.addEventListener('input', applyPortalFilter);
+        })();
+    </script>
+
+    <!-- Script 2: Gestão de Alunos DevTarde -->
     <script>
         (() => {
             const API_URL = 'https://onlinestorage.you.tec.br/api';
@@ -447,25 +863,26 @@
             const STORAGE_KEY = 'senai-devtarde-students';
             const byId = (id) => document.getElementById(id);
             const state = { students: [], editingId: null, viewedId: null, lastFocus: null };
-            const defaultResume = '<!doctype html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:Arial,sans-serif;color:#172033;max-width:850px;margin:0 auto;padding:40px}h1{color:#0e7490;border-bottom:2px solid #67e8f9;padding-bottom:12px}h2{color:#155e75;margin-top:28px}li{margin:8px 0}</style></head><body><h1>Nome do aluno</h1><p>Desenvolvedor em formação | Turma DevTarde</p><h2>Perfil</h2><p>Apresente aqui seu perfil profissional.</p><h2>Habilidades</h2><ul><li>HTML e CSS</li><li>JavaScript</li><li>Git e GitHub</li></ul><h2>Formação</h2><p>Curso de Desenvolvimento de Sistemas - SENAI</p></body></html>';
+
             const service = {
                 async request(path, options = {}) {
-                    const response = await fetch(API_URL + path, { ...options, headers: { Accept: 'application/json', ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.headers || {}) } });
+                    const response = await fetch(API_URL + path, {
+                        ...options,
+                        headers: {
+                            Accept: 'application/json',
+                            ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+                            ...(options.headers || {})
+                        }
+                    });
                     if (!response.ok) throw new Error('FreeOnlineStorage respondeu ' + response.status);
                     if (response.status === 204) return null;
                     const text = await response.text();
                     if (!text) return null;
                     try { return JSON.parse(text); } catch { return text; }
                 },
-                async readKey(key) {
-                    return this.request('/getkey/' + encodeURIComponent(API_BUCKET) + '/' + encodeURIComponent(key), { method: 'GET' });
-                },
-                async writeKey(key, value) {
-                    return this.request('/', { method: 'POST', body: JSON.stringify({ bucket: API_BUCKET, key, value }) });
-                },
-                async deleteKey(key) {
-                    return this.request('/deletekey/' + encodeURIComponent(API_BUCKET) + '/' + encodeURIComponent(key), { method: 'DELETE' });
-                },
+                async readKey(key) { return this.request('/getkey/' + encodeURIComponent(API_BUCKET) + '/' + encodeURIComponent(key), { method: 'GET' }); },
+                async writeKey(key, value) { return this.request('/', { method: 'POST', body: JSON.stringify({ bucket: API_BUCKET, key, value }) }); },
+                async deleteKey(key) { return this.request('/deletekey/' + encodeURIComponent(API_BUCKET) + '/' + encodeURIComponent(key), { method: 'DELETE' }); },
                 async readIndex() {
                     try {
                         const result = await this.readKey(API_INDEX_KEY);
@@ -484,10 +901,7 @@
                             const result = await this.readKey('student-' + matricula);
                             const rawValue = result && Object.prototype.hasOwnProperty.call(result, 'value') ? result.value : result;
                             return typeof rawValue === 'string' ? JSON.parse(rawValue) : rawValue;
-                        } catch (error) {
-                            console.warn('Registro ignorado:', matricula, error);
-                            return null;
-                        }
+                        } catch { return null; }
                     }));
                     return students.filter(Boolean);
                 },
@@ -503,58 +917,102 @@
                     await this.writeKey(API_INDEX_KEY, registrations);
                 }
             };
+
             const localStore = {
-                read() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (error) { console.error(error); return []; } },
+                read() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; } },
                 write(items) { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
             };
+
             function abbreviateName(name) {
                 const parts = name.trim().split(/\s+/).filter((part) => !['de', 'da', 'do', 'dos', 'das'].includes(part.toLowerCase()));
                 return parts.length > 1 ? parts[0] + ' ' + parts[parts.length - 1][0].toUpperCase() + '.' : parts[0] || 'Aluno';
             }
-            function sanitizeHtml(html) {
-                const documentNode = new DOMParser().parseFromString(String(html || ''), 'text/html');
-                documentNode.querySelectorAll('iframe,object,embed,form,base').forEach((node) => node.remove());
-                documentNode.querySelectorAll('script').forEach((node) => {
-                    const source = node.getAttribute('src') || '';
-                    if (source !== 'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4') node.remove();
-                    else { node.removeAttribute('integrity'); node.removeAttribute('crossorigin'); }
-                });
-                documentNode.querySelectorAll('*').forEach((node) => [...node.attributes].forEach((attribute) => {
-                    if (/^on/i.test(attribute.name) || /^(javascript|data):/i.test(attribute.value)) node.removeAttribute(attribute.name);
-                }));
-                if (!documentNode.querySelector('script[src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"]')) {
-                    const tailwindScript = documentNode.createElement('script');
-                    tailwindScript.src = 'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4';
-                    documentNode.head.appendChild(tailwindScript);
-                }
-                return '<!doctype html>' + documentNode.documentElement.outerHTML;
+
+            function escapeHtml(value) {
+                return String(value).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
             }
+
             function notify(message, type = 'success') {
                 const element = byId('studentFeedback');
                 element.textContent = message;
-                element.className = 'mt-5 rounded-lg border px-4 py-3 text-sm ' + (type === 'error' ? 'border-red-400/40 bg-red-400/10 text-red-200' : 'border-green-400/40 bg-green-400/10 text-green-200');
+                element.className = 'mt-5 rounded-xl border px-4 py-3 text-sm ' +
+                    (type === 'error'
+                        ? 'border-rose-400/40 bg-rose-500/10 text-rose-400'
+                        : 'border-emerald-400/40 bg-emerald-500/10 text-emerald-400');
                 window.setTimeout(() => element.classList.add('hidden'), 4500);
             }
+
             function setStorageMode(cloud) {
                 const badge = byId('storageStatus');
                 badge.textContent = cloud ? 'Cloud API' : 'Local Sync';
-                badge.className = 'rounded-full border px-3 py-1 text-xs font-semibold ' + (cloud ? 'border-green-300/30 bg-green-300/10 text-green-200' : 'border-amber-300/30 bg-amber-300/10 text-amber-200');
+                badge.className = 'rounded-full border px-3 py-1 text-xs font-semibold ' +
+                    (cloud
+                        ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-400'
+                        : 'border-amber-400/30 bg-amber-400/10 text-amber-400');
             }
+
             async function loadStudents() {
-                if (API_URL) try { const result = await service.list(); state.students = Array.isArray(result) ? result : Array.isArray(result && result.data) ? result.data : []; setStorageMode(true); } catch (error) { console.warn(error); state.students = localStore.read(); setStorageMode(false); notify('API indisponível. Usando Local Sync.', 'error'); }
-                else { state.students = localStore.read(); setStorageMode(false); }
+                if (API_URL) {
+                    try {
+                        const result = await service.list();
+                        state.students = Array.isArray(result) ? result : Array.isArray(result && result.data) ? result.data : [];
+                        setStorageMode(true);
+                    } catch {
+                        state.students = localStore.read();
+                        setStorageMode(false);
+                        notify('API indisponível no momento. Usando Local Sync.', 'error');
+                    }
+                } else {
+                    state.students = localStore.read();
+                    setStorageMode(false);
+                }
                 renderStudents();
             }
+
             function persistLocal() { localStore.write(state.students); }
+
             function renderStudents() {
                 const query = byId('studentSearch').value.trim().toLowerCase();
-                const students = state.students.filter((student) => [student.matricula, student.nome, student.telefone, student.portfolioUrl].join(' ').toLowerCase().includes(query)).sort((a, b) => abbreviateName(a.nome).localeCompare(abbreviateName(b.nome), 'pt-BR'));
+                const students = state.students
+                    .filter((s) => [s.matricula, s.nome, s.telefone, s.portfolioUrl].join(' ').toLowerCase().includes(query))
+                    .sort((a, b) => abbreviateName(a.nome).localeCompare(abbreviateName(b.nome), 'pt-BR'));
                 byId('studentCount').textContent = students.length;
-                byId('studentGrid').innerHTML = students.length ? students.map((student) => `<article class="rounded-2xl border border-slate-700 bg-slate-950/50 p-5 transition hover:-translate-y-1 hover:border-cyan-400/60"><div class="flex items-start gap-4"><div class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-cyan-400/20 text-xl font-bold text-cyan-200">${student.foto ? `<img src="${escapeHtml(student.foto)}" alt="Foto de ${escapeHtml(student.nome)}" class="h-full w-full object-cover" loading="lazy" onerror="this.parentElement.textContent='${escapeHtml(student.nome.charAt(0).toUpperCase())}'">` : escapeHtml(student.nome.charAt(0).toUpperCase())}</div><div class="min-w-0"><h3 class="truncate font-bold text-white">${escapeHtml(abbreviateName(student.nome))}</h3><span class="text-xs font-semibold text-cyan-300">${escapeHtml(student.matricula)}</span></div></div><p class="mt-4 truncate text-sm text-slate-400">${escapeHtml(student.telefone || 'Telefone não informado')}</p><a href="${escapeHtml(student.portfolioUrl || '#')}" target="_blank" rel="noopener noreferrer" class="mt-2 block truncate text-sm text-cyan-300 hover:text-cyan-200">${escapeHtml(student.portfolioUrl || 'Link não informado')}</a><div class="mt-5 flex gap-2"><button type="button" data-view="${escapeHtml(student.matricula)}" class="flex-1 rounded-lg bg-cyan-500 px-3 py-2 text-sm font-bold text-slate-950 hover:bg-cyan-300">Ver aluno</button><button type="button" data-edit="${escapeHtml(student.matricula)}" class="rounded-lg border border-slate-600 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800">Editar</button></div></article>`).join('') : '<div class="rounded-2xl border border-dashed border-slate-700 p-10 text-center text-slate-400 md:col-span-2 xl:col-span-3">Nenhum aluno encontrado. Cadastre o primeiro aluno da turma.</div>';
+                byId('studentGrid').innerHTML = students.length
+                    ? students.map((s) => `
+                        <article class="ux-card rounded-2xl p-5" data-spotlight-card="flat">
+                            <div class="flex items-start gap-4">
+                                <div class="flex h-13 w-13 shrink-0 items-center justify-center overflow-hidden rounded-2xl text-lg font-bold" style="background:var(--ds-accent-soft);color:var(--ds-accent);">
+                                    ${s.foto ? `<img src="${escapeHtml(s.foto)}" alt="Foto de ${escapeHtml(s.nome)}" class="h-full w-full object-cover" loading="lazy" onerror="this.parentElement.textContent='${escapeHtml(s.nome.charAt(0).toUpperCase())}'">` : escapeHtml(s.nome.charAt(0).toUpperCase())}
+                                </div>
+                                <div class="min-w-0">
+                                    <h3 class="truncate font-bold portal-ink">${escapeHtml(abbreviateName(s.nome))}</h3>
+                                    <span class="ds-mono text-xs font-semibold" style="color:var(--ds-accent);">${escapeHtml(s.matricula)}</span>
+                                </div>
+                            </div>
+                            <p class="mt-3.5 truncate text-xs portal-muted">${escapeHtml(s.telefone || 'Telefone não informado')}</p>
+                            <a href="${escapeHtml(s.portfolioUrl || '#')}" target="_blank" rel="noopener noreferrer" class="mt-1.5 block truncate text-xs font-medium" style="color:var(--ds-accent);">${escapeHtml(s.portfolioUrl || 'Link não informado')}</a>
+                            <div class="mt-4 flex gap-2">
+                                <button type="button" data-view="${escapeHtml(s.matricula)}" class="ux-btn ux-btn-primary flex-1 rounded-xl px-3 py-2 text-xs">
+                                    <isax-anim name="eye" size="14"></isax-anim>
+                                    <span>Ver aluno</span>
+                                </button>
+                                <button type="button" data-edit="${escapeHtml(s.matricula)}" class="ux-btn ux-btn-ghost rounded-xl px-3 py-2 text-xs">
+                                    <isax-anim name="edit" size="14"></isax-anim>
+                                    <span>Editar</span>
+                                </button>
+                            </div>
+                        </article>`).join('')
+                    : '<div class="rounded-2xl border border-dashed p-10 text-center text-sm portal-muted portal-border md:col-span-2 xl:col-span-3">Nenhum aluno encontrado. Cadastre o primeiro aluno da turma.</div>';
+                if (window.AnimateUI) window.AnimateUI.refresh();
             }
-            function escapeHtml(value) { return String(value).replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[character])); }
+
             function openModal(id) { byId(id).classList.remove('hidden'); document.body.classList.add('overflow-hidden'); state.lastFocus = document.activeElement; }
-            function closeModal(id) { byId(id).classList.add('hidden'); if (!document.querySelector('[role="dialog"]:not(.hidden)')) document.body.classList.remove('overflow-hidden'); if (state.lastFocus) state.lastFocus.focus(); }
+            function closeModal(id) {
+                byId(id).classList.add('hidden');
+                if (!document.querySelector('[role="dialog"]:not(.hidden)')) document.body.classList.remove('overflow-hidden');
+                if (state.lastFocus && typeof state.lastFocus.focus === 'function') state.lastFocus.focus();
+            }
+
             function openForm(matricula = null) {
                 state.editingId = matricula;
                 const student = state.students.find((item) => item.matricula === matricula);
@@ -563,44 +1021,134 @@
                 byId('studentRegistration').readOnly = Boolean(student);
                 byId('studentPhotoFile').value = '';
                 byId('studentPhotoUrl').dataset.fileValue = '';
-                if (student) { byId('studentRegistration').value = student.matricula; byId('studentName').value = student.nome; byId('studentPhone').value = student.telefone || ''; byId('studentPortfolio').value = student.portfolioUrl || ''; byId('studentPhotoUrl').value = student.foto && !student.foto.startsWith('data:') ? student.foto : ''; }
+                if (student) {
+                    byId('studentRegistration').value = student.matricula;
+                    byId('studentName').value = student.nome;
+                    byId('studentPhone').value = student.telefone || '';
+                    byId('studentPortfolio').value = student.portfolioUrl || '';
+                    byId('studentPhotoUrl').value = student.foto && !student.foto.startsWith('data:') ? student.foto : '';
+                }
                 openModal('studentFormModal');
             }
+
             function showStudent(matricula) {
-                const student = state.students.find((item) => item.matricula === matricula); if (!student) return;
-                state.viewedId = matricula; byId('studentViewRegistration').textContent = student.matricula; byId('studentViewTitle').textContent = student.nome; byId('studentViewMeta').textContent = student.telefone || 'Telefone não informado'; byId('studentViewPhoto').innerHTML = student.foto ? `<img src="${escapeHtml(student.foto)}" alt="Foto de ${escapeHtml(student.nome)}" class="h-full w-full object-cover">` : escapeHtml(student.nome.charAt(0).toUpperCase()); byId('studentWhatsapp').href = student.telefone ? 'https://wa.me/55' + student.telefone.replace(/\D/g, '') : '#'; const preview = byId('studentPortfolioPreview'); const portfolioOpen = byId('studentPortfolioOpen'); const fallback = byId('studentPortfolioFallback'); preview.src = student.portfolioUrl || 'about:blank'; portfolioOpen.href = student.portfolioUrl || '#'; portfolioOpen.classList.toggle('pointer-events-none', !student.portfolioUrl); portfolioOpen.setAttribute('aria-disabled', String(!student.portfolioUrl)); fallback.href = student.portfolioUrl || '#'; fallback.classList.toggle('hidden', !student.portfolioUrl); openModal('studentViewModal');
+                const student = state.students.find((item) => item.matricula === matricula);
+                if (!student) return;
+                state.viewedId = matricula;
+                byId('studentViewRegistration').textContent = student.matricula;
+                byId('studentViewTitle').textContent = student.nome;
+                byId('studentViewMeta').textContent = student.telefone || 'Telefone não informado';
+                byId('studentViewPhoto').innerHTML = student.foto
+                    ? `<img src="${escapeHtml(student.foto)}" alt="Foto de ${escapeHtml(student.nome)}" class="h-full w-full object-cover">`
+                    : escapeHtml(student.nome.charAt(0).toUpperCase());
+                byId('studentWhatsapp').href = student.telefone ? 'https://wa.me/55' + student.telefone.replace(/\D/g, '') : '#';
+                const preview = byId('studentPortfolioPreview');
+                const portfolioOpen = byId('studentPortfolioOpen');
+                const fallback = byId('studentPortfolioFallback');
+                preview.src = student.portfolioUrl || 'about:blank';
+                portfolioOpen.href = student.portfolioUrl || '#';
+                portfolioOpen.classList.toggle('pointer-events-none', !student.portfolioUrl);
+                fallback.href = student.portfolioUrl || '#';
+                fallback.classList.toggle('hidden', !student.portfolioUrl);
+                openModal('studentViewModal');
             }
-            function closeStudentsApp() { byId('studentsApp').classList.add('hidden'); if (!document.querySelector('[role="dialog"]:not(.hidden)')) document.body.classList.remove('overflow-hidden'); }
-            byId('openStudentsApp').addEventListener('click', () => { byId('studentsApp').classList.remove('hidden'); document.body.classList.add('overflow-hidden'); loadStudents(); byId('newStudentButton').focus(); });
+
+            function closeStudentsApp() {
+                byId('studentsApp').classList.add('hidden');
+                if (!document.querySelector('[role="dialog"]:not(.hidden)')) document.body.classList.remove('overflow-hidden');
+            }
+
+            byId('openStudentsApp').addEventListener('click', () => {
+                byId('studentsApp').classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+                loadStudents();
+                byId('newStudentButton').focus();
+            });
             byId('closeStudentsApp').addEventListener('click', closeStudentsApp);
-            byId('studentsApp').addEventListener('click', (event) => { if (event.target === byId('studentsApp')) closeStudentsApp(); });
+            byId('studentsApp').addEventListener('click', (ev) => { if (ev.target === byId('studentsApp')) closeStudentsApp(); });
             byId('newStudentButton').addEventListener('click', () => openForm());
             byId('studentSearch').addEventListener('input', renderStudents);
-            byId('studentRegistration').addEventListener('input', (event) => { event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10); });
-            byId('studentPhone').addEventListener('input', (event) => { const digits = event.target.value.replace(/\D/g, '').slice(0, 11); event.target.value = digits.length > 6 ? `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}` : digits; });
-            byId('studentPhotoFile').addEventListener('change', (event) => { const file = event.target.files[0]; if (!file) return; if (!file.type.startsWith('image/')) { event.target.value = ''; return notify('Selecione um arquivo de imagem válido.', 'error'); } if (file.size > 2 * 1024 * 1024) { event.target.value = ''; return notify('A foto deve ter no máximo 2 MB.', 'error'); } const reader = new FileReader(); reader.onload = () => { byId('studentPhotoUrl').value = ''; byId('studentPhotoUrl').dataset.fileValue = reader.result; }; reader.readAsDataURL(file); });
-            byId('studentForm').addEventListener('submit', async (event) => { event.preventDefault(); const matricula = byId('studentRegistration').value.trim(); const existing = state.students.find((student) => student.matricula === matricula); if (!/^[A-Z]{3}\d{7}$/.test(matricula)) return notify('Informe uma matrícula no formato correto.', 'error'); if (existing && state.editingId !== matricula) return notify('Esta matrícula já está cadastrada.', 'error'); const old = state.students.find((student) => student.matricula === state.editingId); const portfolioUrl = byId('studentPortfolio').value.trim(); const photoUrl = byId('studentPhotoUrl').value.trim(); let foto = byId('studentPhotoUrl').dataset.fileValue || (old && old.foto) || ''; if (photoUrl) { try { const parsedUrl = new URL(photoUrl); if (!['http:', 'https:'].includes(parsedUrl.protocol)) throw new Error(); foto = photoUrl; } catch { return notify('Informe uma URL válida para a foto.', 'error'); } } try { const parsedPortfolioUrl = new URL(portfolioUrl); if (!['http:', 'https:'].includes(parsedPortfolioUrl.protocol)) throw new Error(); } catch { return notify('Informe um link HTTP ou HTTPS válido para currículo ou portfólio.', 'error'); } const student = { matricula, nome: byId('studentName').value.trim(), telefone: byId('studentPhone').value.trim(), portfolioUrl, foto }; if (!student.nome || !student.telefone) return notify('Preencha nome e telefone.', 'error'); try { if (API_URL) { try { await service.save(student); setStorageMode(true); } catch (error) { console.warn('Cloud API indisponível; salvando localmente.', error); setStorageMode(false); } } state.students = old ? state.students.map((item) => item.matricula === old.matricula ? student : item) : [...state.students, student]; persistLocal(); closeModal('studentFormModal'); renderStudents(); notify(old ? 'Aluno atualizado com sucesso.' : 'Aluno cadastrado com sucesso.'); } catch (error) { console.error(error); notify('Não foi possível salvar o aluno.', 'error'); } });
-            byId('studentGrid').addEventListener('click', (event) => { const view = event.target.closest('[data-view]'); const edit = event.target.closest('[data-edit]'); if (view) showStudent(view.dataset.view); if (edit) openForm(edit.dataset.edit); });
+            byId('studentRegistration').addEventListener('input', (ev) => {
+                ev.target.value = ev.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+            });
+            byId('studentPhone').addEventListener('input', (ev) => {
+                const d = ev.target.value.replace(/\D/g, '').slice(0, 11);
+                ev.target.value = d.length > 6 ? `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}` : d;
+            });
+            byId('studentPhotoFile').addEventListener('change', (ev) => {
+                const file = ev.target.files[0];
+                if (!file) return;
+                if (!file.type.startsWith('image/')) { ev.target.value = ''; return notify('Selecione uma imagem válida.', 'error'); }
+                if (file.size > 2 * 1024 * 1024) { ev.target.value = ''; return notify('A foto deve ter no máximo 2 MB.', 'error'); }
+                const reader = new FileReader();
+                reader.onload = () => { byId('studentPhotoUrl').value = ''; byId('studentPhotoUrl').dataset.fileValue = reader.result; };
+                reader.readAsDataURL(file);
+            });
+
+            byId('studentForm').addEventListener('submit', async (ev) => {
+                ev.preventDefault();
+                const matricula = byId('studentRegistration').value.trim();
+                const existing = state.students.find((s) => s.matricula === matricula);
+                if (!/^[A-Z]{3}\d{7}$/.test(matricula)) return notify('Informe uma matrícula no formato correto (ex: NIT0312117).', 'error');
+                if (existing && state.editingId !== matricula) return notify('Esta matrícula já está cadastrada.', 'error');
+                const old = state.students.find((s) => s.matricula === state.editingId);
+                const portfolioUrl = byId('studentPortfolio').value.trim();
+                const photoUrl = byId('studentPhotoUrl').value.trim();
+                let foto = byId('studentPhotoUrl').dataset.fileValue || (old && old.foto) || '';
+                if (photoUrl) {
+                    try {
+                        const parsed = new URL(photoUrl);
+                        if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error();
+                        foto = photoUrl;
+                    } catch { return notify('Informe uma URL válida para a foto.', 'error'); }
+                }
+                try {
+                    const parsedPortfolio = new URL(portfolioUrl);
+                    if (!['http:', 'https:'].includes(parsedPortfolio.protocol)) throw new Error();
+                } catch { return notify('Informe um link HTTP/HTTPS válido.', 'error'); }
+
+                const student = { matricula, nome: byId('studentName').value.trim(), telefone: byId('studentPhone').value.trim(), portfolioUrl, foto };
+                if (!student.nome || !student.telefone) return notify('Preencha nome e telefone.', 'error');
+
+                try {
+                    if (API_URL) {
+                        try { await service.save(student); setStorageMode(true); }
+                        catch { setStorageMode(false); }
+                    }
+                    state.students = old ? state.students.map((item) => item.matricula === old.matricula ? student : item) : [...state.students, student];
+                    persistLocal();
+                    closeModal('studentFormModal');
+                    renderStudents();
+                    notify(old ? 'Aluno atualizado com sucesso.' : 'Aluno cadastrado com sucesso.');
+                } catch { notify('Não foi possível salvar o aluno.', 'error'); }
+            });
+
+            byId('studentGrid').addEventListener('click', (ev) => {
+                const view = ev.target.closest('[data-view]');
+                const edit = ev.target.closest('[data-edit]');
+                if (view) showStudent(view.dataset.view);
+                if (edit) openForm(edit.dataset.edit);
+            });
             byId('editStudentButton').addEventListener('click', () => { closeModal('studentViewModal'); openForm(state.viewedId); });
-            byId('deleteStudentButton').addEventListener('click', async () => { const student = state.students.find((item) => item.matricula === state.viewedId); if (!student || !window.confirm(`Excluir a matrícula ${student.matricula}?`)) return; if (API_URL) try { await service.remove(student.matricula); } catch (error) { console.warn('Cloud API indisponível; excluindo do cache local.', error); setStorageMode(false); } state.students = state.students.filter((item) => item.matricula !== student.matricula); persistLocal(); closeModal('studentViewModal'); renderStudents(); notify('Matrícula excluída.'); });
-            document.querySelectorAll('[data-close-modal]').forEach((button) => button.addEventListener('click', () => closeModal(button.dataset.closeModal)));
-            document.addEventListener('keydown', (event) => { if (event.key !== 'Escape') return; const childDialog = document.querySelector('[role="dialog"]:not(.hidden)[id^="student"]'); if (childDialog && childDialog.id !== 'studentsApp') closeModal(childDialog.id); else if (!byId('studentsApp').classList.contains('hidden')) closeStudentsApp(); });
+            byId('deleteStudentButton').addEventListener('click', async () => {
+                const student = state.students.find((item) => item.matricula === state.viewedId);
+                if (!student || !window.confirm(`Excluir a matrícula ${student.matricula}?`)) return;
+                if (API_URL) { try { await service.remove(student.matricula); } catch { setStorageMode(false); } }
+                state.students = state.students.filter((item) => item.matricula !== student.matricula);
+                persistLocal();
+                closeModal('studentViewModal');
+                renderStudents();
+                notify('Matrícula excluída.');
+            });
+            document.querySelectorAll('[data-close-modal]').forEach((btn) => btn.addEventListener('click', () => closeModal(btn.dataset.closeModal)));
+            document.addEventListener('keydown', (ev) => {
+                if (ev.key !== 'Escape') return;
+                const childDialog = document.querySelector('[role="dialog"]:not(.hidden)[id^="student"]');
+                if (childDialog && childDialog.id !== 'studentsApp') closeModal(childDialog.id);
+                else if (!byId('studentsApp').classList.contains('hidden')) closeStudentsApp();
+            });
         })();
     </script>
-
-    <script>
-        setInterval(manterTelaAtiva, 6000); 
-
-        async function manterTelaAtiva() {
-            try {
-                const wakeLock = await navigator.wakeLock.request('screen');
-                console.log('A tela não vai apagar enquanto esta aba estiver ativa.');
-            } catch (err) {
-                console.error('Não foi possível ativar o Wake Lock:', err);
-            }
-        }
-    </script>
-
 </body>
 
 </html>

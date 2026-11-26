@@ -26,12 +26,16 @@ async function show(req, res) {
 
 async function create(req, res) {
   try {
-    console.log('Dados do usuário:', req.body);
     const user = await userService.createUser(req.body);
-    console.log('Usuário criado com sucesso:', user);
     res.status(201).json(user);
   } catch (error) {
     console.error('Erro ao criar usuário:', error);
+    if (error.statusCode === 400) {
+      return res.status(400).json({ error: error.message });
+    }
+    if (error.code === 'SQLITE_CONSTRAINT') {
+      return res.status(409).json({ error: 'Email já cadastrado' });
+    }
     res.status(500).json({ error: 'Erro ao criar usuário' });
   }
 }
@@ -45,6 +49,9 @@ async function update(req, res) {
     res.json(user);
   } catch (error) {
     console.error('Erro ao atualizar usuário:', error);
+    if (error.code === 'SQLITE_CONSTRAINT') {
+      return res.status(409).json({ error: 'Email já cadastrado' });
+    }
     res.status(500).json({ error: 'Erro ao atualizar usuário' });
   }
 }

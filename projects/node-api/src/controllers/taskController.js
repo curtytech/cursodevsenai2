@@ -5,34 +5,34 @@ async function index(req, res) {
     const tasks = await taskService.getAlltasks();
     res.json(tasks);
   } catch (error) {
-    console.error('Erro ao obter usuários:', error);
-    res.status(500).json({ error: 'Erro ao obter usuários' });
+    console.error('Erro ao obter tarefas:', error);
+    res.status(500).json({ error: 'Erro ao obter tarefas' });
   }
 }
 
 async function show(req, res) {
   try {
-    console.log('ID do usuário:', req.params.id);
     const task = await taskService.gettaskById(req.params.id);
     if (!task) {
-      return res.status(404).json({ error: 'Usuário não encontrado' });
+      return res.status(404).json({ error: 'Tarefa não encontrada' });
     }
     res.json(task);
   } catch (error) {
-    console.error('Erro ao obter usuário:', error);
-    res.status(500).json({ error: 'Erro ao obter usuário' });
+    console.error('Erro ao obter tarefa:', error);
+    res.status(500).json({ error: 'Erro ao obter tarefa' });
   }
 }
 
 async function create(req, res) {
   try {
-    console.log('Dados do usuário:', req.body);
     const task = await taskService.createtask(req.body);
-    console.log('Usuário criado com sucesso:', task);
     res.status(201).json(task);
   } catch (error) {
-    console.error('Erro ao criar usuário:', error);
-    res.status(500).json({ error: 'Erro ao criar usuário' });
+    console.error('Erro ao criar tarefa:', error);
+    if (error.statusCode === 400) {
+      return res.status(400).json({ error: error.message });
+    }
+    res.status(500).json({ error: 'Erro ao criar tarefa' });
   }
 }
 
@@ -40,12 +40,15 @@ async function update(req, res) {
   try {
     const task = await taskService.updatetask(req.params.id, req.body);
     if (!task) {
-      return res.status(404).json({ error: 'Usuário não encontrado' });
+      return res.status(404).json({ error: 'Tarefa não encontrada' });
     }
     res.json(task);
   } catch (error) {
-    console.error('Erro ao atualizar usuário:', error);
-    res.status(500).json({ error: 'Erro ao atualizar usuário' });
+    console.error('Erro ao atualizar tarefa:', error);
+    if (error.statusCode === 400) {
+      return res.status(400).json({ error: error.message });
+    }
+    res.status(500).json({ error: 'Erro ao atualizar tarefa' });
   }
 }
 
@@ -53,12 +56,12 @@ async function deleteTask (req, res) {
   try {
     const task = await taskService.deleteTask(req.params.id);
     if (!task) {
-      return res.status(404).json({ error: 'Usuário não encontrado' });
+      return res.status(404).json({ error: 'Tarefa não encontrada' });
     }
-    res.json({ message: 'Usuário excluído com sucesso' });
+    res.json({ message: 'Tarefa excluída com sucesso' });
   } catch (error) {
-    console.error('Erro ao excluir usuário:', error);
-    res.status(500).json({ error: 'Erro ao excluir usuário' });
+    console.error('Erro ao excluir tarefa:', error);
+    res.status(500).json({ error: 'Erro ao excluir tarefa' });
   }
 }
 

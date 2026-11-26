@@ -1,0 +1,241 @@
+/* ==========================================================================
+   Iconsax Animated — Micro-animações Vetoriais Fluidas (340ms–540ms)
+   Compatível com SVGs estilo Iconsax (Linear + Duotone) e Lottie JSON.
+   ========================================================================== */
+
+isax-anim {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  vertical-align: middle;
+  --isax-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --isax-dur: 420ms;
+}
+
+isax-anim svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+}
+
+isax-anim .isax-duotone {
+  opacity: 0.16;
+  transition: opacity var(--isax-dur) var(--isax-ease),
+              transform var(--isax-dur) var(--isax-ease);
+}
+
+/* Partes animáveis */
+isax-anim .isax-part {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform var(--isax-dur) var(--isax-ease),
+              opacity var(--isax-dur) var(--isax-ease);
+}
+
+isax-anim .isax-draw {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 480ms var(--isax-ease);
+}
+
+/* Keyframes calibrados — fluidos, orgânicos, nem rápidos nem lentos */
+@keyframes isaxDrawIn {
+  0% { stroke-dashoffset: 48; opacity: 0.3; }
+  100% { stroke-dashoffset: 0; opacity: 1; }
+}
+
+@keyframes isaxSlideRight {
+  0% { transform: translateX(0); }
+  45% { transform: translateX(3.2px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes isaxSlideLeft {
+  0% { transform: translateX(0); }
+  45% { transform: translateX(-3.2px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes isaxNudgeUp {
+  0% { transform: translateY(0); }
+  45% { transform: translateY(-2.8px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes isaxLidLift {
+  0% { transform: translateY(0) rotate(0deg); }
+  45% { transform: translateY(-2.2px) rotate(-14deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+@keyframes isaxPenWrite {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  30% { transform: translate(-1.2px, 1px) rotate(-10deg); }
+  65% { transform: translate(1.2px, -0.8px) rotate(6deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes isaxSpinQuarter {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(90deg) scale(1.06); }
+  100% { transform: rotate(90deg) scale(1); }
+}
+
+@keyframes isaxSpinHalf {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(180deg); }
+}
+
+@keyframes isaxCompassSway {
+  0% { transform: rotate(0deg); }
+  35% { transform: rotate(22deg); }
+  70% { transform: rotate(-12deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes isaxLockSettle {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-2px); }
+  75% { transform: translateY(0.8px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes isaxBellSwing {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(12deg); }
+  55% { transform: rotate(-10deg); }
+  80% { transform: rotate(5deg); }
+}
+
+@keyframes isaxBreath {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.06); opacity: 0.9; }
+}
+
+@keyframes isaxAmbientFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1.8px); }
+}
+
+@keyframes isaxSendFly {
+  0% { transform: translate(0, 0); }
+  45% { transform: translate(2.4px, -2.4px) scale(0.95); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes isaxBookOpen {
+  0% { transform: scaleX(1); }
+  45% { transform: scaleX(1.08); }
+  100% { transform: scaleX(1); }
+}
+
+/* Gatilho no hover do próprio ícone OU de qualquer elemento interativo pai */
+:is(a, button, .group, .ux-card, [data-icon-hover]):hover isax-anim .isax-duotone,
+isax-anim:hover .isax-duotone,
+isax-anim[data-playing="true"] .isax-duotone {
+  opacity: 0.28;
+}
+
+:is(a, button, .group, .ux-card, [data-icon-hover]):hover isax-anim .isax-anim-draw,
+isax-anim:hover .isax-anim-draw,
+isax-anim[trigger="mount"] .isax-anim-draw,
+isax-anim[data-playing="true"] .isax-anim-draw {
+  animation: isaxDrawIn 480ms var(--isax-ease) both;
+}
+
+:is(a, button, .group, .ux-card, [data-icon-hover]):hover isax-anim .isax-anim-right,
+isax-anim:hover .isax-anim-right,
+isax-anim[data-playing="true"] .isax-anim-right {
+  animation: isaxSlideRight 460ms var(--isax-ease) both;
+}
+
+:is(a, button, .group, .ux-card, [data-icon-hover]):hover isax-anim .isax-anim-left,
+isax-anim:hover .isax-anim-left,
+isax-anim[data-playing="true"] .isax-anim-left {
+  animation: isaxSlideLeft 460ms var(--isax-ease) both;
+}
+
+:is(a, button, .group, .ux-card, [data-icon-hover]):hover isax-anim .isax-anim-up,
+isax-anim:hover .isax-anim-up,
+isax-anim[data-playing="true"] .isax-anim-up {
+  animation: isaxNudgeUp 460ms var(--isax-ease) both;
+}
+
+:is(a, button, .group, .ux-card, [data-icon-hover]):hover isax-anim .isax-anim-lid,
+isax-anim:hover .isax-anim-lid,
+isax-anim[data-playing="true"] .isax-anim-lid {
+  transform-origin: 18px 6px;
+  animation: isaxLidLift 480ms var(--isax-ease) both;
+}
+
+:is(a, button, .group, .ux-card, [data-icon-hover]):hover isax-anim .isax-anim-write,
+isax-anim:hover .isax-anim-write,
+isax-anim[data-playing="true"] .isax-anim-write {
+  animation: isaxPenWrite 520ms var(--isax-ease) both;
+}
+
+:is(a, button, .group, .ux-card, [data-icon-hover]):hover isax-anim .isax-anim-spin-q,
+isax-anim:hover .isax-anim-spin-q,
+isax-anim[data-playing="true"] .isax-anim-spin-q {
+  animation: isaxSpinQuarter 460ms var(--isax-ease) both;
+}
+
+:is(a, button, .group, .ux-card, [data-icon-hover]):hover isax-anim .isax-anim-spin-h,
+isax-anim:hover .isax-anim-spin-h,
+isax-anim[data-playing="true"] .isax-anim-spin-h {
+  animation: isaxSpinHalf 520ms var(--isax-ease) both;
+}
+
+:is(a, button, .group, .ux-card, [data-icon-hover]):hover isax-anim .isax-anim-compass,
+isax-anim:hover .isax-anim-compass,
+isax-anim[data-playing="true"] .isax-anim-compass {
+  animation: isaxCompassSway 560ms var(--isax-ease) both;
+}
+
+:is(a, button, .group, .ux-card, [data-icon-hover]):hover isax-anim .isax-anim-lock,
+isax-anim:hover .isax-anim-lock,
+isax-anim[data-playing="true"] .isax-anim-lock {
+  animation: isaxLockSettle 460ms var(--isax-ease) both;
+}
+
+:is(a, button, .group, .ux-card, [data-icon-hover]):hover isax-anim .isax-anim-send,
+isax-anim:hover .isax-anim-send,
+isax-anim[data-playing="true"] .isax-anim-send {
+  animation: isaxSendFly 460ms var(--isax-ease) both;
+}
+
+:is(a, button, .group, .ux-card, [data-icon-hover]):hover isax-anim .isax-anim-book,
+isax-anim:hover .isax-anim-book,
+isax-anim[data-playing="true"] .isax-anim-book {
+  animation: isaxBookOpen 480ms var(--isax-ease) both;
+}
+
+:is(a, button, .group, .ux-card, [data-icon-hover]):hover isax-anim .isax-anim-breath,
+isax-anim:hover .isax-anim-breath,
+isax-anim[data-playing="true"] .isax-anim-breath {
+  animation: isaxBreath 520ms var(--isax-ease) both;
+}
+
+/* Modo ambiente calmo (ex: emblema de destaque ou selo de status) */
+isax-anim[trigger="ambient"] svg {
+  animation: isaxAmbientFloat 3.6s ease-in-out infinite;
+}
+
+isax-anim[trigger="ambient"] .isax-anim-compass {
+  animation: isaxCompassSway 4.8s var(--isax-ease) infinite;
+}
+
+isax-anim[trigger="ambient"] .isax-anim-breath {
+  animation: isaxBreath 3.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  isax-anim *,
+  isax-anim svg {
+    animation: none !important;
+    transition: none !important;
+  }
+}

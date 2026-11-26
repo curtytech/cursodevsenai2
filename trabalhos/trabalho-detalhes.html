@@ -6,24 +6,32 @@
     <title>Portfólio do Aluno — Dev SENAI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="../assets/ui/motion.css">
+    <link rel="stylesheet" href="../assets/ui/animate-ui.css">
+    <link rel="stylesheet" href="../assets/ui/iconsax-animated.css">
+    <link rel="stylesheet" href="../assets/ui/project-assistant.css">
+    <script src="../assets/ui/iconsax-animated.js" defer></script>
+    <script src="../assets/ui/theme-and-motion.js"></script>
+    <script src="../assets/ui/animate-ui.js" defer></script>
+    <script src="../assets/ui/project-assistant.js" defer></script>
 </head>
-<body class="min-h-screen bg-slate-950 font-['Inter',sans-serif] text-slate-100 antialiased selection:bg-cyan-500 selection:text-slate-950">
+<body class="min-h-screen bg-slate-950 font-['Inter',sans-serif] text-slate-100 antialiased selection:bg-cyan-500 selection:text-slate-950" data-assistant-auto-open="false" data-root-prefix="../" data-animate-bg="gravity">
 
     <!-- Topbar / Header -->
     <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
-        <div class="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto flex h-20 w-full max-w-[1560px] items-center justify-between px-4 sm:px-8 lg:px-12">
             <div class="flex items-center gap-4">
-                <a href="trabalhos.html" class="group flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/60 px-4 py-2 text-xs font-semibold text-slate-300 transition hover:border-cyan-400/50 hover:bg-slate-800 hover:text-white">
-                    <svg class="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                <a href="trabalhos.html" class="ux-btn group flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/60 px-4 py-2 text-xs font-semibold text-slate-300 hover:border-cyan-400/50 hover:bg-slate-800 hover:text-white">
+                    <isax-anim name="arrow-left" size="15"></isax-anim>
                     <span>Voltar para a Turma</span>
                 </a>
             </div>
 
             <div class="flex items-center gap-3">
-                <button id="openUploadBtn" type="button" class="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-cyan-950/40 transition hover:-translate-y-0.5 hover:bg-cyan-300 active:translate-y-0">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                <button id="openUploadBtn" type="button" class="ux-btn inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-cyan-950/40 hover:bg-cyan-300">
+                    <isax-anim name="upload" size="16"></isax-anim>
                     <span>Publicar Novo Trabalho</span>
                 </button>
             </div>
@@ -45,10 +53,10 @@
     </div>
 
     <!-- Conteúdo Principal -->
-    <main class="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8 space-y-10">
+    <main class="relative z-10 mx-auto w-full max-w-[1560px] px-4 py-10 sm:px-8 lg:px-12 space-y-10">
 
         <!-- Card do Perfil do Aluno -->
-        <section id="studentProfileHeader" class="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 via-slate-900/60 to-slate-950 p-6 sm:p-10">
+        <section id="studentProfileHeader" data-spotlight-card="flat" data-reveal class="relative overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 via-slate-900/60 to-slate-950 p-6 sm:p-10">
             <div class="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl"></div>
             
             <div class="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
@@ -78,8 +86,8 @@
                     </div>
 
                     <button id="openEditStudentModalBtn" type="button" onclick="openEditStudentModal()" 
-                            class="inline-flex items-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/90 px-4 py-3.5 text-xs font-bold text-slate-200 shadow-sm transition hover:border-cyan-400 hover:bg-slate-800 hover:text-cyan-300">
-                        <svg class="h-4 w-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            class="ux-btn inline-flex items-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/90 px-4 py-3.5 text-xs font-bold text-slate-200 shadow-sm hover:border-cyan-400 hover:bg-slate-800 hover:text-cyan-300">
+                        <isax-anim name="edit" size="16" class="text-cyan-400"></isax-anim>
                         <span>Editar Aluno</span>
                     </button>
                 </div>

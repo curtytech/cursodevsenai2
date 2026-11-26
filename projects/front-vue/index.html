@@ -1,207 +1,514 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task List Online</title>
-
+    <title>Workspace de Tarefas — Vue 3 + SQLite | DEV SENAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" type="text/css"
-        href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
-    <link rel="stylesheet" type="text/css"
-        href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
-
     <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="../../assets/ui/motion.css">
+    <link rel="stylesheet" href="../../assets/ui/animate-ui.css">
+    <link rel="stylesheet" href="../../assets/ui/iconsax-animated.css">
+    <link rel="stylesheet" href="../../assets/ui/project-assistant.css">
+    <script src="../../assets/ui/iconsax-animated.js" defer></script>
+    <script src="../../assets/ui/theme-and-motion.js"></script>
+    <script src="../../assets/ui/animate-ui.js" defer></script>
+    <script src="../../assets/ui/project-assistant.js" defer></script>
+    <style>
+        .portal-muted { color: var(--ds-ink-muted); }
+        .portal-secondary { color: var(--ds-ink-secondary); }
+        .portal-ink { color: var(--ds-ink); }
+        .portal-border { border-color: var(--ds-border); }
+        .portal-subtle { background: var(--ds-bg-subtle); }
+        .task-row {
+            background: var(--ds-surface);
+            border: 1px solid var(--ds-border);
+            transition:
+                transform 360ms var(--ease-fluid),
+                border-color 280ms var(--ease-standard),
+                box-shadow 360ms var(--ease-fluid);
+        }
+        .task-row:hover {
+            border-color: var(--ds-border-strong);
+            box-shadow: var(--ds-shadow-sm);
+            transform: translateY(-2px);
+        }
+        .task-row.is-done { opacity: 0.8; }
+    </style>
 </head>
 
-<body id="app">
-    <div class="flex flex-col items-center justify-center mt-5 w-full">
-        <div
-            class="animate animate-pulse flex items-center justify-center mt-5 bg-linear-to-r from-sky-700 to-blue-500 rounded px-4 py-2">
-            <p class="text-4xl font-bold text-white"> Lista de Tarefas Online </p>
-        </div>
+<body class="ds-body min-h-screen antialiased" data-assistant-auto-open="false" data-root-prefix="../../" data-animate-bg="gravity">
+    <div id="app" class="relative z-10 flex min-h-screen flex-col">
+        <!-- Header Full-Width -->
+        <header class="sticky top-0 z-30 w-full px-4 pt-3 sm:px-8 lg:px-12">
+            <div class="ux-glass mx-auto flex w-full max-w-[1480px] items-center justify-between gap-3 rounded-2xl px-4 py-3 sm:px-6">
+                <div class="flex items-center gap-3">
+                    <a href="../../index.html" class="ux-btn ux-btn-ghost rounded-xl px-3.5 py-2 text-xs">
+                        <isax-anim name="arrow-left" size="15"></isax-anim>
+                        <span>Voltar ao Portal</span>
+                    </a>
+                    <span class="hidden h-4 w-px sm:block" style="background:var(--ds-border);"></span>
+                    <span class="hidden ds-mono text-xs portal-muted sm:inline">projects/front-vue • Vue 3 + SQLite</span>
+                </div>
 
-        <div class="flex items-center justify-center mt-5 gap-3 w-80">
-            <input v-model="taskTitle" type="text" placeholder="Digite sua tarefa"
-                class="border border-gray-300 rounded px-4 py-2 w-64">
-            <button v-if="!isEditing" @click="addTask"
-                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                <i class="ph ph-plus-circle text-xl font-bold"></i>
-            </button>
-            <button v-else @click="editTask" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                <i class="ph ph-check text-xl font-bold"></i>
-            </button>
-        </div>
-        <p v-if="feedbackMessage" class="mt-2 text-sm text-gray-700">{{ feedbackMessage }}</p>
-
-        <div class="flex flex-col items-center justify-center mt-5 gap-3 w-80 ">
-            <div v-for="task in tasks" :key="task.id"
-                class="flex items-center justify-between gap-3 border border-gray-300 rounded px-4 py-2 w-full ">
-                <button v-if="task.is_completed" @click="checkTask(task)"
-                    class="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center">
-                    <i class="ph ph-check-circle text-xl font-bold text-white"></i>
-                </button>
-                <button v-else @click="checkTask(task)"
-                    class="w-8 h-8 rounded-lg bg-gray-500 flex items-center justify-center">
-                    <i class="ph ph-circle text-xl font-bold text-white"></i>
-                </button>
-                <p class="text-lg">{{ task.title }}</p>
-
-                <div class="flex gap-2">
-                    <button @click="getEditingTask(task)"
-                        class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">
-                        <i class="ph ph-pen text-md font-bold"></i>
+                <div class="flex items-center gap-2">
+                    <button type="button" @click="getTask"
+                        class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition"
+                        :style="apiOnline
+                            ? 'background:var(--ds-emerald-soft);border-color:rgba(16,185,129,0.3);color:var(--ds-emerald);'
+                            : 'background:var(--ds-rose-soft);border-color:rgba(244,63,94,0.35);color:var(--ds-rose);'"
+                        title="Clique para sincronizar com a API">
+                        <isax-anim :name="apiOnline ? 'shield-tick' : 'refresh'" size="14"></isax-anim>
+                        <span>{{ apiOnline ? 'API SQLite Online' : 'API Offline • Reconectar' }}</span>
                     </button>
-                    <button @click="deleteTask(task)" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
-                        <i class="ph ph-trash text-md font-bold"></i>
+
+                    <button type="button" data-open-voice-guide class="ux-btn ux-btn-ghost hidden rounded-xl px-3 py-1.5 text-xs sm:inline-flex">
+                        <isax-anim name="microphone" size="15"></isax-anim>
+                        <span>Guia de Voz</span>
+                    </button>
+
+                    <button type="button" data-theme-toggle class="ux-btn ux-btn-ghost h-9 w-9 rounded-xl"
+                        aria-label="Alternar tema">
+                        <isax-anim name="sun" size="16"></isax-anim>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Workspace Full-Width 12 Colunas -->
+        <main class="mx-auto grid w-full max-w-[1480px] flex-1 grid-cols-1 gap-6 px-4 py-8 sm:px-8 lg:grid-cols-12 lg:items-start lg:gap-8 lg:px-12">
+
+            <!-- COLUNA ESQUERDA (4 colunas): Métricas, Anel Circular Animado & Atalhos -->
+            <aside class="space-y-5 lg:sticky lg:top-24 lg:col-span-4">
+                <section class="ux-surface rounded-3xl p-6" data-spotlight-card="flat" data-reveal>
+                    <span class="aui-shimmer inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wider"
+                        style="background:var(--ds-accent-soft);border-color:var(--ds-accent-border);color:var(--ds-accent);">
+                        <isax-anim name="database" size="14"></isax-anim>
+                        <span>SQLite Persistente</span>
+                    </span>
+
+                    <h1 data-split-text class="ds-display mt-3 text-2xl font-extrabold portal-ink sm:text-3xl">
+                        Lista de Tarefas Online
+                    </h1>
+                    <p class="mt-1.5 text-sm leading-relaxed portal-muted">
+                        Organize atividades em tempo real com animações fluidas e sincronização direta na API Express.
+                    </p>
+
+                    <!-- Anel Circular de Progresso Animado -->
+                    <div class="mt-6 flex items-center gap-5 rounded-2xl border p-4 portal-subtle portal-border">
+                        <div class="relative flex h-24 w-24 shrink-0 items-center justify-center">
+                            <svg class="-rotate-90" width="96" height="96" viewBox="0 0 120 120" aria-hidden="true">
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="var(--ds-border-strong)" stroke-width="9"></circle>
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="var(--ds-emerald)" stroke-width="9"
+                                    stroke-linecap="round"
+                                    class="aui-ring-progress"
+                                    :stroke-dasharray="ringCircumference"
+                                    :stroke-dashoffset="ringDashOffset"></circle>
+                            </svg>
+                            <span class="ds-display absolute text-lg font-extrabold portal-ink">{{ completionPercent }}%</span>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="ds-display text-sm font-bold portal-ink">Progresso Geral</p>
+                            <p class="text-xs portal-secondary">{{ completedCount }} concluída(s) de {{ tasks.length }} total</p>
+                            <p class="text-[11px] portal-muted">{{ pendingCount }} aguardando conclusão</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 grid grid-cols-3 gap-2.5">
+                        <div class="portal-subtle rounded-2xl border p-3 text-center portal-border">
+                            <span class="ds-display block text-xl font-extrabold portal-ink">{{ tasks.length }}</span>
+                            <span class="text-[11px] portal-muted">Total</span>
+                        </div>
+                        <div class="portal-subtle rounded-2xl border p-3 text-center portal-border">
+                            <span class="ds-display block text-xl font-extrabold" style="color:var(--ds-amber);">{{ pendingCount }}</span>
+                            <span class="text-[11px] portal-muted">Pendentes</span>
+                        </div>
+                        <div class="portal-subtle rounded-2xl border p-3 text-center portal-border">
+                            <span class="ds-display block text-xl font-extrabold" style="color:var(--ds-emerald);">{{ completedCount }}</span>
+                            <span class="text-[11px] portal-muted">Feitas</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Card de Referência da API & Voz -->
+                <section class="ux-surface rounded-3xl p-5 space-y-3" data-spotlight-card="flat" data-reveal data-reveal-delay="80">
+                    <div class="flex items-center justify-between">
+                        <span class="ds-display text-sm font-bold portal-ink">Endpoint Ativo</span>
+                        <button type="button" data-copy-text="http://localhost:3000/api/tasks"
+                            class="ux-btn ux-btn-ghost rounded-lg px-2.5 py-1 text-[11px]">
+                            <isax-anim name="copy" size="13"></isax-anim>
+                            <span data-copy-label>Copiar URL</span>
+                        </button>
+                    </div>
+                    <div class="portal-subtle rounded-xl border px-3 py-2 ds-mono text-xs portal-secondary portal-border">
+                        http://localhost:3000/api/tasks
+                    </div>
+                    <button type="button" data-open-voice-guide data-magnetic
+                        class="ux-btn ux-btn-primary w-full rounded-xl px-4 py-2.5 text-xs">
+                        <isax-anim name="microphone" size="16"></isax-anim>
+                        <span>Tirar Dúvida por Voz (Guia Kore)</span>
+                    </button>
+                </section>
+            </aside>
+
+            <!-- COLUNA DIREITA (8 colunas): Composer, Sliding Filters & Lista Fluida -->
+            <div class="space-y-5 lg:col-span-8">
+                <!-- Composer -->
+                <section class="ux-surface rounded-3xl p-5 sm:p-6" data-spotlight-card="flat" data-reveal data-reveal-delay="50">
+                    <form @submit.prevent="isEditing ? editTask() : addTask()" class="space-y-3">
+                        <div v-if="isEditing"
+                            class="flex items-center justify-between rounded-xl border px-3.5 py-2 text-xs"
+                            style="background:var(--ds-accent-soft);border-color:var(--ds-accent-border);color:var(--ds-accent);">
+                            <span class="inline-flex items-center gap-2 font-semibold">
+                                <isax-anim name="edit" size="15"></isax-anim>
+                                <span>Editando tarefa #{{ editingTaskId }}</span>
+                            </span>
+                            <button type="button" @click="cancelEdit" class="font-semibold underline hover:opacity-80">
+                                Cancelar (Esc)
+                            </button>
+                        </div>
+
+                        <div class="flex flex-col gap-3 sm:flex-row">
+                            <input ref="taskInput" v-model="taskTitle" type="text"
+                                :placeholder="isEditing ? 'Atualize o título da tarefa...' : 'Adicione uma nova tarefa e pressione Enter...'"
+                                class="ux-input flex-1 rounded-2xl px-4 py-3.5 text-sm" />
+
+                            <button type="submit" :disabled="submitting" data-magnetic
+                                class="ux-btn ux-btn-primary rounded-2xl px-6 py-3.5 text-xs sm:w-auto">
+                                <isax-anim :name="isEditing ? 'tick-circle' : 'add-circle'" size="18"></isax-anim>
+                                <span>{{ isEditing ? 'Salvar Alteração' : 'Adicionar Tarefa' }}</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Feedback acessível -->
+                    <div v-if="feedbackMessage" role="status"
+                        class="mt-4 flex items-center justify-between gap-2 rounded-xl border px-3.5 py-2.5 text-xs font-medium"
+                        :style="feedbackType === 'error'
+                            ? 'background:var(--ds-rose-soft);border-color:rgba(244,63,94,0.35);color:var(--ds-rose);'
+                            : 'background:var(--ds-emerald-soft);border-color:rgba(16,185,129,0.3);color:var(--ds-emerald);'">
+                        <span class="inline-flex items-center gap-2">
+                            <isax-anim :name="feedbackType === 'error' ? 'warning' : 'tick-circle'" size="16" trigger="mount"></isax-anim>
+                            <span>{{ feedbackMessage }}</span>
+                        </span>
+                        <button type="button" @click="feedbackMessage = ''" aria-label="Dispensar aviso" class="opacity-70 hover:opacity-100">
+                            <isax-anim name="close" size="14"></isax-anim>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Barra de Filtros Sliding Pill + Busca -->
+                <section class="ux-surface flex flex-col gap-3 rounded-2xl p-3 sm:flex-row sm:items-center sm:justify-between" data-reveal data-reveal-delay="100">
+                    <div ref="slidingTabs" data-sliding-tabs class="inline-flex items-center gap-1 rounded-xl p-1 portal-subtle border portal-border">
+                        <button type="button" @click="setFilter('all')"
+                            class="ux-btn rounded-xl border border-transparent px-3.5 py-2 text-xs"
+                            :class="filter === 'all' ? 'is-tab-active' : 'portal-secondary'">
+                            Todas ({{ tasks.length }})
+                        </button>
+                        <button type="button" @click="setFilter('pending')"
+                            class="ux-btn rounded-xl border border-transparent px-3.5 py-2 text-xs"
+                            :class="filter === 'pending' ? 'is-tab-active' : 'portal-secondary'">
+                            Pendentes ({{ pendingCount }})
+                        </button>
+                        <button type="button" @click="setFilter('completed')"
+                            class="ux-btn rounded-xl border border-transparent px-3.5 py-2 text-xs"
+                            :class="filter === 'completed' ? 'is-tab-active' : 'portal-secondary'">
+                            Concluídas ({{ completedCount }})
+                        </button>
+                    </div>
+
+                    <div class="relative flex-1 sm:max-w-xs">
+                        <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 portal-muted">
+                            <isax-anim name="search" size="15"></isax-anim>
+                        </span>
+                        <input v-model="searchQuery" type="search" placeholder="Filtrar por texto..."
+                            class="ux-input w-full rounded-xl py-2 pl-9 pr-3 text-xs" />
+                    </div>
+                </section>
+
+                <!-- Lista de Tarefas Animada -->
+                <section aria-label="Lista de tarefas">
+                    <div v-if="loading" class="ux-surface rounded-3xl p-10 text-center text-sm portal-muted">
+                        Carregando tarefas do SQLite...
+                    </div>
+
+                    <transition-group v-else-if="filteredTasks.length" name="ux-list" tag="div" class="flex flex-col gap-3">
+                        <div v-for="task in filteredTasks" :key="task.id"
+                            class="task-row flex items-center justify-between gap-3.5 rounded-2xl px-4 py-3.5 sm:px-5"
+                            :class="{ 'is-done': task.is_completed }">
+                            <button type="button" @click="checkTask(task)"
+                                class="ux-btn h-10 w-10 shrink-0 rounded-xl border"
+                                :style="task.is_completed
+                                    ? 'background:var(--ds-emerald);border-color:transparent;color:#04131c;'
+                                    : 'background:var(--ds-bg-subtle);border-color:var(--ds-border-strong);color:var(--ds-ink-muted);'"
+                                :aria-label="task.is_completed ? 'Marcar como pendente' : 'Marcar como concluída'">
+                                <isax-anim :name="task.is_completed ? 'tick-circle' : 'circle'" size="20"
+                                    :trigger="task.is_completed ? 'mount' : 'hover'"></isax-anim>
+                            </button>
+
+                            <div class="min-w-0 flex-1">
+                                <p class="break-words text-sm font-medium sm:text-base"
+                                    :class="task.is_completed ? 'line-through portal-muted' : 'portal-ink'">
+                                    {{ task.title }}
+                                </p>
+                                <span class="ds-mono text-[11px] portal-muted">
+                                    ID #{{ task.id }} • {{ task.is_completed ? 'Concluída' : 'Em aberto' }}
+                                </span>
+                            </div>
+
+                            <div class="flex shrink-0 items-center gap-2">
+                                <button type="button" @click="getEditingTask(task)"
+                                    class="ux-btn ux-btn-ghost h-9 w-9 rounded-xl"
+                                    aria-label="Editar tarefa" title="Editar">
+                                    <isax-anim name="edit" size="16"></isax-anim>
+                                </button>
+                                <button type="button" @click="askDelete(task)"
+                                    class="ux-btn h-9 w-9 rounded-xl border"
+                                    style="background:var(--ds-rose-soft);border-color:rgba(244,63,94,0.3);color:var(--ds-rose);"
+                                    aria-label="Excluir tarefa" title="Excluir">
+                                    <isax-anim name="trash" size="16"></isax-anim>
+                                </button>
+                            </div>
+                        </div>
+                    </transition-group>
+
+                    <div v-else class="ux-surface rounded-3xl p-12 text-center">
+                        <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl portal-subtle portal-muted">
+                            <isax-anim name="tick-circle" size="22"></isax-anim>
+                        </div>
+                        <p class="ds-display text-base font-bold portal-ink">Nenhuma tarefa encontrada</p>
+                        <p class="mt-1 text-xs portal-muted">
+                            {{ tasks.length ? 'Ajuste o filtro ou a busca para visualizar outras tarefas.' : 'Adicione sua primeira tarefa acima para começar.' }}
+                        </p>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Modal de Confirmação de Exclusão -->
+        <div v-if="taskToDelete" @click.self="taskToDelete = null"
+            class="ux-modal-animate fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 p-4 backdrop-blur-sm"
+            role="dialog" aria-modal="true">
+            <div class="ux-surface w-full max-w-sm rounded-3xl p-6">
+                <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border"
+                    style="background:var(--ds-rose-soft);border-color:rgba(244,63,94,0.35);color:var(--ds-rose);">
+                    <isax-anim name="trash" size="21" trigger="ambient"></isax-anim>
+                </div>
+                <h2 class="ds-display text-lg font-bold portal-ink">Excluir tarefa?</h2>
+                <p class="mt-1.5 text-sm portal-secondary">
+                    Tem certeza que deseja remover <strong>"{{ taskToDelete.title }}"</strong> do banco SQLite?
+                </p>
+                <div class="mt-6 flex justify-end gap-2.5">
+                    <button type="button" @click="taskToDelete = null" class="ux-btn ux-btn-ghost rounded-xl px-4 py-2 text-xs">
+                        Cancelar
+                    </button>
+                    <button type="button" @click="confirmDelete" class="ux-btn rounded-xl px-4 py-2 text-xs text-white"
+                        style="background:var(--ds-rose);">
+                        <isax-anim name="trash" size="15"></isax-anim>
+                        <span>Excluir</span>
                     </button>
                 </div>
             </div>
         </div>
-
     </div>
 
     <script>
+        const API_URL = 'http://localhost:3000/api/tasks';
+
         const app = Vue.createApp({
             data() {
                 return {
                     taskTitle: '',
                     feedbackMessage: '',
+                    feedbackType: 'success',
                     tasks: [],
+                    loading: true,
+                    submitting: false,
+                    apiOnline: true,
                     isEditing: false,
-                    editingTaskId: null
+                    editingTaskId: null,
+                    taskToDelete: null,
+                    filter: 'all',
+                    searchQuery: '',
+                    ringCircumference: 2 * Math.PI * 50
+                };
+            },
+
+            computed: {
+                completedCount() { return this.tasks.filter((t) => Boolean(t.is_completed)).length; },
+                pendingCount() { return this.tasks.length - this.completedCount; },
+                completionPercent() {
+                    if (!this.tasks.length) return 0;
+                    return Math.round((this.completedCount / this.tasks.length) * 100);
+                },
+                ringDashOffset() {
+                    return this.ringCircumference * (1 - this.completionPercent / 100);
+                },
+                filteredTasks() {
+                    const q = this.searchQuery.trim().toLowerCase();
+                    return this.tasks.filter((task) => {
+                        if (this.filter === 'pending' && task.is_completed) return false;
+                        if (this.filter === 'completed' && !task.is_completed) return false;
+                        if (q && !String(task.title || '').toLowerCase().includes(q)) return false;
+                        return true;
+                    });
                 }
             },
 
             mounted() {
-                this.getTask()
+                this.getTask();
+                window.addEventListener('keydown', this.handleKeydown);
+                this.$nextTick(() => {
+                    if (window.AnimateUI) window.AnimateUI.refresh();
+                });
+            },
+
+            beforeUnmount() {
+                window.removeEventListener('keydown', this.handleKeydown);
             },
 
             methods: {
-                async getTask() {
-                    console.log('Obtendo tarefas...');
-                    try {
-                        const response = await fetch('http://localhost:3000/api/tasks');
-                        if (!response.ok) {
-                            throw new Error(`Erro ao obter tarefas (${response.status}).`);
+                setFilter(val) {
+                    this.filter = val;
+                    this.$nextTick(() => {
+                        if (window.AnimateUI && this.$refs.slidingTabs) {
+                            window.AnimateUI.syncSlidingTabs(this.$refs.slidingTabs);
                         }
-                        const tasks = await response.json();
-                        this.tasks = tasks;
-                        console.log('Tarefas obtidas:', tasks);
+                    });
+                },
+                handleKeydown(ev) {
+                    if (ev.key === 'Escape') {
+                        if (this.taskToDelete) this.taskToDelete = null;
+                        else if (this.isEditing) this.cancelEdit();
+                    }
+                },
+                notify(msg, type = 'success') {
+                    this.feedbackMessage = msg;
+                    this.feedbackType = type;
+                },
+                async getTask() {
+                    this.loading = true;
+                    try {
+                        const response = await fetch(API_URL);
+                        if (!response.ok) throw new Error(`Erro ao obter tarefas (${response.status}).`);
+                        const data = await response.json();
+                        this.tasks = Array.isArray(data) ? data : [];
+                        this.apiOnline = true;
                     } catch (error) {
                         console.error('Não foi possível obter as tarefas:', error);
+                        this.apiOnline = false;
+                        this.notify('API indisponível em localhost:3000. Rode "npm run dev" em projects/node-api.', 'error');
+                    } finally {
+                        this.loading = false;
+                        this.$nextTick(() => {
+                            if (window.AnimateUI && this.$refs.slidingTabs) {
+                                window.AnimateUI.syncSlidingTabs(this.$refs.slidingTabs);
+                            }
+                        });
                     }
                 },
                 async addTask() {
                     const title = this.taskTitle.trim();
-                    if (!title) {
-                        this.feedbackMessage = 'Digite uma tarefa antes de adicionar.';
-                        return;
-                    }
-
+                    if (!title) { this.notify('Digite o título de uma tarefa antes de adicionar.', 'error'); return; }
+                    this.submitting = true;
                     try {
-                        const response = await fetch('http://localhost:3000/api/tasks', {
+                        const response = await fetch(API_URL, {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ title })
                         });
-
-                        if (!response.ok) {
-                            throw new Error(`Erro ao adicionar tarefa (${response.status}).`);
-                        }
-
+                        if (!response.ok) throw new Error(`Erro ao adicionar tarefa (${response.status}).`);
                         await response.json();
                         this.taskTitle = '';
-                        this.feedbackMessage = 'Tarefa adicionada com sucesso.';
-                        this.getTask();
+                        this.apiOnline = true;
+                        this.notify('Tarefa adicionada com sucesso.');
+                        await this.getTask();
                     } catch (error) {
                         console.error('Não foi possível adicionar a tarefa:', error);
-                        this.feedbackMessage = 'Não foi possível adicionar a tarefa. Verifique se a API está disponível.';
-                    }
+                        this.apiOnline = false;
+                        this.notify('Não foi possível adicionar a tarefa. Verifique se a API está ativa.', 'error');
+                    } finally { this.submitting = false; }
                 },
-                async checkTask(Task) {
+                async checkTask(task) {
                     try {
-                        const response = await fetch(`http://localhost:3000/api/tasks/${Task.id}`, {
+                        const response = await fetch(`${API_URL}/${task.id}`, {
                             method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ id: Task.id, is_completed: !Task.is_completed })
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ is_completed: !task.is_completed })
                         });
-
-                        if (!response.ok) {
-                            throw new Error(`Erro ao adicionar tarefa (${response.status}).`);
-                        }
-
-                        await response.json();
-                        this.feedbackMessage = 'Tarefa atualizada com sucesso.';
-                        this.getTask();
+                        if (!response.ok) throw new Error(`Erro ao atualizar tarefa (${response.status}).`);
+                        const updated = await response.json();
+                        this.tasks = this.tasks.map((t) => (t.id === updated.id ? updated : t));
+                        this.apiOnline = true;
+                        this.notify(updated.is_completed ? 'Tarefa marcada como concluída.' : 'Tarefa marcada como pendente.');
                     } catch (error) {
                         console.error('Não foi possível atualizar a tarefa:', error);
-                        this.feedbackMessage = 'Não foi possível atualizar a tarefa. Verifique se a API está disponível.';
+                        this.apiOnline = false;
+                        this.notify('Não foi possível atualizar a tarefa.', 'error');
                     }
                 },
-                async getEditingTask(task) {
+                getEditingTask(task) {
                     this.taskTitle = task.title;
                     this.isEditing = true;
                     this.editingTaskId = task.id;
+                    this.$nextTick(() => { if (this.$refs.taskInput) this.$refs.taskInput.focus(); });
+                },
+                cancelEdit() {
+                    this.isEditing = false;
+                    this.editingTaskId = null;
+                    this.taskTitle = '';
                 },
                 async editTask() {
+                    const title = this.taskTitle.trim();
+                    if (!title) { this.notify('O título da tarefa não pode ficar vazio.', 'error'); return; }
+                    this.submitting = true;
                     try {
-                        const response = await fetch(`http://localhost:3000/api/tasks/${this.editingTaskId}`, {
+                        const response = await fetch(`${API_URL}/${this.editingTaskId}`, {
                             method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ title: this.taskTitle })
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ title })
                         });
-
-                        if (!response.ok) {
-                            throw new Error(`Erro ao atualizar tarefa (${response.status}).`);
-                        }
-
+                        if (!response.ok) throw new Error(`Erro ao atualizar tarefa (${response.status}).`);
                         await response.json();
-                        this.taskTitle = '';
-                        this.feedbackMessage = 'Tarefa atualizada com sucesso.';
-                        this.isEditing = false;
-                        this.editingTaskId = null;
-                        console.log('Tarefa editada com sucesso:', this.isEditing);
-                        this.getTask();
-
+                        this.cancelEdit();
+                        this.apiOnline = true;
+                        this.notify('Tarefa atualizada com sucesso.');
+                        await this.getTask();
                     } catch (error) {
                         console.error('Não foi possível atualizar a tarefa:', error);
-                        this.feedbackMessage = 'Não foi possível atualizar a tarefa. Verifique se a API está disponível.';
-                    }
-
-                    // Lógica para editar uma tarefa existente
-                    console.log('Editar tarefa');
+                        this.apiOnline = false;
+                        this.notify('Não foi possível atualizar a tarefa.', 'error');
+                    } finally { this.submitting = false; }
                 },
-                async deleteTask(task) {
-                    // Lógica para excluir uma tarefa existente
+                askDelete(task) { this.taskToDelete = task; },
+                async confirmDelete() {
+                    if (!this.taskToDelete) return;
+                    const target = this.taskToDelete;
                     try {
-                        const response = await fetch(`http://localhost:3000/api/tasks/${task.id}`, {
-                            method: 'DELETE'
-                        });
-                        if (!response.ok) {
-                            throw new Error(`Erro ao excluir tarefa (${response.status}).`);
-                        }
-                        const tasks = await response.json();
-                        this.tasks = tasks;
-                        console.log('Tarefas obtidas:', tasks);
-                        this.getTask();
+                        const response = await fetch(`${API_URL}/${target.id}`, { method: 'DELETE' });
+                        if (!response.ok) throw new Error(`Erro ao excluir tarefa (${response.status}).`);
+                        await response.json();
+                        if (this.editingTaskId === target.id) this.cancelEdit();
+                        this.tasks = this.tasks.filter((t) => t.id !== target.id);
+                        this.apiOnline = true;
+                        this.notify('Tarefa excluída com sucesso.');
                     } catch (error) {
-                        console.error('Não foi possível obter as tarefas:', error);
-                    }
+                        console.error('Não foi possível excluir a tarefa:', error);
+                        this.apiOnline = false;
+                        this.notify('Não foi possível excluir a tarefa.', 'error');
+                    } finally { this.taskToDelete = null; }
                 }
             }
-        })
+        });
 
-        app.mount('#app')
+        app.mount('#app');
     </script>
-
 </body>
 
 </html>

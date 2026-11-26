@@ -59,10 +59,34 @@
                 </div>
             </div>
         </div>
-
     </div>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+        import {
+            addDoc,
+            collection,
+            deleteDoc,
+            doc,
+            getFirestore,
+            onSnapshot,
+            updateDoc
+        } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbrvSEmepmw2GnwL73LcYK7JDxbzJQQNE",
+            authDomain: "senai-b4f48.firebaseapp.com",
+            projectId: "senai-b4f48",
+            storageBucket: "senai-b4f48.firebasestorage.app",
+            messagingSenderId: "837681907187",
+            appId: "1:837681907187:web:4fe97020db7f11959ffe86"
+        };
+
+        const firebaseApp = initializeApp(firebaseConfig);
+        const db = getFirestore(firebaseApp);
+        const tasksCollection = collection(db, 'tasks');
+        let unsubscribeTasks = null;
+
         const app = Vue.createApp({
             data() {
                 return {
@@ -75,23 +99,27 @@
             },
 
             mounted() {
-                this.getTask()
+                this.listenToTasks()
+            },
+
+            beforeUnmount() {
+                if (unsubscribeTasks) {
+                    unsubscribeTasks();
+                    unsubscribeTasks = null;
+                }
             },
 
             methods: {
-                async getTask() {
-                    console.log('Obtendo tarefas...');
-                    try {
-                        const response = await fetch('http://localhost:3000/api/tasks');
-                        if (!response.ok) {
-                            throw new Error(`Erro ao obter tarefas (${response.status}).`);
-                        }
-                        const tasks = await response.json();
-                        this.tasks = tasks;
-                        console.log('Tarefas obtidas:', tasks);
-                    } catch (error) {
+                listenToTasks() {
+                    unsubscribeTasks = onSnapshot(tasksCollection, snapshot => {
+                        this.tasks = snapshot.docs.map(taskDoc => ({
+                            id: taskDoc.id,
+                            ...taskDoc.data()
+                        }));
+                    }, error => {
                         console.error('Não foi possível obter as tarefas:', error);
-                    }
+                        this.feedbackMessage = 'Não foi possível carregar as tarefas do Firestore.';
+                    });
                 },
                 async addTask() {
                     const title = this.taskTitle.trim();
@@ -101,47 +129,28 @@
                     }
 
                     try {
-                        const response = await fetch('http://localhost:3000/api/tasks', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ title })
+                        await addDoc(tasksCollection, {
+                            title,
+                            is_completed: false
                         });
 
-                        if (!response.ok) {
-                            throw new Error(`Erro ao adicionar tarefa (${response.status}).`);
-                        }
-
-                        await response.json();
                         this.taskTitle = '';
                         this.feedbackMessage = 'Tarefa adicionada com sucesso.';
-                        this.getTask();
                     } catch (error) {
                         console.error('Não foi possível adicionar a tarefa:', error);
-                        this.feedbackMessage = 'Não foi possível adicionar a tarefa. Verifique se a API está disponível.';
+                        this.feedbackMessage = 'Não foi possível adicionar a tarefa no Firestore.';
                     }
                 },
                 async checkTask(Task) {
                     try {
-                        const response = await fetch(`http://localhost:3000/api/tasks/${Task.id}`, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ id: Task.id, is_completed: !Task.is_completed })
+                        await updateDoc(doc(db, 'tasks', Task.id), {
+                            is_completed: !Task.is_completed
                         });
 
-                        if (!response.ok) {
-                            throw new Error(`Erro ao adicionar tarefa (${response.status}).`);
-                        }
-
-                        await response.json();
                         this.feedbackMessage = 'Tarefa atualizada com sucesso.';
-                        this.getTask();
                     } catch (error) {
                         console.error('Não foi possível atualizar a tarefa:', error);
-                        this.feedbackMessage = 'Não foi possível atualizar a tarefa. Verifique se a API está disponível.';
+                        this.feedbackMessage = 'Não foi possível atualizar a tarefa no Firestore.';
                     }
                 },
                 async getEditingTask(task) {
@@ -150,50 +159,33 @@
                     this.editingTaskId = task.id;
                 },
                 async editTask() {
+                    const title = this.taskTitle.trim();
+                    if (!title) {
+                        this.feedbackMessage = 'Digite uma tarefa antes de salvar.';
+                        return;
+                    }
+
                     try {
-                        const response = await fetch(`http://localhost:3000/api/tasks/${this.editingTaskId}`, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ title: this.taskTitle })
+                        await updateDoc(doc(db, 'tasks', this.editingTaskId), {
+                            title
                         });
 
-                        if (!response.ok) {
-                            throw new Error(`Erro ao atualizar tarefa (${response.status}).`);
-                        }
-
-                        await response.json();
                         this.taskTitle = '';
                         this.feedbackMessage = 'Tarefa atualizada com sucesso.';
                         this.isEditing = false;
                         this.editingTaskId = null;
-                        console.log('Tarefa editada com sucesso:', this.isEditing);
-                        this.getTask();
-
                     } catch (error) {
                         console.error('Não foi possível atualizar a tarefa:', error);
-                        this.feedbackMessage = 'Não foi possível atualizar a tarefa. Verifique se a API está disponível.';
+                        this.feedbackMessage = 'Não foi possível atualizar a tarefa no Firestore.';
                     }
-
-                    // Lógica para editar uma tarefa existente
-                    console.log('Editar tarefa');
                 },
                 async deleteTask(task) {
-                    // Lógica para excluir uma tarefa existente
                     try {
-                        const response = await fetch(`http://localhost:3000/api/tasks/${task.id}`, {
-                            method: 'DELETE'
-                        });
-                        if (!response.ok) {
-                            throw new Error(`Erro ao excluir tarefa (${response.status}).`);
-                        }
-                        const tasks = await response.json();
-                        this.tasks = tasks;
-                        console.log('Tarefas obtidas:', tasks);
-                        this.getTask();
+                        await deleteDoc(doc(db, 'tasks', task.id));
+                        this.feedbackMessage = 'Tarefa excluída com sucesso.';
                     } catch (error) {
-                        console.error('Não foi possível obter as tarefas:', error);
+                        console.error('Não foi possível excluir a tarefa:', error);
+                        this.feedbackMessage = 'Não foi possível excluir a tarefa do Firestore.';
                     }
                 }
             }

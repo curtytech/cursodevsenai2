@@ -1,0 +1,377 @@
+/* ==========================================================================
+   DEV SENAI — Design System Editorial & Motion Design Calibrado
+   Estética humana de produto (sem clichês neon), foco em UX e fluidez.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* Superfícies & Tinta — Dark Editorial Refinado */
+  --ds-bg: #090d14;
+  --ds-bg-subtle: #0d131d;
+  --ds-surface: #111824;
+  --ds-surface-elevated: #161f2e;
+  --ds-surface-glass: rgba(15, 22, 34, 0.78);
+  --ds-border: rgba(148, 163, 184, 0.15);
+  --ds-border-strong: rgba(148, 163, 184, 0.28);
+  --ds-ink: #f1f5f9;
+  --ds-ink-secondary: #cbd5e1;
+  --ds-ink-muted: #8b9bb4;
+
+  /* Acentos Funcionais (contidos e legíveis — WCAG AA+) */
+  --ds-accent: #22d3ee;
+  --ds-accent-ink: #04131c;
+  --ds-accent-soft: rgba(34, 211, 238, 0.11);
+  --ds-accent-border: rgba(34, 211, 238, 0.32);
+
+  --ds-emerald: #10b981;
+  --ds-emerald-soft: rgba(16, 185, 129, 0.12);
+  --ds-amber: #f59e0b;
+  --ds-amber-soft: rgba(245, 158, 11, 0.12);
+  --ds-rose: #f43f5e;
+  --ds-rose-soft: rgba(244, 63, 94, 0.12);
+  --ds-indigo: #818cf8;
+  --ds-indigo-soft: rgba(129, 140, 248, 0.12);
+
+  /* Sombras táteis suaves */
+  --ds-shadow-sm: 0 2px 8px rgba(2, 6, 23, 0.24);
+  --ds-shadow-md: 0 12px 32px -12px rgba(2, 6, 23, 0.55);
+  --ds-shadow-lg: 0 24px 64px -16px rgba(2, 6, 23, 0.72);
+
+  /* Curvas & Durações de Motion Design (nem rápido demais, nem lento demais) */
+  --ease-fluid: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.28, 0.64, 1);
+  --dur-micro: 300ms;
+  --dur-base: 420ms;
+  --dur-panel: 480ms;
+  --dur-reveal: 580ms;
+
+  /* Tipografia */
+  --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Papel quente editorial + grafite nítido */
+  --ds-bg: #f6f5f0;
+  --ds-bg-subtle: #eeece5;
+  --ds-surface: #ffffff;
+  --ds-surface-elevated: #fcfbf8;
+  --ds-surface-glass: rgba(255, 255, 255, 0.84);
+  --ds-border: rgba(15, 23, 42, 0.10);
+  --ds-border-strong: rgba(15, 23, 42, 0.20);
+  --ds-ink: #111827;
+  --ds-ink-secondary: #334155;
+  --ds-ink-muted: #64748b;
+
+  --ds-accent: #0284c7;
+  --ds-accent-ink: #ffffff;
+  --ds-accent-soft: rgba(2, 132, 199, 0.09);
+  --ds-accent-border: rgba(2, 132, 199, 0.28);
+
+  --ds-emerald: #059669;
+  --ds-emerald-soft: rgba(5, 150, 105, 0.10);
+  --ds-amber: #d97706;
+  --ds-amber-soft: rgba(217, 119, 6, 0.11);
+  --ds-rose: #e11d48;
+  --ds-rose-soft: rgba(225, 29, 72, 0.10);
+  --ds-indigo: #4f46e5;
+  --ds-indigo-soft: rgba(79, 70, 229, 0.10);
+
+  --ds-shadow-sm: 0 1px 4px rgba(15, 23, 42, 0.06);
+  --ds-shadow-md: 0 10px 28px -10px rgba(15, 23, 42, 0.12);
+  --ds-shadow-lg: 0 22px 54px -14px rgba(15, 23, 42, 0.18);
+}
+
+/* Base editorial */
+html {
+  scroll-behavior: smooth;
+}
+
+body.ds-body {
+  background-color: var(--ds-bg);
+  color: var(--ds-ink);
+  font-family: var(--font-sans);
+  transition: background-color var(--dur-base) var(--ease-standard),
+              color var(--dur-base) var(--ease-standard);
+  position: relative;
+  overflow-x: hidden;
+}
+
+body.ds-body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(900px 420px at 14% -8%, rgba(34, 211, 238, 0.065), transparent 65%),
+    radial-gradient(760px 380px at 88% 2%, rgba(16, 185, 129, 0.05), transparent 62%);
+  transition: opacity var(--dur-base) var(--ease-standard);
+}
+
+:root[data-theme="light"] body.ds-body::before {
+  background:
+    radial-gradient(900px 420px at 14% -8%, rgba(2, 132, 199, 0.06), transparent 65%),
+    radial-gradient(760px 380px at 88% 2%, rgba(5, 150, 105, 0.045), transparent 62%);
+}
+
+.ds-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.025em;
+}
+
+.ds-mono {
+  font-family: var(--font-mono);
+}
+
+/* Superfícies & Cards com resposta tátil fluida */
+.ux-surface {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  box-shadow: var(--ds-shadow-sm);
+  transition: background-color var(--dur-micro) var(--ease-standard),
+              border-color var(--dur-micro) var(--ease-standard),
+              box-shadow var(--dur-base) var(--ease-fluid);
+}
+
+.ux-glass {
+  background: var(--ds-surface-glass);
+  border: 1px solid var(--ds-border);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  transition: background-color var(--dur-micro) var(--ease-standard),
+              border-color var(--dur-micro) var(--ease-standard);
+}
+
+.ux-card {
+  position: relative;
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-border);
+  box-shadow: var(--ds-shadow-sm);
+  transition:
+    transform var(--dur-base) var(--ease-fluid),
+    border-color var(--dur-micro) var(--ease-standard),
+    box-shadow var(--dur-base) var(--ease-fluid),
+    background-color var(--dur-micro) var(--ease-standard);
+  will-change: transform;
+}
+
+.ux-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--ds-border-strong);
+  box-shadow: var(--ds-shadow-md);
+}
+
+.ux-card:active {
+  transform: translateY(-1px) scale(0.992);
+}
+
+/* Micro-interação de botões */
+.ux-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform var(--dur-micro) var(--ease-fluid),
+    background-color var(--dur-micro) var(--ease-standard),
+    border-color var(--dur-micro) var(--ease-standard),
+    color var(--dur-micro) var(--ease-standard),
+    box-shadow var(--dur-micro) var(--ease-fluid);
+}
+
+.ux-btn:hover:not(:disabled) {
+  transform: translateY(-1.5px);
+}
+
+.ux-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+}
+
+.ux-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ux-btn-primary {
+  background: var(--ds-accent);
+  color: var(--ds-accent-ink);
+  border: 1px solid transparent;
+  box-shadow: 0 6px 18px -6px rgba(34, 211, 238, 0.35);
+}
+
+:root[data-theme="light"] .ux-btn-primary {
+  box-shadow: 0 6px 18px -6px rgba(2, 132, 199, 0.32);
+}
+
+.ux-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.06);
+  box-shadow: 0 10px 24px -8px rgba(34, 211, 238, 0.45);
+}
+
+.ux-btn-ghost {
+  background: transparent;
+  color: var(--ds-ink-secondary);
+  border: 1px solid var(--ds-border);
+}
+
+.ux-btn-ghost:hover:not(:disabled) {
+  background: var(--ds-surface-elevated);
+  border-color: var(--ds-border-strong);
+  color: var(--ds-ink);
+}
+
+/* Inputs acessíveis */
+.ux-input {
+  background: var(--ds-bg-subtle);
+  color: var(--ds-ink);
+  border: 1px solid var(--ds-border);
+  transition:
+    border-color var(--dur-micro) var(--ease-standard),
+    box-shadow var(--dur-micro) var(--ease-standard),
+    background-color var(--dur-micro) var(--ease-standard);
+}
+
+.ux-input::placeholder {
+  color: var(--ds-ink-muted);
+}
+
+.ux-input:focus {
+  outline: none;
+  border-color: var(--ds-accent);
+  box-shadow: 0 0 0 3px var(--ds-accent-soft);
+}
+
+/* Foco visível acessível */
+:is(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--ds-accent);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Scroll Reveal — Entrada Orgânica Calibrada (580ms ease-out-expo)
+   ========================================================================== */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity var(--dur-reveal) var(--ease-fluid),
+    transform var(--dur-reveal) var(--ease-fluid);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   Modais & Drawers — Motion Fluido (460ms)
+   ========================================================================== */
+@keyframes uxBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes uxModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.ux-modal-animate {
+  animation: uxBackdropIn 320ms var(--ease-standard) both;
+}
+
+.ux-modal-animate > * {
+  animation: uxModalIn var(--dur-panel) var(--ease-fluid) both;
+}
+
+/* ==========================================================================
+   Vue <transition-group name="ux-list"> — Listas Fluidas (380ms)
+   ========================================================================== */
+.ux-list-enter-active,
+.ux-list-leave-active {
+  transition:
+    opacity 380ms var(--ease-fluid),
+    transform 380ms var(--ease-fluid);
+}
+
+.ux-list-enter-from {
+  opacity: 0;
+  transform: translateY(10px) scale(0.985);
+}
+
+.ux-list-leave-to {
+  opacity: 0;
+  transform: translateX(18px) scale(0.975);
+}
+
+.ux-list-move {
+  transition: transform 420ms var(--ease-fluid);
+}
+
+/* Barra de progresso fluida */
+.ux-progress-bar {
+  transition: width 520ms var(--ease-fluid);
+}
+
+/* Link com sublinhado animado sutil */
+.ux-nav-link {
+  position: relative;
+  color: var(--ds-ink-secondary);
+  transition: color var(--dur-micro) var(--ease-standard);
+}
+
+.ux-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.35rem;
+  height: 1.5px;
+  border-radius: 99px;
+  background: var(--ds-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 340ms var(--ease-fluid);
+}
+
+.ux-nav-link:hover,
+.ux-nav-link.is-active {
+  color: var(--ds-ink);
+}
+
+.ux-nav-link:hover::after,
+.ux-nav-link.is-active::after {
+  transform: scaleX(1);
+}
+
+/* Respeito integral à preferência de movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

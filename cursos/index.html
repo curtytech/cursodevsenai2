@@ -3,26 +3,43 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Módulo de Cursos & Vídeos - SENAI</title>
+    <title>Módulo de Cursos &amp; Vídeos - SENAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../assets/ui/motion.css" />
+    <link rel="stylesheet" href="../assets/ui/animate-ui.css" />
+    <link rel="stylesheet" href="../assets/ui/iconsax-animated.css" />
+    <link rel="stylesheet" href="../assets/ui/project-assistant.css" />
+    <script src="../assets/ui/iconsax-animated.js" defer></script>
+    <script src="../assets/ui/theme-and-motion.js"></script>
+    <script src="../assets/ui/animate-ui.js" defer></script>
+    <script src="../assets/ui/project-assistant.js" defer></script>
   </head>
   <body
     class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased"
+    data-assistant-auto-open="false"
+    data-root-prefix="../"
+    data-animate-bg="gravity"
   >
     <!-- Header / Navbar -->
     <header
-      class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50"
+      class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40"
     >
       <div
-        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"
+        class="max-w-[1560px] mx-auto px-4 sm:px-8 lg:px-12 h-16 flex items-center justify-between"
       >
         <div class="flex items-center gap-3">
           <div
-            class="w-8 h-8 rounded-lg bg-cyan-600 flex items-center justify-center font-bold text-white shadow-lg shadow-cyan-500/20"
+            class="w-9 h-9 rounded-xl bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center text-cyan-400 shadow-lg shadow-cyan-500/10"
           >
-            S
+            <isax-anim name="video-play" size="20"></isax-anim>
           </div>
-          <span class="font-bold text-lg tracking-tight text-slate-100"
+          <span class="ds-display font-bold text-lg tracking-tight text-slate-100"
             >DEV SENAI
             <span class="text-cyan-400 font-normal"
               >| Plataforma de Cursos</span
@@ -31,21 +48,24 @@
         </div>
         <a
           href="../index.html"
-          class="text-sm font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-1"
+          class="ux-btn rounded-xl border border-slate-800 bg-slate-900/70 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:border-cyan-400/40 hover:text-white"
         >
-          &larr; Voltar ao Início
+          <isax-anim name="arrow-left" size="15"></isax-anim>
+          <span>Voltar ao Início</span>
         </a>
       </div>
     </header>
 
     <!-- Conteúdo Principal -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+    <main class="relative z-10 flex-1 max-w-[1560px] w-full mx-auto px-4 py-6 sm:px-8 lg:px-12 space-y-8">
       <div
         class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-800/80 pb-6"
+        data-reveal
       >
         <div>
           <h1
-            class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white"
+            data-split-text
+            class="ds-display text-3xl sm:text-4xl font-extrabold tracking-tight text-white"
           >
             Cursos Disponíveis
           </h1>
@@ -57,23 +77,25 @@
         <button
           id="openModalBtn"
           type="button"
-          class="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-950/40 transition duration-200 hover:bg-cyan-300 active:scale-95 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+          data-magnetic
+          class="ux-btn inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-950/40 hover:bg-cyan-300"
         >
-          <span class="text-lg leading-none">+</span> Criar Novo Curso
+          <isax-anim name="add-circle" size="18"></isax-anim>
+          <span>Criar Novo Curso</span>
         </button>
       </div>
 
       <!-- Grid do Catálogo de Cursos -->
       <div
         id="coursesGrid"
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
       ></div>
     </main>
 
     <!-- MODAL: Criar / Editar Curso -->
     <div
       id="courseModal"
-      class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm"
+      class="ux-modal-animate fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
     >
@@ -240,7 +262,7 @@
     <!-- MODAL CUSTOMIZADO DE CONFIRMAÇÃO DE EXCLUSÃO -->
     <div
       id="deleteConfirmModal"
-      class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm flex items-center justify-center"
+      class="ux-modal-animate fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 p-4 backdrop-blur-sm flex items-center justify-center"
       role="dialog"
       aria-modal="true"
     >
@@ -250,19 +272,7 @@
         <div
           class="mx-auto w-12 h-12 rounded-2xl bg-rose-950/50 border border-rose-800/60 flex items-center justify-center text-rose-400"
         >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-            />
-          </svg>
+          <isax-anim name="trash" size="24" trigger="ambient"></isax-anim>
         </div>
 
         <div>
@@ -589,6 +599,17 @@
             submitBtn.textContent = "Salvar Curso";
           }
         });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          modal.classList.add("hidden");
+          const delModal = document.getElementById("deleteConfirmModal");
+          if (delModal) {
+            delModal.classList.add("hidden");
+            delModal.classList.remove("flex");
+          }
+        }
+      });
 
       document.addEventListener("DOMContentLoaded", renderCourses);
     </script>
