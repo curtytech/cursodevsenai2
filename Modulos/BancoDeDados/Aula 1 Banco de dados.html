@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,9 @@
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -43,7 +46,7 @@
       user-select: none;
       -webkit-font-smoothing: antialiased;
     }
-    
+
     .slide-container {
       aspect-ratio: 16 / 9;
       max-height: calc(100vh - 5rem);
@@ -63,7 +66,7 @@
       transform: translateY(6px);
       transition: opacity 0.25s ease-out, transform 0.25s ease-out;
     }
-    
+
     .slide.active {
       display: flex;
       opacity: 1;
@@ -86,9 +89,11 @@
         background: white !important;
         color: black !important;
       }
+
       .no-print {
         display: none !important;
       }
+
       .slide {
         display: flex !important;
         opacity: 1 !important;
@@ -99,18 +104,22 @@
         border: none !important;
         box-shadow: none !important;
       }
+
       .slide-container {
         max-height: none !important;
       }
     }
   </style>
 </head>
+
 <body class="min-h-screen flex flex-col justify-between overflow-x-hidden">
 
   <!-- ================= TOP BAR (Navegação & Status) ================= -->
-  <header class="no-print bg-white border-b border-slate-200 px-4 py-2.5 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+  <header
+    class="no-print bg-white border-b border-slate-200 px-4 py-2.5 flex items-center justify-between sticky top-0 z-30 shadow-xs">
     <div class="flex items-center space-x-3">
-      <div class="w-8 h-8 rounded-lg bg-emerald-800 text-white flex items-center justify-center font-bold text-sm shadow-xs">
+      <div
+        class="w-8 h-8 rounded-lg bg-emerald-800 text-white flex items-center justify-center font-bold text-sm shadow-xs">
         BD
       </div>
       <div>
@@ -125,7 +134,8 @@
 
     <!-- Indicador Central de Slide & Progresso -->
     <div class="flex items-center space-x-3">
-      <div class="hidden sm:flex items-center space-x-1.5 bg-slate-100 rounded-full px-3 py-1 text-xs font-medium text-slate-700 border border-slate-200">
+      <div
+        class="hidden sm:flex items-center space-x-1.5 bg-slate-100 rounded-full px-3 py-1 text-xs font-medium text-slate-700 border border-slate-200">
         <span class="text-emerald-700 font-bold" id="currentSlideNum">1</span>
         <span class="text-slate-400">/</span>
         <span id="totalSlideNum">25</span>
@@ -133,43 +143,66 @@
 
       <!-- Barra de progresso discreta -->
       <div class="w-32 md:w-48 bg-slate-200 rounded-full h-1.5 overflow-hidden">
-        <div id="progressBar" class="bg-emerald-600 h-1.5 transition-all duration-300 rounded-full" style="width: 4%;"></div>
+        <div id="progressBar" class="bg-emerald-600 h-1.5 transition-all duration-300 rounded-full" style="width: 4%;">
+        </div>
       </div>
     </div>
 
     <!-- Controles de Modo e Painéis -->
     <div class="flex items-center space-x-1 sm:space-x-2">
       <!-- Botão Menu / Índice -->
-      <button onclick="toggleTocModal()" class="px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-emerald-800 hover:bg-emerald-50 rounded-md transition flex items-center gap-1.5 border border-slate-200" title="Índice dos Slides (Atalho: M)">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+      <button onclick="toggleTocModal()"
+        class="px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-emerald-800 hover:bg-emerald-50 rounded-md transition flex items-center gap-1.5 border border-slate-200"
+        title="Índice dos Slides (Atalho: M)">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+        </svg>
         <span class="hidden md:inline">Índice</span>
       </button>
 
       <!-- Botão Notas do Professor -->
-      <button onclick="toggleTeacherNotes()" id="btnTeacherNotes" class="px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-emerald-800 hover:bg-emerald-50 rounded-md transition flex items-center gap-1.5 border border-slate-200" title="Dicas Pedagógicas & Tempo (Atalho: P)">
-        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+      <button onclick="toggleTeacherNotes()" id="btnTeacherNotes"
+        class="px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-emerald-800 hover:bg-emerald-50 rounded-md transition flex items-center gap-1.5 border border-slate-200"
+        title="Dicas Pedagógicas & Tempo (Atalho: P)">
+        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
         <span class="hidden md:inline">Notas do Professor</span>
       </button>
 
       <!-- Botão Tela Cheia -->
-      <button onclick="toggleFullScreen()" class="p-1.5 text-slate-600 hover:text-emerald-700 hover:bg-slate-100 rounded-md transition" title="Alternar Tela Cheia (F)">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0 0l-5-5m-7 11l-5 5m0 0h4m-4 0v-4m16 4v-4m0 4l-5-5"/></svg>
+      <button onclick="toggleFullScreen()"
+        class="p-1.5 text-slate-600 hover:text-emerald-700 hover:bg-slate-100 rounded-md transition"
+        title="Alternar Tela Cheia (F)">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0 0l-5-5m-7 11l-5 5m0 0h4m-4 0v-4m16 4v-4m0 4l-5-5" />
+        </svg>
       </button>
     </div>
   </header>
 
   <!-- ================= PALCO PRINCIPAL (SLIDES) ================= -->
   <main class="flex-1 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-100/60">
-    <div class="w-full max-w-6xl bg-white rounded-2xl shadow-md border border-slate-200/80 slide-container overflow-hidden relative flex flex-col justify-between">
+    <div
+      class="w-full max-w-6xl bg-white rounded-2xl shadow-md border border-slate-200/80 slide-container overflow-hidden relative flex flex-col justify-between">
 
       <!-- ================= SLIDE 1: CAPA ================= -->
-      <section class="slide active flex-col justify-between h-full p-8 md:p-14 bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 text-white relative overflow-hidden" data-title="Abertura da Aula" data-module="Apresentação">
+      <section
+        class="slide active flex-col justify-between h-full p-8 md:p-14 bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 text-white relative overflow-hidden"
+        data-title="Abertura da Aula" data-module="Apresentação">
         <!-- Detalhes de grid sutis de fundo -->
-        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#22c55e_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none"></div>
-        <div class="absolute -right-24 -bottom-24 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div
+          class="absolute inset-0 opacity-10 bg-[radial-gradient(#22c55e_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none">
+        </div>
+        <div
+          class="absolute -right-24 -bottom-24 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none">
+        </div>
 
         <div class="relative z-10 flex items-center justify-between">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/80 border border-emerald-600/40 text-emerald-300 text-xs font-medium tracking-wide">
+          <div
+            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/80 border border-emerald-600/40 text-emerald-300 text-xs font-medium tracking-wide">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             Aula Introdutória • Tecnologia da Informação
           </div>
@@ -183,7 +216,7 @@
           <p class="mt-4 text-base md:text-lg text-emerald-100/90 font-light leading-relaxed">
             Como dados isolados se transformam em decisões inteligentes que movimentam empresas modernas.
           </p>
-          
+
           <div class="mt-8 flex flex-wrap gap-2 text-xs font-medium text-emerald-200">
             <span class="px-2.5 py-1 rounded bg-white/10 border border-white/10">Dados vs Informação</span>
             <span class="px-2.5 py-1 rounded bg-white/10 border border-white/10">SGBD & SQL</span>
@@ -193,62 +226,86 @@
           </div>
         </div>
 
-        <div class="relative z-10 flex items-center justify-between pt-6 border-t border-emerald-800/60 text-xs text-emerald-300/80">
+        <div
+          class="relative z-10 flex items-center justify-between pt-6 border-t border-emerald-800/60 text-xs text-emerald-300/80">
           <div class="flex items-center gap-2">
             <span class="font-medium text-white">Cenário de Estudo:</span>
             <span>Sistema de Gestão & Clientes da "TechVarejo"</span>
           </div>
           <div class="flex items-center gap-2">
-            <span>Pressione <kbd class="px-1.5 py-0.5 rounded bg-emerald-800 text-white font-mono border border-emerald-700">Espaço</kbd> ou <kbd class="px-1.5 py-0.5 rounded bg-emerald-800 text-white font-mono border border-emerald-700">→</kbd> para avançar</span>
+            <span>Pressione <kbd
+                class="px-1.5 py-0.5 rounded bg-emerald-800 text-white font-mono border border-emerald-700">Espaço</kbd>
+              ou <kbd
+                class="px-1.5 py-0.5 rounded bg-emerald-800 text-white font-mono border border-emerald-700">→</kbd> para
+              avançar</span>
           </div>
         </div>
       </section>
 
       <!-- ================= SLIDE 2: OBJETIVOS DE APRENDIZAGEM ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Objetivos de Aprendizagem" data-module="Planejamento">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Objetivos de Aprendizagem"
+        data-module="Planejamento">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
             <div>
               <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Ponto de Partida</span>
               <h2 class="text-2xl md:text-3xl font-bold text-slate-800">O que você vai dominar ao final desta aula</h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Competências</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Competências</span>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             <!-- Card 1 -->
-            <div class="p-5 rounded-xl bg-slate-50 border border-slate-200/80 hover:border-emerald-500 transition-colors">
-              <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm mb-3">1</div>
+            <div
+              class="p-5 rounded-xl bg-slate-50 border border-slate-200/80 hover:border-emerald-500 transition-colors">
+              <div
+                class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm mb-3">
+                1</div>
               <h3 class="font-semibold text-slate-800 text-sm mb-1.5">Conceitos Fundamentais</h3>
               <p class="text-xs text-slate-600 leading-relaxed">
-                Diferenciar <strong class="text-slate-800">dado, informação e conhecimento</strong>, compreendendo o papel e o valor do banco de dados nas empresas.
+                Diferenciar <strong class="text-slate-800">dado, informação e conhecimento</strong>, compreendendo o
+                papel e o valor do banco de dados nas empresas.
               </p>
             </div>
 
             <!-- Card 2 -->
-            <div class="p-5 rounded-xl bg-slate-50 border border-slate-200/80 hover:border-emerald-500 transition-colors">
-              <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm mb-3">2</div>
+            <div
+              class="p-5 rounded-xl bg-slate-50 border border-slate-200/80 hover:border-emerald-500 transition-colors">
+              <div
+                class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm mb-3">
+                2</div>
               <h3 class="font-semibold text-slate-800 text-sm mb-1.5">Estrutura & Qualidade</h3>
               <p class="text-xs text-slate-600 leading-relaxed">
-                Identificar tabelas, campos, registros e chaves primárias, aplicando regras de <strong class="text-slate-800">limpeza e padronização</strong>.
+                Identificar tabelas, campos, registros e chaves primárias, aplicando regras de <strong
+                  class="text-slate-800">limpeza e padronização</strong>.
               </p>
             </div>
 
             <!-- Card 3 -->
-            <div class="p-5 rounded-xl bg-slate-50 border border-slate-200/80 hover:border-emerald-500 transition-colors">
-              <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm mb-3">3</div>
+            <div
+              class="p-5 rounded-xl bg-slate-50 border border-slate-200/80 hover:border-emerald-500 transition-colors">
+              <div
+                class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm mb-3">
+                3</div>
               <h3 class="font-semibold text-slate-800 text-sm mb-1.5">Decisão & Responsabilidade</h3>
               <p class="text-xs text-slate-600 leading-relaxed">
-                Entender relatórios e dashboards corporativos, respeitando os princípios éticos e a <strong class="text-slate-800">LGPD</strong>.
+                Entender relatórios e dashboards corporativos, respeitando os princípios éticos e a <strong
+                  class="text-slate-800">LGPD</strong>.
               </p>
             </div>
           </div>
 
           <!-- Banner de Contexto -->
           <div class="mt-6 p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 flex items-start gap-3">
-            <svg class="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <svg class="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
             <p class="text-xs text-emerald-900 leading-relaxed">
-              <strong class="font-semibold">Nossa linha de raciocínio prática:</strong> Acompanharemos a empresa fictícia <strong>TechVarejo</strong> que precisa transformar milhares de fichas de clientes desorganizadas em um sistema rápido, seguro e gerador de relatórios.
+              <strong class="font-semibold">Nossa linha de raciocínio prática:</strong> Acompanharemos a empresa
+              fictícia <strong>TechVarejo</strong> que precisa transformar milhares de fichas de clientes desorganizadas
+              em um sistema rápido, seguro e gerador de relatórios.
             </p>
           </div>
         </div>
@@ -260,42 +317,51 @@
       </section>
 
       <!-- ================= SLIDE 3: MÓDULO 1 - O QUE SÃO DADOS? ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="O que são Dados?" data-module="Módulo 1 — Dados e Informações">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="O que são Dados?"
+        data-module="Módulo 1 — Dados e Informações">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
             <div>
               <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 1 • Introdução</span>
               <h2 class="text-2xl md:text-3xl font-bold text-slate-800">O que são Dados? Os blocos de construção</h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Fatos Brutos</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Fatos
+              Brutos</span>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <!-- Explicação didática -->
             <div class="space-y-4">
               <p class="text-sm md:text-base text-slate-700 leading-relaxed">
-                Um <strong class="text-emerald-800 font-semibold">dado</strong> é um elemento bruto: um número, uma palavra, um símbolo ou uma data coletada <span class="underline decoration-emerald-400 underline-offset-4">sem contexto imediato</span>.
+                Um <strong class="text-emerald-800 font-semibold">dado</strong> é um elemento bruto: um número, uma
+                palavra, um símbolo ou uma data coletada <span
+                  class="underline decoration-emerald-400 underline-offset-4">sem contexto imediato</span>.
               </p>
               <div class="bg-amber-50/80 border-l-4 border-amber-500 p-3 rounded-r-lg">
                 <p class="text-xs text-amber-900 leading-snug">
-                  <strong>Atenção:</strong> Isoladamente, um dado não transmite uma mensagem completa e não permite tomar uma decisão segura.
+                  <strong>Atenção:</strong> Isoladamente, um dado não transmite uma mensagem completa e não permite
+                  tomar uma decisão segura.
                 </p>
               </div>
               <ul class="space-y-2 text-xs md:text-sm text-slate-600">
                 <li class="flex items-center gap-2">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                  <span>Exemplos soltos: <code class="mono-pill">38,5</code>, <code class="mono-pill">"Silva"</code>, <code class="mono-pill">"Curitiba"</code>, <code class="mono-pill">120</code></span>
+                  <span>Exemplos soltos: <code class="mono-pill">38,5</code>, <code class="mono-pill">"Silva"</code>,
+                    <code class="mono-pill">"Curitiba"</code>, <code class="mono-pill">120</code></span>
                 </li>
                 <li class="flex items-center gap-2">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                  <span>O que significa <strong>"38,5"</strong>? É o preço de um item? A temperatura? Ou o número de um calçado?</span>
+                  <span>O que significa <strong>"38,5"</strong>? É o preço de um item? A temperatura? Ou o número de um
+                    calçado?</span>
                 </li>
               </ul>
             </div>
 
             <!-- Demonstração visual de dados soltos -->
             <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 relative">
-              <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-3">Dados Brutos Desconectados</span>
+              <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-3">Dados Brutos
+                Desconectados</span>
               <div class="grid grid-cols-2 gap-3">
                 <div class="p-3 bg-white rounded-lg border border-slate-200 text-center shadow-2xs">
                   <span class="text-xs text-slate-400 block font-mono">Dado Numérico</span>
@@ -315,7 +381,8 @@
                 </div>
               </div>
               <div class="mt-4 text-center">
-                <span class="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 text-[11px] rounded-full font-medium">
+                <span
+                  class="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 text-[11px] rounded-full font-medium">
                   Sem contexto = Nenhuma decisão possível!
                 </span>
               </div>
@@ -330,14 +397,18 @@
       </section>
 
       <!-- ================= SLIDE 4: DADO x INFORMAÇÃO x CONHECIMENTO ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Dado vs Informação vs Conhecimento" data-module="Módulo 1 — Dados e Informações">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white"
+        data-title="Dado vs Informação vs Conhecimento" data-module="Módulo 1 — Dados e Informações">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 1 • A Escada de Valor</span>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 1 • A Escada de
+                Valor</span>
               <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Dado vs Informação vs Conhecimento</h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Pirâmide DIKW</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Pirâmide
+              DIKW</span>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -345,7 +416,8 @@
             <div class="p-5 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
               <div>
                 <div class="flex items-center justify-between mb-3">
-                  <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-200 text-slate-700 font-mono">NÍVEL 1</span>
+                  <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-200 text-slate-700 font-mono">NÍVEL
+                    1</span>
                   <span class="text-slate-400 text-xs">Bruto</span>
                 </div>
                 <h3 class="text-lg font-bold text-slate-800 mb-2">Dado</h3>
@@ -366,7 +438,9 @@
             <div class="p-5 rounded-xl border-2 border-emerald-500/40 bg-emerald-50/30 flex flex-col justify-between">
               <div>
                 <div class="flex items-center justify-between mb-3">
-                  <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-200 text-emerald-800 font-mono">NÍVEL 2</span>
+                  <span
+                    class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-200 text-emerald-800 font-mono">NÍVEL
+                    2</span>
                   <span class="text-emerald-700 text-xs font-medium">Contextualizado</span>
                 </div>
                 <h3 class="text-lg font-bold text-emerald-950 mb-2">Informação</h3>
@@ -376,7 +450,8 @@
                 <div class="p-3 bg-white rounded-lg border border-emerald-200 text-xs">
                   <p class="font-semibold text-slate-500 text-[10px] uppercase">Exemplo Prático:</p>
                   <p class="text-slate-800 font-medium mt-1 text-xs">
-                    "O estoque do <strong class="text-emerald-800">Notebook Gamer</strong> atingiu <strong class="text-red-600">0 unidades</strong> hoje."
+                    "O estoque do <strong class="text-emerald-800">Notebook Gamer</strong> atingiu <strong
+                      class="text-red-600">0 unidades</strong> hoje."
                   </p>
                 </div>
               </div>
@@ -386,10 +461,13 @@
             </div>
 
             <!-- Nível 3: Conhecimento -->
-            <div class="p-5 rounded-xl border border-emerald-800 bg-emerald-900 text-white flex flex-col justify-between shadow-xs">
+            <div
+              class="p-5 rounded-xl border border-emerald-800 bg-emerald-900 text-white flex flex-col justify-between shadow-xs">
               <div>
                 <div class="flex items-center justify-between mb-3">
-                  <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-800 text-emerald-200 font-mono">NÍVEL 3</span>
+                  <span
+                    class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-800 text-emerald-200 font-mono">NÍVEL
+                    3</span>
                   <span class="text-emerald-300 text-xs">Ação & Decisão</span>
                 </div>
                 <h3 class="text-lg font-bold text-white mb-2">Conhecimento</h3>
@@ -417,61 +495,86 @@
       </section>
 
       <!-- ================= SLIDE 5: O CICLO DE VIDA DA INFORMAÇÃO ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="O Ciclo de Vida da Informação" data-module="Módulo 1 — Dados e Informações">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white"
+        data-title="O Ciclo de Vida da Informação" data-module="Módulo 1 — Dados e Informações">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 1 • Processo Corporativo</span>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 1 • Processo
+                Corporativo</span>
               <h2 class="text-2xl md:text-3xl font-bold text-slate-800">O Ciclo de Vida da Informação</h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Fluxo Contínuo</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Fluxo
+              Contínuo</span>
           </div>
 
           <!-- Fluxograma interativo 6 etapas -->
           <div class="grid grid-cols-2 md:grid-cols-6 gap-2.5 my-4">
             <!-- Etapa 1 -->
             <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-center flex flex-col justify-between">
-              <div class="w-7 h-7 mx-auto rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center mb-2">1</div>
+              <div
+                class="w-7 h-7 mx-auto rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center mb-2">
+                1</div>
               <h4 class="font-bold text-xs text-slate-800 mb-1">Coleta</h4>
-              <p class="text-[11px] text-slate-500 leading-tight">Formulários, compras no caixa, sensores e cadastros.</p>
+              <p class="text-[11px] text-slate-500 leading-tight">Formulários, compras no caixa, sensores e cadastros.
+              </p>
             </div>
             <!-- Etapa 2 -->
             <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-center flex flex-col justify-between">
-              <div class="w-7 h-7 mx-auto rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center mb-2">2</div>
+              <div
+                class="w-7 h-7 mx-auto rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center mb-2">
+                2</div>
               <h4 class="font-bold text-xs text-slate-800 mb-1">Organização</h4>
-              <p class="text-[11px] text-slate-500 leading-tight">Separação em tabelas, campos e formatos padronizados.</p>
+              <p class="text-[11px] text-slate-500 leading-tight">Separação em tabelas, campos e formatos padronizados.
+              </p>
             </div>
             <!-- Etapa 3 -->
             <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-center flex flex-col justify-between">
-              <div class="w-7 h-7 mx-auto rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center mb-2">3</div>
+              <div
+                class="w-7 h-7 mx-auto rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center mb-2">
+                3</div>
               <h4 class="font-bold text-xs text-slate-800 mb-1">Tratamento</h4>
               <p class="text-[11px] text-slate-500 leading-tight">Remoção de duplicatas e correção de digitação.</p>
             </div>
             <!-- Etapa 4 -->
             <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-center flex flex-col justify-between">
-              <div class="w-7 h-7 mx-auto rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center mb-2">4</div>
+              <div
+                class="w-7 h-7 mx-auto rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center mb-2">
+                4</div>
               <h4 class="font-bold text-xs text-slate-800 mb-1">Armazenamento</h4>
               <p class="text-[11px] text-slate-500 leading-tight">Gravação segura em Banco de Dados com backup.</p>
             </div>
             <!-- Etapa 5 -->
             <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-center flex flex-col justify-between">
-              <div class="w-7 h-7 mx-auto rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center mb-2">5</div>
+              <div
+                class="w-7 h-7 mx-auto rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center justify-center mb-2">
+                5</div>
               <h4 class="font-bold text-xs text-slate-800 mb-1">Apresentação</h4>
               <p class="text-[11px] text-slate-500 leading-tight">Relatórios gerenciais e gráficos dinâmicos (BI).</p>
             </div>
             <!-- Etapa 6 -->
-            <div class="p-3.5 rounded-xl bg-emerald-800 border border-emerald-900 text-white text-center flex flex-col justify-between shadow-xs">
-              <div class="w-7 h-7 mx-auto rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center mb-2">6</div>
+            <div
+              class="p-3.5 rounded-xl bg-emerald-800 border border-emerald-900 text-white text-center flex flex-col justify-between shadow-xs">
+              <div
+                class="w-7 h-7 mx-auto rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center mb-2">
+                6</div>
               <h4 class="font-bold text-xs text-white mb-1">Decisão</h4>
-              <p class="text-[11px] text-emerald-100 leading-tight">Ações estratégicas para o crescimento da empresa.</p>
+              <p class="text-[11px] text-emerald-100 leading-tight">Ações estratégicas para o crescimento da empresa.
+              </p>
             </div>
           </div>
 
           <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-4 mt-6">
-            <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-mono font-bold shrink-0">GIGO</div>
+            <div
+              class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-mono font-bold shrink-0">
+              GIGO</div>
             <div>
-              <h5 class="text-xs font-bold text-slate-800">Princípio Fundamental da Computação: Garbage In, Garbage Out</h5>
-              <p class="text-xs text-slate-600">Se você alimentar o banco com <em>"lixo"</em> (dados errados, incompletos e duplicados), os relatórios de gestão entregarão <em>"lixo"</em> — levando a empresa a decisões desastrosas.</p>
+              <h5 class="text-xs font-bold text-slate-800">Princípio Fundamental da Computação: Garbage In, Garbage Out
+              </h5>
+              <p class="text-xs text-slate-600">Se você alimentar o banco com <em>"lixo"</em> (dados errados,
+                incompletos e duplicados), os relatórios de gestão entregarão <em>"lixo"</em> — levando a empresa a
+                decisões desastrosas.</p>
             </div>
           </div>
         </div>
@@ -483,25 +586,30 @@
       </section>
 
       <!-- ================= SLIDE 6: MÓDULO 2 - O QUE É UM BANCO DE DADOS? ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="O que é um Banco de Dados?" data-module="Módulo 2 — Definições e SGBD">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white"
+        data-title="O que é um Banco de Dados?" data-module="Módulo 2 — Definições e SGBD">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 2 • Conceito Central</span>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 2 • Conceito
+                Central</span>
               <h2 class="text-2xl md:text-3xl font-bold text-slate-800">O que é um Banco de Dados e para que serve?</h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Database</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Database</span>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div class="space-y-4">
               <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200">
                 <p class="text-sm md:text-base text-emerald-950 font-medium leading-relaxed">
-                  Um <strong>Banco de Dados</strong> é uma coleção organizada, estruturada e integrada de dados, armazenada digitalmente de modo a permitir buscas ágeis, atualizações seguras e consultas simultâneas.
+                  Um <strong>Banco de Dados</strong> é uma coleção organizada, estruturada e integrada de dados,
+                  armazenada digitalmente de modo a permitir buscas ágeis, atualizações seguras e consultas simultâneas.
                 </p>
               </div>
 
-              <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Por que não guardar tudo em cadernos de papel?</h4>
+              <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Por que não guardar tudo em cadernos
+                de papel?</h4>
               <div class="grid grid-cols-2 gap-3 text-xs">
                 <div class="p-3 rounded-lg border border-slate-200 bg-slate-50">
                   <span class="font-bold text-emerald-700 block mb-1">⚡ Alta Velocidade</span>
@@ -524,13 +632,15 @@
 
             <!-- Exemplos no Mundo Real -->
             <div class="bg-slate-50 rounded-xl p-5 border border-slate-200 space-y-3">
-              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Onde encontramos Bancos de Dados hoje?</span>
-              
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Onde encontramos Bancos de
+                Dados hoje?</span>
+
               <div class="p-3 rounded-lg bg-white border border-slate-200 flex items-center gap-3">
                 <span class="text-xl">🏥</span>
                 <div>
                   <h5 class="text-xs font-bold text-slate-800">Hospital</h5>
-                  <p class="text-[11px] text-slate-500">Prontuários eletrônicos, leitos ocupados, alergias do paciente.</p>
+                  <p class="text-[11px] text-slate-500">Prontuários eletrônicos, leitos ocupados, alergias do paciente.
+                  </p>
                 </div>
               </div>
 
@@ -538,7 +648,8 @@
                 <span class="text-xl">🛍️</span>
                 <div>
                   <h5 class="text-xs font-bold text-slate-800">Lojas & E-commerce</h5>
-                  <p class="text-[11px] text-slate-500">Catálogo de itens, carrinho de compras, frete e histórico de pedidos.</p>
+                  <p class="text-[11px] text-slate-500">Catálogo de itens, carrinho de compras, frete e histórico de
+                    pedidos.</p>
                 </div>
               </div>
 
@@ -546,7 +657,8 @@
                 <span class="text-xl">🎓</span>
                 <div>
                   <h5 class="text-xs font-bold text-slate-800">Escolas & Faculdades</h5>
-                  <p class="text-[11px] text-slate-500">Matrículas, notas semestrais, histórico acadêmico e frequência.</p>
+                  <p class="text-[11px] text-slate-500">Matrículas, notas semestrais, histórico acadêmico e frequência.
+                  </p>
                 </div>
               </div>
             </div>
@@ -560,24 +672,29 @@
       </section>
 
       <!-- ================= SLIDE 7: A TRÍADE - BD vs SGBD vs SISTEMA ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="A Tríade: BD, SGBD e Sistema" data-module="Módulo 2 — Definições e SGBD">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white"
+        data-title="A Tríade: BD, SGBD e Sistema" data-module="Módulo 2 — Definições e SGBD">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
             <div>
               <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 2 • Arquitetura</span>
-              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Banco de Dados vs SGBD vs Sistema de Informação</h2>
+              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Banco de Dados vs SGBD vs Sistema de Informação
+              </h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Não Confunda!</span>
+            <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Não
+              Confunda!</span>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             <!-- Camada 1: Sistema -->
             <div class="p-5 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
               <div>
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-700 uppercase">Camada 1: Usuário</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-700 uppercase">Camada 1:
+                  Usuário</span>
                 <h3 class="text-base font-bold text-slate-800 mt-2 mb-1">Sistema de Informação</h3>
                 <p class="text-xs text-slate-600 mb-4 leading-relaxed">
-                  É a interface com telas, botões, formulários e relatórios que os funcionários e clientes enxergam e clicam.
+                  É a interface com telas, botões, formulários e relatórios que os funcionários e clientes enxergam e
+                  clicam.
                 </p>
                 <div class="p-2.5 bg-white rounded border border-slate-200 text-[11px] text-slate-600">
                   <strong>Exemplos:</strong> App do Banco, Tela de Caixa do Mercado, Portal do Aluno.
@@ -589,12 +706,15 @@
             </div>
 
             <!-- Camada 2: SGBD -->
-            <div class="p-5 rounded-xl border-2 border-emerald-500 bg-emerald-50/50 flex flex-col justify-between shadow-xs">
+            <div
+              class="p-5 rounded-xl border-2 border-emerald-500 bg-emerald-50/50 flex flex-col justify-between shadow-xs">
               <div>
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-200 text-emerald-800 uppercase">Camada 2: O Motor</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-200 text-emerald-800 uppercase">Camada
+                  2: O Motor</span>
                 <h3 class="text-base font-bold text-emerald-950 mt-2 mb-1">SGBD (DBMS)</h3>
                 <p class="text-xs text-slate-700 mb-4 leading-relaxed">
-                  <strong>Sistema Gerenciador de Banco de Dados:</strong> O software inteligente que processa comandos, garante a segurança e faz a leitura/escrita física.
+                  <strong>Sistema Gerenciador de Banco de Dados:</strong> O software inteligente que processa comandos,
+                  garante a segurança e faz a leitura/escrita física.
                 </p>
                 <div class="p-2.5 bg-white rounded border border-emerald-200 text-[11px] text-emerald-900 font-mono">
                   PostgreSQL, MySQL, SQL Server, Oracle, SQLite.
@@ -608,13 +728,16 @@
             <!-- Camada 3: Banco de Dados -->
             <div class="p-5 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
               <div>
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-700 uppercase">Camada 3: Armazém</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-700 uppercase">Camada 3:
+                  Armazém</span>
                 <h3 class="text-base font-bold text-slate-800 mt-2 mb-1">Banco de Dados (Dados)</h3>
                 <p class="text-xs text-slate-600 mb-4 leading-relaxed">
-                  O repositório em disco (SSD/HD/Nuvem) onde os arquivos físicos de tabelas, índices e logs residem gravados em bytes.
+                  O repositório em disco (SSD/HD/Nuvem) onde os arquivos físicos de tabelas, índices e logs residem
+                  gravados em bytes.
                 </p>
                 <div class="p-2.5 bg-white rounded border border-slate-200 text-[11px] text-slate-600">
-                  <strong>Analogia:</strong> Se o Banco é o arquivo de gavetas, o SGBD é o arquivista que organiza e tranca as gavetas.
+                  <strong>Analogia:</strong> Se o Banco é o arquivo de gavetas, o SGBD é o arquivista que organiza e
+                  tranca as gavetas.
                 </div>
               </div>
               <div class="mt-4 pt-3 border-t border-slate-200 text-[11px] text-slate-400">
@@ -631,52 +754,75 @@
       </section>
 
       <!-- ================= SLIDE 8: SGBDs MAIS CONHECIDOS ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Principais SGBDs do Mercado" data-module="Módulo 2 — Definições e SGBD">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white"
+        data-title="Principais SGBDs do Mercado" data-module="Módulo 2 — Definições e SGBD">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 2 • Mercado de Trabalho</span>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 2 • Mercado de
+                Trabalho</span>
               <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Conhecendo os Principais SGBDs</h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Ferramentas Reais</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Ferramentas
+              Reais</span>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <!-- MySQL -->
             <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70 hover:border-emerald-500 transition">
-              <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs mb-3">MySQL</div>
+              <div
+                class="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs mb-3">
+                MySQL</div>
               <h4 class="font-bold text-sm text-slate-800">MySQL</h4>
-              <p class="text-xs text-slate-500 mt-1 mb-3">Código aberto, um dos mais populares da internet, padrão na web (WordPress, sites em geral).</p>
-              <span class="inline-block px-2 py-0.5 rounded text-[10px] bg-blue-50 text-blue-700 font-medium">Web & E-commerce</span>
+              <p class="text-xs text-slate-500 mt-1 mb-3">Código aberto, um dos mais populares da internet, padrão na
+                web (WordPress, sites em geral).</p>
+              <span class="inline-block px-2 py-0.5 rounded text-[10px] bg-blue-50 text-blue-700 font-medium">Web &
+                E-commerce</span>
             </div>
 
             <!-- PostgreSQL -->
             <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70 hover:border-emerald-500 transition">
-              <div class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs mb-3">Postgre</div>
+              <div
+                class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs mb-3">
+                Postgre</div>
               <h4 class="font-bold text-sm text-slate-800">PostgreSQL</h4>
-              <p class="text-xs text-slate-500 mt-1 mb-3">Conhecido como o mais avançado SGBD relacional open-source, robusto e altamente confiável.</p>
-              <span class="inline-block px-2 py-0.5 rounded text-[10px] bg-indigo-50 text-indigo-700 font-medium">Fintechs & Grandes Apps</span>
+              <p class="text-xs text-slate-500 mt-1 mb-3">Conhecido como o mais avançado SGBD relacional open-source,
+                robusto e altamente confiável.</p>
+              <span
+                class="inline-block px-2 py-0.5 rounded text-[10px] bg-indigo-50 text-indigo-700 font-medium">Fintechs &
+                Grandes Apps</span>
             </div>
 
             <!-- Microsoft SQL Server -->
             <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70 hover:border-emerald-500 transition">
-              <div class="w-10 h-10 rounded-lg bg-red-100 text-red-700 flex items-center justify-center font-bold text-xs mb-3">MS-SQL</div>
+              <div
+                class="w-10 h-10 rounded-lg bg-red-100 text-red-700 flex items-center justify-center font-bold text-xs mb-3">
+                MS-SQL</div>
               <h4 class="font-bold text-sm text-slate-800">SQL Server</h4>
-              <p class="text-xs text-slate-500 mt-1 mb-3">Solução corporativa da Microsoft, fortemente integrada ao Windows, Power BI e ecossistema .NET.</p>
-              <span class="inline-block px-2 py-0.5 rounded text-[10px] bg-red-50 text-red-700 font-medium">Grandes Corporações</span>
+              <p class="text-xs text-slate-500 mt-1 mb-3">Solução corporativa da Microsoft, fortemente integrada ao
+                Windows, Power BI e ecossistema .NET.</p>
+              <span class="inline-block px-2 py-0.5 rounded text-[10px] bg-red-50 text-red-700 font-medium">Grandes
+                Corporações</span>
             </div>
 
             <!-- SQLite -->
             <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70 hover:border-emerald-500 transition">
-              <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs mb-3">SQLite</div>
+              <div
+                class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs mb-3">
+                SQLite</div>
               <h4 class="font-bold text-sm text-slate-800">SQLite</h4>
-              <p class="text-xs text-slate-500 mt-1 mb-3">Ultra leve, funciona em um único arquivo local sem precisar instalar servidor dedicado.</p>
-              <span class="inline-block px-2 py-0.5 rounded text-[10px] bg-emerald-50 text-emerald-700 font-medium">Smartphones & Apps Móveis</span>
+              <p class="text-xs text-slate-500 mt-1 mb-3">Ultra leve, funciona em um único arquivo local sem precisar
+                instalar servidor dedicado.</p>
+              <span
+                class="inline-block px-2 py-0.5 rounded text-[10px] bg-emerald-50 text-emerald-700 font-medium">Smartphones
+                & Apps Móveis</span>
             </div>
           </div>
 
           <div class="mt-6 p-3.5 rounded-lg bg-slate-100 text-slate-700 text-xs flex items-center justify-between">
-            <span><strong>Dica de Carreira:</strong> Aprender os princípios de banco de dados permite trabalhar em qualquer um desses sistemas, pois todos utilizam a linguagem <strong>SQL</strong> como base.</span>
+            <span><strong>Dica de Carreira:</strong> Aprender os princípios de banco de dados permite trabalhar em
+              qualquer um desses sistemas, pois todos utilizam a linguagem <strong>SQL</strong> como base.</span>
           </div>
         </div>
 
@@ -687,22 +833,28 @@
       </section>
 
       <!-- ================= SLIDE 9: MÓDULO 3 - CADASTRO DE CLIENTES ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="O Cadastro de Clientes" data-module="Módulo 3 — Clientes e Organização">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="O Cadastro de Clientes"
+        data-module="Módulo 3 — Clientes e Organização">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 3 • Estudo de Caso</span>
-              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">O Coração da Empresa: O Cadastro de Clientes</h2>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 3 • Estudo de
+                Caso</span>
+              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">O Coração da Empresa: O Cadastro de Clientes
+              </h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">TechVarejo</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">TechVarejo</span>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div class="space-y-4">
               <p class="text-sm text-slate-700 leading-relaxed">
-                Nenhuma empresa sobrevive sem saber <strong>quem compra seus produtos</strong>, como contatá-los e onde eles moram.
+                Nenhuma empresa sobrevive sem saber <strong>quem compra seus produtos</strong>, como contatá-los e onde
+                eles moram.
               </p>
-              <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Quais informações compõem um cadastro sadio?</h4>
+              <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Quais informações compõem um
+                cadastro sadio?</h4>
               <div class="space-y-2 text-xs text-slate-600">
                 <div class="flex items-center gap-2 p-2 rounded bg-slate-50 border border-slate-200">
                   <span class="text-emerald-600 font-bold">✓</span>
@@ -726,13 +878,17 @@
             <!-- Card de Perigo da Inconsistência -->
             <div class="p-5 rounded-xl bg-amber-50/60 border border-amber-200 space-y-3">
               <div class="flex items-center gap-2 text-amber-800 font-semibold text-xs">
-                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
                 O Risco de Cadastros Duplicados e Inconsistentes
               </div>
               <ul class="text-xs text-amber-950 space-y-2 leading-relaxed">
                 <li>• Enviar duas faturas ou cupons repetidos para a mesma pessoa.</li>
                 <li>• Mercadoria devolvida porque o endereço continha erros de digitação.</li>
-                <li>• Estatísticas distorcidas: achar que tem 10.000 clientes quando 3.000 são cópias repetidas da mesma pessoa.</li>
+                <li>• Estatísticas distorcidas: achar que tem 10.000 clientes quando 3.000 são cópias repetidas da mesma
+                  pessoa.</li>
               </ul>
               <div class="pt-2 text-[11px] text-amber-700 font-medium">
                 Solução: Estruturar os dados em Tabelas com regras rígidas!
@@ -748,14 +904,18 @@
       </section>
 
       <!-- ================= SLIDE 10: ANATOMIA DE UMA TABELA ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="A Anatomia de uma Tabela" data-module="Módulo 3 — Clientes e Organização">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="A Anatomia de uma Tabela"
+        data-module="Módulo 3 — Clientes e Organização">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 3 • Estrutura Essencial</span>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 3 • Estrutura
+                Essencial</span>
               <h2 class="text-2xl md:text-3xl font-bold text-slate-800">A Anatomia de uma Tabela de Dados</h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Tabela fictícia</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Tabela
+              fictícia</span>
           </div>
 
           <!-- Glossário visual rápido -->
@@ -764,10 +924,12 @@
               <span class="font-bold text-emerald-700">1. Tabela (Entidade):</span> O conjunto completo (ex: Clientes).
             </div>
             <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200">
-              <span class="font-bold text-blue-700">2. Campo (Coluna / Atributo):</span> A característica (ex: E-mail, Cidade).
+              <span class="font-bold text-blue-700">2. Campo (Coluna / Atributo):</span> A característica (ex: E-mail,
+              Cidade).
             </div>
             <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200">
-              <span class="font-bold text-purple-700">3. Registro (Linha / Tupla):</span> Os dados de um único cliente completo.
+              <span class="font-bold text-purple-700">3. Registro (Linha / Tupla):</span> Os dados de um único cliente
+              completo.
             </div>
           </div>
 
@@ -812,31 +974,40 @@
               </tbody>
             </table>
           </div>
-          <p class="text-[11px] text-slate-400 mt-2 text-right italic">* Dados inteiramente inventados e fictícios para fins didáticos.</p>
+          <p class="text-[11px] text-slate-400 mt-2 text-right italic">* Dados inteiramente inventados e fictícios para
+            fins didáticos.</p>
         </div>
 
         <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
           <span>Mas todos os dados do mundo cabem em tabelas organizadas?</span>
-          <span class="font-medium text-emerald-700">Ver Dados Estruturados, Semiestruturados e Não Estruturados →</span>
+          <span class="font-medium text-emerald-700">Ver Dados Estruturados, Semiestruturados e Não Estruturados
+            →</span>
         </div>
       </section>
 
       <!-- ================= SLIDE 11: TIPOS DE ESTRUTURA DE DADOS ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Tipos de Estrutura de Dados" data-module="Módulo 3 — Clientes e Organização">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white"
+        data-title="Tipos de Estrutura de Dados" data-module="Módulo 3 — Clientes e Organização">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 3 • Panorama da Informação</span>
-              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Estruturados vs Semiestruturados vs Não Estruturados</h2>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 3 • Panorama da
+                Informação</span>
+              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Estruturados vs Semiestruturados vs Não
+                Estruturados</h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Formas de Dados</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Formas
+              de Dados</span>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             <!-- Estruturados -->
             <div class="p-5 rounded-xl border-2 border-emerald-500 bg-emerald-50/40 flex flex-col justify-between">
               <div>
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-200 text-emerald-800 uppercase font-mono">Foco Desta Aula</span>
+                <span
+                  class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-200 text-emerald-800 uppercase font-mono">Foco
+                  Desta Aula</span>
                 <h3 class="text-base font-bold text-emerald-950 mt-2 mb-1">Dados Estruturados</h3>
                 <p class="text-xs text-slate-700 mb-3 leading-relaxed">
                   Possuem formato rígido e previsível, organizados em linhas e colunas com tipos de dados bem definidos.
@@ -854,10 +1025,12 @@
             <!-- Semiestruturados -->
             <div class="p-5 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
               <div>
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-700 uppercase font-mono">Flexíveis</span>
+                <span
+                  class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-700 uppercase font-mono">Flexíveis</span>
                 <h3 class="text-base font-bold text-slate-800 mt-2 mb-1">Semiestruturados</h3>
                 <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-                  Não estão em tabelas estritas, mas possuem marcadores, tags ou chaves que organizam os elementos internos.
+                  Não estão em tabelas estritas, mas possuem marcadores, tags ou chaves que organizam os elementos
+                  internos.
                 </p>
                 <div class="p-2.5 bg-white rounded border border-slate-200 text-[11px] space-y-1">
                   <div><strong>Onde vivem:</strong> Arquivos JSON, XML, NoSQL.</div>
@@ -872,13 +1045,17 @@
             <!-- Não Estruturados -->
             <div class="p-5 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
               <div>
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-700 uppercase font-mono">80% do Mundo Digital</span>
+                <span
+                  class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-700 uppercase font-mono">80%
+                  do Mundo Digital</span>
                 <h3 class="text-base font-bold text-slate-800 mt-2 mb-1">Não Estruturados</h3>
                 <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-                  Sem modelo pré-definido. Conteúdos ricos que computadores tradicionais não leem como tabela diretamente.
+                  Sem modelo pré-definido. Conteúdos ricos que computadores tradicionais não leem como tabela
+                  diretamente.
                 </p>
                 <div class="p-2.5 bg-white rounded border border-slate-200 text-[11px] space-y-1">
-                  <div><strong>Onde vivem:</strong> Vídeos, áudios do WhatsApp, fotos de produtos, PDFs, posts em redes.</div>
+                  <div><strong>Onde vivem:</strong> Vídeos, áudios do WhatsApp, fotos de produtos, PDFs, posts em redes.
+                  </div>
                 </div>
               </div>
               <div class="mt-4 pt-2 text-[11px] text-slate-500">
@@ -895,20 +1072,25 @@
       </section>
 
       <!-- ================= SLIDE 12: MÓDULO 4 - COLETA E ENTRADA ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Coleta e Tipos de Dados" data-module="Módulo 4 — Coleta e Estruturação">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Coleta e Tipos de Dados"
+        data-module="Módulo 4 — Coleta e Estruturação">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 4 • Entrada de Dados</span>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 4 • Entrada de
+                Dados</span>
               <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Coleta e Definição de Tipos de Dados</h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Portas de Entrada</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Portas
+              de Entrada</span>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <!-- Portas de Coleta -->
             <div class="space-y-3">
-              <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">De onde vêm os dados da empresa?</h4>
+              <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">De onde vêm os dados da empresa?
+              </h4>
               <div class="grid grid-cols-2 gap-2.5 text-xs">
                 <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
                   <span class="font-semibold text-slate-800 block">📝 Formulários Web</span>
@@ -929,13 +1111,15 @@
               </div>
 
               <div class="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900">
-                <strong>O perigo da falta de máscara:</strong> Se o formulário permitir digitar letras no telefone ou não checar o formato do e-mail, o banco guardará sujeira!
+                <strong>O perigo da falta de máscara:</strong> Se o formulário permitir digitar letras no telefone ou
+                não checar o formato do e-mail, o banco guardará sujeira!
               </div>
             </div>
 
             <!-- Tipos de Dados no Banco -->
             <div class="bg-slate-50 rounded-xl p-5 border border-slate-200">
-              <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-3">Tipos Fundamentais de Colunas</h4>
+              <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-3">Tipos Fundamentais de Colunas
+              </h4>
               <div class="space-y-2 text-xs">
                 <div class="flex items-center justify-between p-2 bg-white rounded border border-slate-200">
                   <span class="font-mono font-bold text-slate-800">VARCHAR / TEXT</span>
@@ -974,14 +1158,18 @@
       </section>
 
       <!-- ================= SLIDE 13: CHAVE PRIMÁRIA (PRIMARY KEY) ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Chave Primária (Primary Key)" data-module="Módulo 4 — Coleta e Estruturação">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white"
+        data-title="Chave Primária (Primary Key)" data-module="Módulo 4 — Coleta e Estruturação">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 4 • Identidade Única</span>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 4 • Identidade
+                Única</span>
               <h2 class="text-2xl md:text-3xl font-bold text-slate-800">A Chave Primária (Primary Key — PK)</h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Regra de Ouro</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Regra
+              de Ouro</span>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
@@ -989,7 +1177,8 @@
               <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200">
                 <h4 class="text-sm font-bold text-emerald-950 mb-1">O que é a Chave Primária?</h4>
                 <p class="text-xs text-emerald-900 leading-relaxed">
-                  É um campo especial (ou conjunto de campos) cujo valor é <strong>estritamente único</strong> para cada linha da tabela. Ela funciona como o <span class="underline">"CPF" ou "RG" do registro</span>.
+                  É um campo especial (ou conjunto de campos) cujo valor é <strong>estritamente único</strong> para cada
+                  linha da tabela. Ela funciona como o <span class="underline">"CPF" ou "RG" do registro</span>.
                 </p>
               </div>
 
@@ -1000,21 +1189,25 @@
                 </div>
                 <div class="flex items-start gap-2">
                   <span class="text-emerald-700 font-bold text-sm">2.</span>
-                  <div><strong>Não pode ser nula (NOT NULL):</strong> Todo registro obrigatoriamente tem uma chave.</div>
+                  <div><strong>Não pode ser nula (NOT NULL):</strong> Todo registro obrigatoriamente tem uma chave.
+                  </div>
                 </div>
                 <div class="flex items-start gap-2">
                   <span class="text-emerald-700 font-bold text-sm">3.</span>
-                  <div><strong>Por que não usar o Nome?</strong> Existem milhares de "José da Silva" no Brasil (homônimos!). O nome causaria confusão fatal em contas bancárias ou notas fiscais.</div>
+                  <div><strong>Por que não usar o Nome?</strong> Existem milhares de "José da Silva" no Brasil
+                    (homônimos!). O nome causaria confusão fatal em contas bancárias ou notas fiscais.</div>
                 </div>
               </div>
             </div>
 
             <!-- Esquema Visual da PK -->
             <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 text-center">
-              <span class="text-xs font-mono text-slate-400 block mb-3 uppercase tracking-wider">Garantia de Identidade</span>
-              
+              <span class="text-xs font-mono text-slate-400 block mb-3 uppercase tracking-wider">Garantia de
+                Identidade</span>
+
               <div class="space-y-2 text-left font-mono text-xs">
-                <div class="p-2.5 bg-emerald-100/70 border border-emerald-300 rounded-lg flex items-center justify-between">
+                <div
+                  class="p-2.5 bg-emerald-100/70 border border-emerald-300 rounded-lg flex items-center justify-between">
                   <div>
                     <span class="font-bold text-emerald-900">id_cliente: 101</span>
                     <span class="text-slate-600 block text-[11px] font-sans">Carlos Mendes (São Paulo)</span>
@@ -1022,7 +1215,8 @@
                   <span class="px-2 py-0.5 rounded bg-emerald-700 text-white text-[10px]">PK ÚNICA</span>
                 </div>
 
-                <div class="p-2.5 bg-emerald-100/70 border border-emerald-300 rounded-lg flex items-center justify-between">
+                <div
+                  class="p-2.5 bg-emerald-100/70 border border-emerald-300 rounded-lg flex items-center justify-between">
                   <div>
                     <span class="font-bold text-emerald-900">id_cliente: 102</span>
                     <span class="text-slate-600 block text-[11px] font-sans">Carlos Mendes (Curitiba - Homônimo!)</span>
@@ -1032,7 +1226,8 @@
               </div>
 
               <div class="mt-4 p-2.5 bg-white border border-slate-200 rounded text-[11px] text-slate-600">
-                💡 <strong>Dica:</strong> Em sistemas reais, a chave primária costuma ser um número auto-incremental gerado automaticamente pelo SGBD (<code class="mono-pill">1, 2, 3...</code>).
+                💡 <strong>Dica:</strong> Em sistemas reais, a chave primária costuma ser um número auto-incremental
+                gerado automaticamente pelo SGBD (<code class="mono-pill">1, 2, 3...</code>).
               </div>
             </div>
           </div>
@@ -1045,18 +1240,24 @@
       </section>
 
       <!-- ================= SLIDE 14: RELACIONAMENTO ENTRE TABELAS ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Relacionamento entre Tabelas" data-module="Módulo 4 — Coleta e Estruturação">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white"
+        data-title="Relacionamento entre Tabelas" data-module="Módulo 4 — Coleta e Estruturação">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 4 • Bancos Relacionais</span>
-              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Relacionando Tabelas: Clientes, Pedidos e Produtos</h2>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 4 • Bancos
+                Relacionais</span>
+              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Relacionando Tabelas: Clientes, Pedidos e
+                Produtos</h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Chave Estrangeira (FK)</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Chave
+              Estrangeira (FK)</span>
           </div>
 
           <p class="text-xs text-slate-600 mb-4">
-            Em vez de guardar tudo misturado em uma planilha gigante cheia de repetições, dividimos as entidades e conectamos através de <strong>Chaves Estrangeiras (Foreign Keys)</strong>.
+            Em vez de guardar tudo misturado em uma planilha gigante cheia de repetições, dividimos as entidades e
+            conectamos através de <strong>Chaves Estrangeiras (Foreign Keys)</strong>.
           </p>
 
           <!-- Diagrama de Relacionamento Simples -->
@@ -1106,7 +1307,8 @@
           </div>
 
           <div class="mt-4 p-3 rounded-lg bg-slate-100 text-slate-700 text-xs flex items-center justify-between">
-            <span>✨ <strong>Benefício Gigante:</strong> Se o cliente mudar de endereço ou o produto mudar de preço, você só altera em <strong>um único lugar</strong>. Zero retrabalho!</span>
+            <span>✨ <strong>Benefício Gigante:</strong> Se o cliente mudar de endereço ou o produto mudar de preço, você
+              só altera em <strong>um único lugar</strong>. Zero retrabalho!</span>
           </div>
         </div>
 
@@ -1117,27 +1319,33 @@
       </section>
 
       <!-- ================= SLIDE 15: MÓDULO 5 - TRATAMENTO E HIGIENIZAÇÃO ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Tratamento e Higienização de Dados" data-module="Módulo 5 — Tratamento e Limpeza">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white"
+        data-title="Tratamento e Higienização de Dados" data-module="Módulo 5 — Tratamento e Limpeza">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 5 • Qualidade da Informação</span>
-              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Tratamento e Limpeza de Dados (Data Cleansing)</h2>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 5 • Qualidade da
+                Informação</span>
+              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Tratamento e Limpeza de Dados (Data Cleansing)
+              </h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-amber-50 text-amber-800 border border-amber-200">Higienização</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-amber-50 text-amber-800 border border-amber-200">Higienização</span>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div class="space-y-4">
               <p class="text-sm text-slate-700 leading-relaxed">
-                <strong>Tratar dados</strong> significa identificar e corrigir erros, incompletudes, inconsistências e duplicações antes de disponibilizar as informações para o negócio.
+                <strong>Tratar dados</strong> significa identificar e corrigir erros, incompletudes, inconsistências e
+                duplicações antes de disponibilizar as informações para o negócio.
               </p>
 
               <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Os 4 Pilares da Higienização:</h4>
               <div class="space-y-2 text-xs">
                 <div class="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
                   <strong class="text-emerald-800">1. Padronização:</strong>
-                  <span class="text-slate-600 block">Ex: Cidade escrita como "SP", "S. Paulo", "sao paulo" vira sempre "São Paulo".</span>
+                  <span class="text-slate-600 block">Ex: Cidade escrita como "SP", "S. Paulo", "sao paulo" vira sempre
+                    "São Paulo".</span>
                 </div>
                 <div class="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
                   <strong class="text-emerald-800">2. Desduplicação:</strong>
@@ -1145,11 +1353,13 @@
                 </div>
                 <div class="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
                   <strong class="text-emerald-800">3. Validação de Obrigatórios:</strong>
-                  <span class="text-slate-600 block">Garantir que nenhum pedido seja emitido sem telefone ou e-mail de contato.</span>
+                  <span class="text-slate-600 block">Garantir que nenhum pedido seja emitido sem telefone ou e-mail de
+                    contato.</span>
                 </div>
                 <div class="p-2.5 rounded-lg border border-slate-200 bg-slate-50">
                   <strong class="text-emerald-800">4. Formatação Uniforme:</strong>
-                  <span class="text-slate-600 block">Datas no padrão <code class="mono-pill">AAAA-MM-DD</code> e telefones com código de área (DDD).</span>
+                  <span class="text-slate-600 block">Datas no padrão <code class="mono-pill">AAAA-MM-DD</code> e
+                    telefones com código de área (DDD).</span>
                 </div>
               </div>
             </div>
@@ -1157,15 +1367,17 @@
             <!-- Quadro comparativo de impacto -->
             <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 text-xs space-y-3">
               <span class="font-bold text-slate-700 uppercase tracking-wider block">Impacto Direto na Empresa</span>
-              
+
               <div class="p-3 bg-red-50 border border-red-200 rounded-lg text-red-900">
                 <strong>Sem Tratamento:</strong>
-                <p class="mt-1">Campanhas de marketing desperdiçam verba enviando 3 e-mails para a mesma pessoa; clientes não recebem SMS com código de entrega.</p>
+                <p class="mt-1">Campanhas de marketing desperdiçam verba enviando 3 e-mails para a mesma pessoa;
+                  clientes não recebem SMS com código de entrega.</p>
               </div>
 
               <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900">
                 <strong>Com Tratamento Profissional:</strong>
-                <p class="mt-1">Base confiável, relatórios 100% fieis à realidade e auditorias financeiras sem divergências.</p>
+                <p class="mt-1">Base confiável, relatórios 100% fieis à realidade e auditorias financeiras sem
+                  divergências.</p>
               </div>
             </div>
           </div>
@@ -1178,14 +1390,19 @@
       </section>
 
       <!-- ================= SLIDE 16: LABORATÓRIO ANTES vs DEPOIS ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Laboratório: Antes vs Depois" data-module="Módulo 5 — Tratamento e Limpeza">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white"
+        data-title="Laboratório: Antes vs Depois" data-module="Módulo 5 — Tratamento e Limpeza">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 5 • Demonstração Prática</span>
-              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Antes vs Depois: Transformando o Caos em Valor</h2>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 5 • Demonstração
+                Prática</span>
+              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Antes vs Depois: Transformando o Caos em Valor
+              </h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Limpeza Real</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Limpeza
+              Real</span>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1241,14 +1458,18 @@
       </section>
 
       <!-- ================= SLIDE 17: MÓDULO 6 - ARMAZENAMENTO & SQL ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Armazenamento e Introdução ao SQL" data-module="Módulo 6 — Estrutura e Armazenamento">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white"
+        data-title="Armazenamento e Introdução ao SQL" data-module="Módulo 6 — Estrutura e Armazenamento">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 6 • Tecnologia e Linguagem</span>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 6 • Tecnologia e
+                Linguagem</span>
               <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Como os Dados Vivem: Armazenamento e SQL</h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Lógico vs Físico</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Lógico
+              vs Físico</span>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1261,10 +1482,12 @@
               </div>
               <div class="p-3 rounded-lg border border-slate-200 bg-slate-50 text-xs">
                 <strong class="text-slate-800 block mb-1">Armazenamento Físico (Na Máquina):</strong>
-                Blocos de bytes gravados em discos SSD de servidores locais (On-Premises) ou servidores na Nuvem (Cloud: AWS, Azure, Google Cloud).
+                Blocos de bytes gravados em discos SSD de servidores locais (On-Premises) ou servidores na Nuvem (Cloud:
+                AWS, Azure, Google Cloud).
               </div>
               <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-950">
-                🔒 <strong>Segurança e Backup:</strong> Cópias periódicas automáticas (backups) garantem que se o servidor queimar, nenhum dado de cliente seja perdido.
+                🔒 <strong>Segurança e Backup:</strong> Cópias periódicas automáticas (backups) garantem que se o
+                servidor queimar, nenhum dado de cliente seja perdido.
               </div>
             </div>
 
@@ -1282,14 +1505,21 @@
                 <!-- Comandos essenciais -->
                 <div class="space-y-1.5 font-mono text-[11px]">
                   <div class="p-2 bg-slate-800/80 rounded border border-slate-700">
-                    <span class="text-emerald-400 font-bold">SELECT</span> * <span class="text-emerald-400 font-bold">FROM</span> clientes <span class="text-emerald-400 font-bold">WHERE</span> cidade = <span class="text-amber-300">'Curitiba'</span>;
-                    <span class="text-[10px] text-slate-400 block font-sans">-> "Busque todos os clientes que moram em Curitiba"</span>
+                    <span class="text-emerald-400 font-bold">SELECT</span> * <span
+                      class="text-emerald-400 font-bold">FROM</span> clientes <span
+                      class="text-emerald-400 font-bold">WHERE</span> cidade = <span
+                      class="text-amber-300">'Curitiba'</span>;
+                    <span class="text-[10px] text-slate-400 block font-sans">-> "Busque todos os clientes que moram em
+                      Curitiba"</span>
                   </div>
                   <div class="p-2 bg-slate-800/80 rounded border border-slate-700">
-                    <span class="text-blue-400 font-bold">INSERT INTO</span> clientes ... <span class="text-slate-400 font-sans text-[10px]">(Cadastrar novo)</span>
+                    <span class="text-blue-400 font-bold">INSERT INTO</span> clientes ... <span
+                      class="text-slate-400 font-sans text-[10px]">(Cadastrar novo)</span>
                   </div>
                   <div class="p-2 bg-slate-800/80 rounded border border-slate-700">
-                    <span class="text-yellow-400 font-bold">UPDATE</span> clientes <span class="text-yellow-400 font-bold">SET</span> ... <span class="text-slate-400 font-sans text-[10px]">(Atualizar dados)</span>
+                    <span class="text-yellow-400 font-bold">UPDATE</span> clientes <span
+                      class="text-yellow-400 font-bold">SET</span> ... <span
+                      class="text-slate-400 font-sans text-[10px]">(Atualizar dados)</span>
                   </div>
                 </div>
               </div>
@@ -1308,14 +1538,19 @@
       </section>
 
       <!-- ================= SLIDE 18: PLANILHAS vs BANCO DE DADOS ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Planilhas vs Banco de Dados" data-module="Módulo 6 — Estrutura e Armazenamento">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white"
+        data-title="Planilhas vs Banco de Dados" data-module="Módulo 6 — Estrutura e Armazenamento">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 6 • Comparativo Crítico</span>
-              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Planilhas (Excel) vs Bancos de Dados: O Duelo</h2>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 6 • Comparativo
+                Crítico</span>
+              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Planilhas (Excel) vs Bancos de Dados: O Duelo
+              </h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Escolha Certa</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Escolha
+              Certa</span>
           </div>
 
           <div class="overflow-x-auto rounded-xl border border-slate-200">
@@ -1331,29 +1566,36 @@
                 <tr>
                   <td class="py-2.5 px-4 font-semibold">Volume de Dados</td>
                   <td class="py-2.5 px-4 text-slate-500">Milhares de linhas (começa a travar com arquivos grandes)</td>
-                  <td class="py-2.5 px-4 font-medium text-emerald-900 bg-emerald-50/30">Milhões e bilhões de registros com velocidade instantânea</td>
+                  <td class="py-2.5 px-4 font-medium text-emerald-900 bg-emerald-50/30">Milhões e bilhões de registros
+                    com velocidade instantânea</td>
                 </tr>
                 <tr>
                   <td class="py-2.5 px-4 font-semibold">Usuários Simultâneos</td>
-                  <td class="py-2.5 px-4 text-slate-500">Poucas pessoas; risco de sobrescrever arquivos ou bloquear tela</td>
-                  <td class="py-2.5 px-4 font-medium text-emerald-900 bg-emerald-50/30">Milhares de usuários simultâneos lendo e gravando ao mesmo tempo</td>
+                  <td class="py-2.5 px-4 text-slate-500">Poucas pessoas; risco de sobrescrever arquivos ou bloquear tela
+                  </td>
+                  <td class="py-2.5 px-4 font-medium text-emerald-900 bg-emerald-50/30">Milhares de usuários simultâneos
+                    lendo e gravando ao mesmo tempo</td>
                 </tr>
                 <tr>
                   <td class="py-2.5 px-4 font-semibold">Integridade & Regras</td>
-                  <td class="py-2.5 px-4 text-slate-500">Usuário pode apagar fórmulas ou colar texto onde era número</td>
-                  <td class="py-2.5 px-4 font-medium text-emerald-900 bg-emerald-50/30">Regras invioláveis: o banco rejeita dados inválidos ou fora do padrão</td>
+                  <td class="py-2.5 px-4 text-slate-500">Usuário pode apagar fórmulas ou colar texto onde era número
+                  </td>
+                  <td class="py-2.5 px-4 font-medium text-emerald-900 bg-emerald-50/30">Regras invioláveis: o banco
+                    rejeita dados inválidos ou fora do padrão</td>
                 </tr>
                 <tr>
                   <td class="py-2.5 px-4 font-semibold">Segurança & Auditoria</td>
                   <td class="py-2.5 px-4 text-slate-500">Arquivo fácil de copiar para pendrive ou vazar por engano</td>
-                  <td class="py-2.5 px-4 font-medium text-emerald-900 bg-emerald-50/30">Permissões por usuário, criptografia e logs de quem alterou o quê</td>
+                  <td class="py-2.5 px-4 font-medium text-emerald-900 bg-emerald-50/30">Permissões por usuário,
+                    criptografia e logs de quem alterou o quê</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
           <div class="mt-4 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-950">
-            💡 <strong>Conclusão do Professor:</strong> Planilhas são excelentes para rascunhos rápidos e análises individuais; para o sistema da empresa rodar 24h por dia, um <strong>Banco de Dados é obrigatório</strong>.
+            💡 <strong>Conclusão do Professor:</strong> Planilhas são excelentes para rascunhos rápidos e análises
+            individuais; para o sistema da empresa rodar 24h por dia, um <strong>Banco de Dados é obrigatório</strong>.
           </div>
         </div>
 
@@ -1364,14 +1606,19 @@
       </section>
 
       <!-- ================= SLIDE 19: MÓDULO 7 - APRESENTAÇÃO DE DADOS ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Dashboards e Apresentação" data-module="Módulo 7 — Apresentação dos Dados">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Dashboards e Apresentação"
+        data-module="Módulo 7 — Apresentação dos Dados">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 7 • Visualização & BI</span>
-              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Transformando Dados em Informação Útil: Dashboards</h2>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 7 • Visualização &
+                BI</span>
+              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Transformando Dados em Informação Útil:
+                Dashboards</h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Painel Gerencial</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">Painel
+              Gerencial</span>
           </div>
 
           <!-- Mini Dashboard Fictício da TechVarejo -->
@@ -1442,7 +1689,8 @@
               <div>
                 <h4 class="font-bold text-emerald-950 mb-2">Decisão de Negócio Apoiada em Dados:</h4>
                 <p class="text-xs text-emerald-900 leading-relaxed">
-                  "Como <strong>45% dos clientes</strong> estão em São Paulo e o produto mais vendido é o <em>Mouse Sem Fio</em>, abriremos um centro de distribuição em Campinas para reduzir o frete em 30%."
+                  "Como <strong>45% dos clientes</strong> estão em São Paulo e o produto mais vendido é o <em>Mouse Sem
+                    Fio</em>, abriremos um centro de distribuição em Campinas para reduzir o frete em 30%."
                 </p>
               </div>
               <div class="pt-2 text-[11px] text-emerald-800 font-semibold border-t border-emerald-200">
@@ -1459,14 +1707,18 @@
       </section>
 
       <!-- ================= SLIDE 20: MÓDULO 8 - CONTEXTO CORPORATIVO ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Contexto Corporativo Integrado" data-module="Módulo 8 — Contexto Corporativo">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white"
+        data-title="Contexto Corporativo Integrado" data-module="Módulo 8 — Contexto Corporativo">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 8 • Integração Empresarial</span>
-              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">O Banco de Dados no Coração da Empresa Integrada</h2>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 8 • Integração
+                Empresarial</span>
+              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">O Banco de Dados no Coração da Empresa Integrada
+              </h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">ERP & CRM</span>
+            <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">ERP
+              & CRM</span>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -1474,28 +1726,32 @@
             <div class="p-4 rounded-xl border border-slate-200 bg-slate-50">
               <span class="text-2xl mb-2 block">🤝</span>
               <h4 class="font-bold text-xs text-slate-800">CRM & Vendas</h4>
-              <p class="text-[11px] text-slate-500 mt-1">Histórico de conversas, preferências e aniversários do cliente para atendimento personalizado.</p>
+              <p class="text-[11px] text-slate-500 mt-1">Histórico de conversas, preferências e aniversários do cliente
+                para atendimento personalizado.</p>
             </div>
 
             <!-- Estoque -->
             <div class="p-4 rounded-xl border border-slate-200 bg-slate-50">
               <span class="text-2xl mb-2 block">📦</span>
               <h4 class="font-bold text-xs text-slate-800">Estoque & Logística</h4>
-              <p class="text-[11px] text-slate-500 mt-1">Baixa automática no inventário a cada venda aprovada no cartão de crédito.</p>
+              <p class="text-[11px] text-slate-500 mt-1">Baixa automática no inventário a cada venda aprovada no cartão
+                de crédito.</p>
             </div>
 
             <!-- Financeiro -->
             <div class="p-4 rounded-xl border border-slate-200 bg-slate-50">
               <span class="text-2xl mb-2 block">💳</span>
               <h4 class="font-bold text-xs text-slate-800">Financeiro & Fiscal</h4>
-              <p class="text-[11px] text-slate-500 mt-1">Emissão instantânea de Nota Fiscal Eletrônica e conciliação de boletos pagos.</p>
+              <p class="text-[11px] text-slate-500 mt-1">Emissão instantânea de Nota Fiscal Eletrônica e conciliação de
+                boletos pagos.</p>
             </div>
 
             <!-- Recursos Humanos -->
             <div class="p-4 rounded-xl border border-slate-200 bg-slate-50">
               <span class="text-2xl mb-2 block">👥</span>
               <h4 class="font-bold text-xs text-slate-800">Recursos Humanos</h4>
-              <p class="text-[11px] text-slate-500 mt-1">Comissões dos vendedores calculadas automaticamente com base nos pedidos faturados.</p>
+              <p class="text-[11px] text-slate-500 mt-1">Comissões dos vendedores calculadas automaticamente com base
+                nos pedidos faturados.</p>
             </div>
           </div>
 
@@ -1503,9 +1759,12 @@
           <div class="mt-6 p-4 rounded-xl bg-emerald-900 text-white flex items-center justify-between">
             <div>
               <h5 class="text-xs font-bold text-emerald-300 uppercase tracking-wider">Fim dos "Silos de Informação"</h5>
-              <p class="text-xs text-emerald-100 mt-1">Quando todos os departamentos consultam o mesmo banco de dados, o cliente nunca precisa repetir seus dados 3 vezes para setores diferentes.</p>
+              <p class="text-xs text-emerald-100 mt-1">Quando todos os departamentos consultam o mesmo banco de dados, o
+                cliente nunca precisa repetir seus dados 3 vezes para setores diferentes.</p>
             </div>
-            <span class="text-xl px-3 py-1 bg-emerald-800 rounded font-mono text-emerald-200 text-xs shrink-0 ml-4">Unicidade da Verdade</span>
+            <span
+              class="text-xl px-3 py-1 bg-emerald-800 rounded font-mono text-emerald-200 text-xs shrink-0 ml-4">Unicidade
+              da Verdade</span>
           </div>
         </div>
 
@@ -1516,29 +1775,38 @@
       </section>
 
       <!-- ================= SLIDE 21: MÓDULO 9 - ÉTICA E LGPD ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Ética e LGPD" data-module="Módulo 9 — Ética e Privacidade">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Ética e LGPD"
+        data-module="Módulo 9 — Ética e Privacidade">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 9 • Responsabilidade Social e Legal</span>
-              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Ética, Privacidade e Lei Geral de Proteção de Dados (LGPD)</h2>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 9 • Responsabilidade
+                Social e Legal</span>
+              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Ética, Privacidade e Lei Geral de Proteção de
+                Dados (LGPD)</h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Lei 13.709</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Lei
+              13.709</span>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
             <div class="space-y-3 text-xs">
               <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
                 <strong class="text-emerald-800 font-bold block mb-1">1. Princípio da Necessidade:</strong>
-                Colete apenas o que for estritamente útil para a operação. (Uma loja de roupas precisa perguntar a religião ou tipo sanguíneo do cliente? Não!).
+                Colete apenas o que for estritamente útil para a operação. (Uma loja de roupas precisa perguntar a
+                religião ou tipo sanguíneo do cliente? Não!).
               </div>
               <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
                 <strong class="text-emerald-800 font-bold block mb-1">2. Finalidade e Transparência:</strong>
-                O titular do dado tem o direito de saber exatamente para que seus dados serão usados e onde ficarão guardados.
+                O titular do dado tem o direito de saber exatamente para que seus dados serão usados e onde ficarão
+                guardados.
               </div>
               <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <strong class="text-emerald-800 font-bold block mb-1">3. Controle de Acesso & Confidencialidade:</strong>
-                Nem todo funcionário pode ver tudo. Apenas o setor financeiro deve ter acesso a dados de cartão de crédito.
+                <strong class="text-emerald-800 font-bold block mb-1">3. Controle de Acesso &
+                  Confidencialidade:</strong>
+                Nem todo funcionário pode ver tudo. Apenas o setor financeiro deve ter acesso a dados de cartão de
+                crédito.
               </div>
             </div>
 
@@ -1573,21 +1841,27 @@
       </section>
 
       <!-- ================= SLIDE 22: MÓDULO 10 - ATIVIDADE PRÁTICA ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Atividade Prática em Grupo" data-module="Módulo 10 — Revisão e Prática">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white"
+        data-title="Atividade Prática em Grupo" data-module="Módulo 10 — Revisão e Prática">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 10 • Dinâmica de Sala</span>
-              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Atividade Prática: O Desafio da "Loja do Bairro"</h2>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 10 • Dinâmica de
+                Sala</span>
+              <h2 class="text-2xl md:text-3xl font-bold text-slate-800">Atividade Prática: O Desafio da "Loja do Bairro"
+              </h2>
             </div>
-            <span class="text-xs font-mono px-2.5 py-1 rounded bg-amber-100 text-amber-800 border border-amber-300">Tempo: 15 min</span>
+            <span
+              class="text-xs font-mono px-2.5 py-1 rounded bg-amber-100 text-amber-800 border border-amber-300">Tempo:
+              15 min</span>
           </div>
 
           <!-- Situação-problema -->
           <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl mb-4 text-xs">
             <span class="font-bold text-slate-800 uppercase tracking-wide block mb-1">Cenário Desafiador:</span>
             <p class="text-slate-600 leading-relaxed">
-              Uma loja de autopeças mantém seus clientes em uma folha com anotações soltas: nomes sem sobrenome, telefones sem DDD, e-mails com espaços digitados por engano, clientes repetidos e endereços incompletos.
+              Uma loja de autopeças mantém seus clientes em uma folha com anotações soltas: nomes sem sobrenome,
+              telefones sem DDD, e-mails com espaços digitados por engano, clientes repetidos e endereços incompletos.
             </p>
           </div>
 
@@ -1627,15 +1901,19 @@
       </section>
 
       <!-- ================= SLIDE 23: QUIZ INTERATIVO (5 QUESTÕES) ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Quiz de Fixação Interativo" data-module="Módulo 10 — Revisão e Prática">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white"
+        data-title="Quiz de Fixação Interativo" data-module="Módulo 10 — Revisão e Prática">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
             <div>
-              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 10 • Fixação de Conteúdo</span>
+              <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Módulo 10 • Fixação de
+                Conteúdo</span>
               <h2 class="text-xl md:text-2xl font-bold text-slate-800">Quiz Interativo: 5 Perguntas Rápidas</h2>
             </div>
             <div class="flex items-center gap-2">
-              <span id="quizScore" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Acertos: 0/5</span>
+              <span id="quizScore"
+                class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Acertos:
+                0/5</span>
             </div>
           </div>
 
@@ -1657,9 +1935,12 @@
 
             <!-- Navegação do Quiz -->
             <div class="flex items-center justify-between pt-2">
-              <button onclick="prevQuizQuestion()" id="btnPrevQuiz" class="px-3 py-1 text-xs rounded border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40">Anterior</button>
+              <button onclick="prevQuizQuestion()" id="btnPrevQuiz"
+                class="px-3 py-1 text-xs rounded border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-40">Anterior</button>
               <span class="text-xs text-slate-400 font-mono" id="quizNavInfo">Questão 1 de 5</span>
-              <button onclick="nextQuizQuestion()" id="btnNextQuiz" class="px-3 py-1 text-xs rounded bg-emerald-700 text-white hover:bg-emerald-800">Próxima Questão</button>
+              <button onclick="nextQuizQuestion()" id="btnNextQuiz"
+                class="px-3 py-1 text-xs rounded bg-emerald-700 text-white hover:bg-emerald-800">Próxima
+                Questão</button>
             </div>
           </div>
         </div>
@@ -1671,14 +1952,16 @@
       </section>
 
       <!-- ================= SLIDE 24: GABARITO & GUIA DO PROFESSOR ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white" data-title="Gabarito e Guia do Professor" data-module="Módulo 10 — Revisão e Prática">
+      <section class="slide flex-col justify-between h-full p-8 md:p-12 bg-white"
+        data-title="Gabarito e Guia do Professor" data-module="Módulo 10 — Revisão e Prática">
         <div>
           <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
             <div>
               <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Exclusivo para o Docente</span>
               <h2 class="text-2xl font-bold text-slate-800">Gabarito Oficial e Guia Pedagógico</h2>
             </div>
-            <button onclick="toggleTeacherAnswers()" id="btnToggleAnswers" class="px-2.5 py-1 text-xs font-medium rounded-md bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100 transition">
+            <button onclick="toggleTeacherAnswers()" id="btnToggleAnswers"
+              class="px-2.5 py-1 text-xs font-medium rounded-md bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100 transition">
               🔓 Revelar / Ocultar Gabarito
             </button>
           </div>
@@ -1687,27 +1970,37 @@
             <!-- Q1 -->
             <div class="p-3 rounded-lg border border-slate-200 bg-slate-50">
               <span class="font-bold text-emerald-800 block">Questão 1: Diferença entre Dado e Informação</span>
-              <p class="text-slate-700 mt-0.5"><strong>Resposta Correta:</strong> O dado é o fato bruto desprovido de contexto (ex: 38,5); a informação é o dado processado e contextualizado que transmite um significado claro (ex: temperatura corporal indicando febre).</p>
+              <p class="text-slate-700 mt-0.5"><strong>Resposta Correta:</strong> O dado é o fato bruto desprovido de
+                contexto (ex: 38,5); a informação é o dado processado e contextualizado que transmite um significado
+                claro (ex: temperatura corporal indicando febre).</p>
             </div>
             <!-- Q2 -->
             <div class="p-3 rounded-lg border border-slate-200 bg-slate-50">
               <span class="font-bold text-emerald-800 block">Questão 2: Papel do SGBD</span>
-              <p class="text-slate-700 mt-0.5"><strong>Resposta Correta:</strong> O SGBD é o software gerenciador que controla o acesso, a segurança, o processamento de consultas e a integridade física dos dados gravados em disco.</p>
+              <p class="text-slate-700 mt-0.5"><strong>Resposta Correta:</strong> O SGBD é o software gerenciador que
+                controla o acesso, a segurança, o processamento de consultas e a integridade física dos dados gravados
+                em disco.</p>
             </div>
             <!-- Q3 -->
             <div class="p-3 rounded-lg border border-slate-200 bg-slate-50">
               <span class="font-bold text-emerald-800 block">Questão 3: Finalidade da Chave Primária (PK)</span>
-              <p class="text-slate-700 mt-0.5"><strong>Resposta Correta:</strong> Identificar cada registro de forma única e exclusiva na tabela, garantindo que não haja duplicidade nem confusão entre clientes diferentes (inclusive homônimos).</p>
+              <p class="text-slate-700 mt-0.5"><strong>Resposta Correta:</strong> Identificar cada registro de forma
+                única e exclusiva na tabela, garantindo que não haja duplicidade nem confusão entre clientes diferentes
+                (inclusive homônimos).</p>
             </div>
             <!-- Q4 -->
             <div class="p-3 rounded-lg border border-slate-200 bg-slate-50">
               <span class="font-bold text-emerald-800 block">Questão 4: Planilha vs Banco de Dados</span>
-              <p class="text-slate-700 mt-0.5"><strong>Resposta Correta:</strong> Bancos de dados oferecem suporte a múltiplos usuários simultâneos com alto desempenho, regras estritas de integridade e segurança robusta contra corrupção de arquivos.</p>
+              <p class="text-slate-700 mt-0.5"><strong>Resposta Correta:</strong> Bancos de dados oferecem suporte a
+                múltiplos usuários simultâneos com alto desempenho, regras estritas de integridade e segurança robusta
+                contra corrupção de arquivos.</p>
             </div>
             <!-- Q5 -->
             <div class="p-3 rounded-lg border border-slate-200 bg-slate-50">
               <span class="font-bold text-emerald-800 block">Questão 5: Princípio da Necessidade na LGPD</span>
-              <p class="text-slate-700 mt-0.5"><strong>Resposta Correta:</strong> A organização deve coletar estritamente os dados essenciais para atingir sua finalidade de negócio, evitando coletar dados desnecessários ou sensíveis sem justificativa legal.</p>
+              <p class="text-slate-700 mt-0.5"><strong>Resposta Correta:</strong> A organização deve coletar
+                estritamente os dados essenciais para atingir sua finalidade de negócio, evitando coletar dados
+                desnecessários ou sensíveis sem justificativa legal.</p>
             </div>
           </div>
         </div>
@@ -1719,9 +2012,12 @@
       </section>
 
       <!-- ================= SLIDE 25: CONCLUSÃO & SÍNTESE ================= -->
-      <section class="slide flex-col justify-between h-full p-8 md:p-14 bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 text-white relative overflow-hidden" data-title="Conclusão e Próximos Passos" data-module="Encerramento">
+      <section
+        class="slide flex-col justify-between h-full p-8 md:p-14 bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 text-white relative overflow-hidden"
+        data-title="Conclusão e Próximos Passos" data-module="Encerramento">
         <div class="relative z-10 flex items-center justify-between">
-          <span class="px-3 py-1 rounded-full bg-emerald-800 text-emerald-300 text-xs font-mono font-medium">Missão Cumprida</span>
+          <span class="px-3 py-1 rounded-full bg-emerald-800 text-emerald-300 text-xs font-mono font-medium">Missão
+            Cumprida</span>
           <span class="text-xs text-emerald-300/70">Aula Concluída</span>
         </div>
 
@@ -1730,7 +2026,8 @@
             Os dados são o combustível. A organização é o motor.
           </h2>
           <p class="mt-3 text-sm md:text-base text-emerald-100/90 font-light leading-relaxed">
-            Hoje vocês aprenderam que programar telas bonitas não adianta nada se os dados por trás forem desorganizados. Um bom profissional de TI cuida da informação com rigor técnico e ética.
+            Hoje vocês aprenderam que programar telas bonitas não adianta nada se os dados por trás forem
+            desorganizados. Um bom profissional de TI cuida da informação com rigor técnico e ética.
           </p>
 
           <div class="grid grid-cols-3 gap-3 mt-6 text-xs text-emerald-100">
@@ -1749,7 +2046,8 @@
           </div>
         </div>
 
-        <div class="relative z-10 flex items-center justify-between pt-4 border-t border-emerald-800 text-xs text-emerald-300/80">
+        <div
+          class="relative z-10 flex items-center justify-between pt-4 border-t border-emerald-800 text-xs text-emerald-300/80">
           <span>Obrigado pela participação! Dúvidas e debates abertos.</span>
           <span class="font-mono text-emerald-400">Próxima Aula: Primeiros Comandos SQL na Prática</span>
         </div>
@@ -1762,21 +2060,30 @@
   <footer class="no-print bg-white border-t border-slate-200 px-4 py-2.5 flex items-center justify-between z-20">
     <div class="flex items-center space-x-2 text-xs text-slate-500">
       <span class="hidden sm:inline">Use o teclado:</span>
-      <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-[11px] font-mono text-slate-700">←</kbd>
-      <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-[11px] font-mono text-slate-700">→</kbd>
-      <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-[11px] font-mono text-slate-700">Espaço</kbd>
+      <kbd
+        class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-[11px] font-mono text-slate-700">←</kbd>
+      <kbd
+        class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-[11px] font-mono text-slate-700">→</kbd>
+      <kbd
+        class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-[11px] font-mono text-slate-700">Espaço</kbd>
     </div>
 
     <!-- Botões Anterior / Próximo -->
     <div class="flex items-center space-x-2">
-      <button onclick="prevSlide()" id="btnPrev" class="px-4 py-1.5 rounded-lg border border-slate-200 text-slate-700 font-medium text-xs hover:bg-slate-50 active:scale-95 transition flex items-center gap-1">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      <button onclick="prevSlide()" id="btnPrev"
+        class="px-4 py-1.5 rounded-lg border border-slate-200 text-slate-700 font-medium text-xs hover:bg-slate-50 active:scale-95 transition flex items-center gap-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
         <span>Anterior</span>
       </button>
 
-      <button onclick="nextSlide()" id="btnNext" class="px-5 py-1.5 rounded-lg bg-emerald-700 text-white font-medium text-xs hover:bg-emerald-800 active:scale-95 transition flex items-center gap-1 shadow-xs">
+      <button onclick="nextSlide()" id="btnNext"
+        class="px-5 py-1.5 rounded-lg bg-emerald-700 text-white font-medium text-xs hover:bg-emerald-800 active:scale-95 transition flex items-center gap-1 shadow-xs">
         <span>Próximo</span>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
       </button>
     </div>
 
@@ -1786,15 +2093,19 @@
   </footer>
 
   <!-- ================= MODAL: ÍNDICE DE SLIDES (DRAWER) ================= -->
-  <div id="tocModal" class="no-print fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
+  <div id="tocModal"
+    class="no-print fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div
+      class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
       <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
         <div>
           <h3 class="font-bold text-slate-800 text-base">Índice da Apresentação</h3>
           <p class="text-xs text-slate-500">Clique para saltar diretamente para qualquer slide</p>
         </div>
         <button onclick="toggleTocModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
       </div>
       <div class="p-6 overflow-y-auto space-y-2 flex-1" id="tocList">
@@ -1804,7 +2115,8 @@
   </div>
 
   <!-- ================= PAINEL: NOTAS DO PROFESSOR (DRAWER LATERAL) ================= -->
-  <aside id="teacherNotesDrawer" class="no-print fixed right-0 top-0 bottom-0 w-80 md:w-96 bg-white shadow-2xl border-l border-slate-200 z-40 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between">
+  <aside id="teacherNotesDrawer"
+    class="no-print fixed right-0 top-0 bottom-0 w-80 md:w-96 bg-white shadow-2xl border-l border-slate-200 z-40 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between">
     <div>
       <div class="p-4 border-b border-slate-200 bg-emerald-950 text-white flex items-center justify-between">
         <div>
@@ -1812,7 +2124,9 @@
           <h4 class="font-bold text-sm">Dicas Didáticas & Ritmo</h4>
         </div>
         <button onclick="toggleTeacherNotes()" class="text-emerald-300 hover:text-white p-1">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
       </div>
 
@@ -1824,17 +2138,22 @@
             <span class="font-mono text-emerald-700">50 a 60 min</span>
           </div>
           <div class="text-[11px] text-emerald-800">
-            Mantenha uma média de <strong>2 a 2,5 minutos por slide</strong> para reservar 15 minutos para a atividade prática.
+            Mantenha uma média de <strong>2 a 2,5 minutos por slide</strong> para reservar 15 minutos para a atividade
+            prática.
           </div>
         </div>
 
         <div id="slideSpecificNote" class="space-y-3">
           <h5 class="text-xs font-bold text-slate-800 uppercase tracking-wider" id="noteSlideTitle">Slide Atual</h5>
-          <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 leading-relaxed" id="noteContent">
-            Dica para a abertura da aula: acolha os alunos e quebre o mito de que banco de dados é apenas matemática complexa. Use o exemplo cotidiano do Instagram ou Mercado Livre.
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 leading-relaxed"
+            id="noteContent">
+            Dica para a abertura da aula: acolha os alunos e quebre o mito de que banco de dados é apenas matemática
+            complexa. Use o exemplo cotidiano do Instagram ou Mercado Livre.
           </div>
-          <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900" id="noteQuestionPrompt">
-            <strong>Pergunta provocativa para a turma:</strong> "Alguém já tentou comprar algo na internet e o site disse que o item estava esgotado só depois que você clicou em pagar?"
+          <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900"
+            id="noteQuestionPrompt">
+            <strong>Pergunta provocativa para a turma:</strong> "Alguém já tentou comprar algo na internet e o site
+            disse que o item estava esgotado só depois que você clicou em pagar?"
           </div>
         </div>
       </div>
@@ -1847,7 +2166,9 @@
   </aside>
 
   <!-- ================= JAVASCRIPT: LÓGICA DE NAVEGAÇÃO E QUIZ ================= -->
-  <script src="../assets/libControler.js"></script>
+  <script src="../../assets/libControler.js"></script>
+
 
 </body>
+
 </html>
